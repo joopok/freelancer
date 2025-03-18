@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useLoading } from '@/components/layout/Loading';
 import { motion } from 'framer-motion';
@@ -16,16 +16,21 @@ interface Category {
 
 export default function BlogCategoriesPage() {
   const { setLoading } = useLoading();
+  const loadingExecutedRef = useRef(false);
   
-  // 페이지 로드 시 로딩 효과 표시 추가
+  // 페이지 로드 시 로딩 효과 표시
   useEffect(() => {
-    setLoading(true);
-    
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 10000); // 1초 로딩 효과로 줄임
-    
-    return () => clearTimeout(timer);
+    if (!loadingExecutedRef.current) {
+      loadingExecutedRef.current = true;
+      setLoading(true, '카테고리 페이지 로딩 중...');
+      
+      // 페이지 로딩이 완료되면 로딩 상태 해제
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
   }, [setLoading]);
   
   // 카테고리 데이터
@@ -216,29 +221,32 @@ export default function BlogCategoriesPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.5 }}
+              className="h-full"
             >
               <Link 
                 href={`/blog?category=${category.id}`}
-                className="block group"
+                className="block group h-full"
               >
-                <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 h-full p-8 flex flex-col">
-                  <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-indigo-200 transition-colors">
-                    <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={category.icon} />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2 text-gray-800 flex items-center">
-                    {category.name}
-                    <span className="ml-2 text-sm text-gray-500 font-normal">({category.count})</span>
-                  </h3>
-                  <p className="text-gray-600 mb-4">{category.description}</p>
-                  <div className="mt-auto">
-                    <span className="text-indigo-600 flex items-center group-hover:text-indigo-800">
-                      더 보기
-                      <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+                  <div className="p-8 flex flex-col flex-grow">
+                    <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-indigo-200 transition-colors">
+                      <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={category.icon} />
                       </svg>
-                    </span>
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2 text-gray-800 flex items-center">
+                      {category.name}
+                      <span className="ml-2 text-sm text-gray-500 font-normal">({category.count})</span>
+                    </h3>
+                    <p className="text-gray-600 mb-4 flex-grow">{category.description}</p>
+                    <div className="mt-auto">
+                      <span className="text-indigo-600 flex items-center group-hover:text-indigo-800">
+                        더 보기
+                        <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </Link>

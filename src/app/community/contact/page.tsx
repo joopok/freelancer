@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useLoading } from '@/components/layout/Loading';
 
@@ -13,16 +13,21 @@ export default function BlogContactPage() {
     subject: '',
     message: ''
   });
+  const loadingExecutedRef = useRef(false);
   
   // 페이지 로드 시 로딩 효과 표시
   useEffect(() => {
-    setLoading(true);
-    
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000); // 1초 로딩 효과로 줄임
-    
-    return () => clearTimeout(timer);
+    if (!loadingExecutedRef.current) {
+      loadingExecutedRef.current = true;
+      setLoading(true, '문의 페이지 로딩 중...');
+      
+      // 페이지 로딩이 완료되면 로딩 상태 해제
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
   }, [setLoading]);
   
   // 폼 입력값 변경 핸들러
@@ -37,13 +42,13 @@ export default function BlogContactPage() {
   // 폼 제출 핸들러
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setLoading(true, '문의 제출 중...');
     
     // 폼 제출 시뮬레이션 (실제로는 API 호출)
     setTimeout(() => {
       setFormSubmitted(true);
       setLoading(false);
-    }, 1000); // 1초 로딩 효과로 줄임
+    }, 1000);
   };
   
   return (

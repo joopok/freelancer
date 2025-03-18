@@ -26,26 +26,23 @@ export default function RemoteProjectPage() {
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [selectedDuration, setSelectedDuration] = useState<string>('');
   const [selectedBudget, setSelectedBudget] = useState<string>('');
-  
+
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState<number>(1);
   const projectsPerPage = 10;
 
   // 모든 기술 스택 목록
   const allSkills = [
-    'React', 'Node.js', 'Python', 'Java', 'TypeScript', 
-    'React Native', 'Flutter', 'AWS', 'Docker', 'Spring', 
+    'React', 'Node.js', 'Python', 'Java', 'TypeScript',
+    'React Native', 'Flutter', 'AWS', 'Docker', 'Spring',
     'Django', 'PHP', 'JavaScript', 'Vue.js', 'Angular'
   ];
 
   // 재택 프로젝트 데이터 로드 - 컴포넌트 마운트 시 한 번만 실행
   useEffect(() => {
-    // 로컬 로딩 상태만 설정
     setLocalLoading(true);
-    
-    // 데이터 로딩 시뮬레이션 (실제로는 API 호출)
+
     const timer = setTimeout(() => {
-      // 실제 프로덕션에서는 API 요청으로 데이터를 가져오게 됩니다
       const projectsData: Project[] = [
         {
           id: "1",
@@ -53,7 +50,7 @@ export default function RemoteProjectPage() {
           company: "(주)테크인사이트",
           skills: ["Python", "TensorFlow", "AWS"],
           duration: "4개월",
-          budget: "4,500만원", 
+          budget: "4,500만원",
           deadline: "D-3",
           type: "재택",
           description: "사용자 행동 패턴 분석을 통한 맞춤형 상품 추천 시스템 개발 프로젝트입니다.",
@@ -64,7 +61,7 @@ export default function RemoteProjectPage() {
           title: "블록체인 기반 결제 시스템 구축",
           company: "(주)블록테크",
           skills: ["Solidity", "Web3.js", "Node.js"],
-          duration: "6개월", 
+          duration: "6개월",
           budget: "7,000만원",
           deadline: "D-7",
           type: "재택",
@@ -113,7 +110,7 @@ export default function RemoteProjectPage() {
           company: "(주)인텔리봇",
           skills: ["NLP", "Python", "TensorFlow"],
           duration: "5개월",
-          budget: "5,800만원", 
+          budget: "5,800만원",
           deadline: "D-2",
           type: "재택",
           description: "자연어 처리 기술을 활용한 고객 응대용 AI 챗봇 시스템 개발 프로젝트입니다.",
@@ -124,7 +121,7 @@ export default function RemoteProjectPage() {
           title: "보안 시스템 강화 프로젝트",
           company: "(주)시큐리티솔루션",
           skills: ["Java", "Spring Security", "Penetration Testing"],
-          duration: "3개월", 
+          duration: "3개월",
           budget: "4,200만원",
           deadline: "D-6",
           type: "재택",
@@ -192,11 +189,11 @@ export default function RemoteProjectPage() {
           level: "고급"
         }
       ];
-      
+
       setProjects(projectsData);
       setLocalLoading(false);
     }, 800);
-    
+
     return () => {
       clearTimeout(timer);
     };
@@ -205,32 +202,28 @@ export default function RemoteProjectPage() {
   // 필터링된 프로젝트 계산
   const filteredProjects = useMemo(() => {
     return projects.filter(project => {
-      // 검색어 필터링
-      const matchesSearch = searchTerm === '' || 
+      const matchesSearch = searchTerm === '' ||
         project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (project.description && project.description.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      // 스킬 필터링
+
       const matchesSkills = selectedSkills.length === 0 ||
         selectedSkills.every(skill => project.skills.includes(skill));
-      
-      // 기간 필터링
-      const matchesDuration = selectedDuration === '' || 
+
+      const matchesDuration = selectedDuration === '' ||
         (selectedDuration === '3' && parseInt(project.duration) <= 3) ||
         (selectedDuration === '6' && parseInt(project.duration) <= 6) ||
         (selectedDuration === '12' && parseInt(project.duration) <= 12);
-      
-      // 예산 필터링
+
       const projectBudget = parseInt(project.budget.replace(/[^0-9]/g, ''));
-      const matchesBudget = selectedBudget === '' || 
+      const matchesBudget = selectedBudget === '' ||
         (selectedBudget === '3000000' && projectBudget >= 3000000) ||
         (selectedBudget === '5000000' && projectBudget >= 5000000) ||
         (selectedBudget === '10000000' && projectBudget >= 10000000) ||
         (selectedBudget === '30000000' && projectBudget >= 30000000) ||
         (selectedBudget === '50000000' && projectBudget >= 50000000);
-      
+
       return matchesSearch && matchesSkills && matchesDuration && matchesBudget;
     });
   }, [projects, searchTerm, selectedSkills, selectedDuration, selectedBudget]);
@@ -258,9 +251,9 @@ export default function RemoteProjectPage() {
   };
 
   const toggleSkillFilter = (skill: string) => {
-    setSelectedSkills(prev => 
-      prev.includes(skill) 
-        ? prev.filter(s => s !== skill) 
+    setSelectedSkills(prev =>
+      prev.includes(skill)
+        ? prev.filter(s => s !== skill)
         : [...prev, skill]
     );
     setCurrentPage(1); // 필터 변경 시 첫 페이지로
@@ -305,16 +298,16 @@ export default function RemoteProjectPage() {
             </circle>
           </svg>
         </div>
-        
+
         {/* 배너 콘텐츠 */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative z-10">
           <h1 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight leading-tight">
-            재택/원격 <span className="text-pink-300">프로젝트</span>
+            재택 / 원격 <span className="text-pink-300"> 프로젝트 </span>
           </h1>
           <p className="text-xl md:text-2xl mb-10 text-indigo-100 max-w-3xl font-light">
             장소에 구애받지 않고 자유롭게 진행할 수 있는 원격 프로젝트를 찾아보세요
           </p>
-          
+
           {/* 검색창 */}
           <div className="bg-white/10 backdrop-blur-md p-2 flex items-center max-w-3xl rounded-2xl shadow-lg border border-white/20">
             <input
@@ -329,30 +322,30 @@ export default function RemoteProjectPage() {
             </button>
           </div>
         </div>
-        
+
         {/* 인터랙티브 애니메이션 요소 */}
         <div className="absolute bottom-0 left-0 w-full overflow-hidden">
           <div className="relative h-16">
             {/* 웨이브 애니메이션 */}
             <div className="absolute bottom-0 left-0 w-full">
               <svg className="w-full h-12" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                <path 
-                  d="M0,0 C150,90 350,0 500,80 C650,160 750,40 900,100 C1050,160 1150,60 1200,80 L1200,120 L0,120 Z" 
+                <path
+                  d="M0,0 C150,90 350,0 500,80 C650,160 750,40 900,100 C1050,160 1150,60 1200,80 L1200,120 L0,120 Z"
                   className="fill-white opacity-70"
                 >
-                  <animate 
-                    attributeName="d" 
+                  <animate
+                    attributeName="d"
                     dur="10s"
                     repeatCount="indefinite"
                     values="
-                      M0,0 C150,90 350,0 500,80 C650,160 750,40 900,100 C1050,160 1150,60 1200,80 L1200,120 L0,120 Z;
-                      M0,0 C150,40 350,80 500,20 C650,60 750,120 900,40 C1050,20 1150,80 1200,60 L1200,120 L0,120 Z;
-                      M0,0 C150,90 350,0 500,80 C650,160 750,40 900,100 C1050,160 1150,60 1200,80 L1200,120 L0,120 Z"
+                    M0, 0 C150, 90 350, 0 500, 80 C650, 160 750, 40 900, 100 C1050, 160 1150, 60 1200, 80 L1200, 120 L0, 120 Z;
+                    M0, 0 C150, 40 350, 80 500, 20 C650, 60 750, 120 900, 40 C1050, 20 1150, 80 1200, 60 L1200, 120 L0, 120 Z;
+                    M0, 0 C150, 90 350, 0 500, 80 C650, 160 750, 40 900, 100 C1050, 160 1150, 60 1200, 80 L1200, 120 L0, 120 Z"
                   />
                 </path>
               </svg>
             </div>
-            
+
             {/* 부유하는 아이콘들 */}
             <div className="absolute bottom-4 left-1/4 animate-bounce-slow opacity-80">
               <div className="bg-white p-2 rounded-full shadow-lg">
@@ -361,7 +354,7 @@ export default function RemoteProjectPage() {
                 </svg>
               </div>
             </div>
-            
+
             <div className="absolute bottom-8 left-1/2 animate-float opacity-80">
               <div className="bg-white p-2 rounded-full shadow-lg">
                 <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -369,7 +362,7 @@ export default function RemoteProjectPage() {
                 </svg>
               </div>
             </div>
-            
+
             <div className="absolute bottom-6 left-3/4 animate-pulse opacity-80">
               <div className="bg-white p-2 rounded-full shadow-lg">
                 <svg className="w-6 h-6 text-pink-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -379,7 +372,7 @@ export default function RemoteProjectPage() {
             </div>
           </div>
         </div>
-        
+
         {/* 애니메이션 스타일 */}
         <style jsx>{`
           @keyframes bounce-slow {
@@ -427,7 +420,7 @@ export default function RemoteProjectPage() {
               </svg>
               프로젝트 필터
             </h3>
-            
+
             {/* 기술 스택 필터 */}
             <div className="mb-8">
               <h4 className="font-medium text-gray-900 mb-4 flex items-center">
@@ -441,10 +434,9 @@ export default function RemoteProjectPage() {
                   <button
                     key={skill}
                     onClick={() => toggleSkillFilter(skill)}
-                    className={`text-xs px-3 py-1.5 rounded-full transition-all ${
-                      selectedSkills.includes(skill)
-                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm'
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+                    className={`text-xs px-3 py-1.5 rounded-full transition-all ${selectedSkills.includes(skill)
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
                     }`}
                   >
                     {skill}
@@ -452,7 +444,7 @@ export default function RemoteProjectPage() {
                 ))}
               </div>
             </div>
-            
+
             {/* 개발 기간 필터 */}
             <div className="mb-8">
               <h4 className="font-medium text-gray-900 mb-4 flex items-center">
@@ -467,13 +459,13 @@ export default function RemoteProjectPage() {
                 value={selectedDuration}
                 onChange={handleDurationChange}
               >
-                <option value="">전체</option>
-                <option value="3">3개월 이내</option>
-                <option value="6">6개월 이내</option>
-                <option value="12">12개월 이내</option>
+                <option value=""> 전체 </option>
+                <option value="3"> 3개월 이내 </option>
+                <option value="6"> 6개월 이내 </option>
+                <option value="12"> 12개월 이내 </option>
               </select>
             </div>
-            
+
             {/* 예산 필터 */}
             <div className="mb-8">
               <h4 className="font-medium text-gray-900 mb-4 flex items-center">
@@ -488,23 +480,18 @@ export default function RemoteProjectPage() {
                 value={selectedBudget}
                 onChange={handleBudgetChange}
               >
-                <option value="">전체</option>
-                <option value="3000000">300만원 이상</option>
-                <option value="5000000">500만원 이상</option>
-                <option value="10000000">1,000만원 이상</option>
-                <option value="30000000">3,000만원 이상</option>
-                <option value="50000000">5,000만원 이상</option>
+                <option value=""> 전체 </option>
+                <option value="3000000"> 300만원 이상 </option>
+                <option value="5000000"> 500만원 이상 </option>
+                <option value="10000000"> 1,000만원 이상 </option>
+                <option value="30000000"> 3,000만원 이상 </option>
+                <option value="50000000"> 5,000만원 이상 </option>
               </select>
             </div>
-            
+
             {/* 필터 초기화 버튼 */}
             <button
-              onClick={() => {
-                setSelectedSkills([]);
-                setSelectedDuration('');
-                setSelectedBudget('');
-                setSearchTerm('');
-              }}
+              onClick={resetFilters}
               className="w-full py-3 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-800 rounded-xl transition-all text-sm font-medium border border-gray-200 hover:shadow-sm flex items-center justify-center"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -519,10 +506,10 @@ export default function RemoteProjectPage() {
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center">
-                  <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">재택/원격 프로젝트</span>
-                  <span className="ml-2 text-sm font-normal bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full">NEW</span>
+                  <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 / 원격 프로젝트 </span>
+                  <span className="ml-2 text-sm font-normal bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full"> NEW </span>
                 </h2>
-                <p className="text-gray-600">총 <span className="font-semibold text-indigo-600">{filteredProjects.length}</span>개의 프로젝트가 있습니다</p>
+                <p className="text-gray-600"> 총 <span className="font-semibold text-indigo-600">{filteredProjects.length}</span>개의 프로젝트가 있습니다</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 transition-all flex items-center gap-1 shadow-sm">
@@ -555,8 +542,8 @@ export default function RemoteProjectPage() {
               filteredProjects.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {paginatedProjects.map((project) => (
-                    <div 
-                      key={project.id} 
+                    <div
+                      key={project.id}
                       className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group relative"
                     >
                       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 to-purple-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
@@ -578,16 +565,16 @@ export default function RemoteProjectPage() {
                           </svg>
                           {project.company}
                         </p>
-                        
+
                         {project.description && (
-                          <p className="text-gray-700 mb-4 text-sm line-clamp-2 bg-gray-50 p-4 rounded-xl border border-gray-100">{project.description}</p>
+                          <p className="text-gray-700 mb-4 text-sm line-clamp-2 bg-gray-50 p-4 rounded-xl border border-gray-100"> {project.description} </p>
                         )}
-                        
+
                         <div className="mb-4">
                           <div className="flex flex-wrap gap-2 mb-4">
                             {project.skills.map((skill) => (
-                              <span 
-                                key={skill} 
+                              <span
+                                key={skill}
                                 className="bg-indigo-50 text-indigo-600 text-xs px-3 py-1 rounded-full border border-indigo-100"
                               >
                                 {skill}
@@ -609,7 +596,7 @@ export default function RemoteProjectPage() {
                             </span>
                           </div>
                         </div>
-                        
+
                         <Link
                           href={`/project/${project.id}`}
                           className="block w-full text-center bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 text-indigo-700 font-medium py-3 rounded-xl transition-all mt-4 group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:text-white border border-indigo-100 group-hover:border-transparent"
@@ -625,9 +612,9 @@ export default function RemoteProjectPage() {
                   <svg className="w-20 h-20 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <h3 className="text-xl font-medium text-gray-900 mb-3">일치하는 프로젝트가 없습니다</h3>
-                  <p className="text-gray-600 mb-6">검색어나 필터 조건을 변경해 보세요.</p>
-                  <button 
+                  <h3 className="text-xl font-medium text-gray-900 mb-3"> 일치하는 프로젝트가 없습니다 </h3>
+                  <p className="text-gray-600 mb-6"> 검색어나 필터 조건을 변경해 보세요.</p>
+                  <button
                     onClick={() => {
                       setSelectedSkills([]);
                       setSelectedDuration('');
@@ -649,7 +636,7 @@ export default function RemoteProjectPage() {
             {filteredProjects.length > 0 && (
               <div className="flex justify-center mt-12">
                 <nav className="flex items-center space-x-3">
-                  <button 
+                  <button
                     className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-indigo-300 hover:text-indigo-600"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
@@ -659,33 +646,27 @@ export default function RemoteProjectPage() {
                     </svg>
                     이전
                   </button>
-                  
+
                   <div className="flex items-center space-x-2">
                     {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
-                      // 현재 페이지 주변의 페이지 번호만 표시
                       let pageNumber;
                       if (totalPages <= 5) {
-                        // 전체 페이지가 5개 이하면 모든 페이지 번호 표시
                         pageNumber = index + 1;
                       } else if (currentPage <= 3) {
-                        // 현재 페이지가 3 이하면 1~5 표시
                         pageNumber = index + 1;
                       } else if (currentPage >= totalPages - 2) {
-                        // 현재 페이지가 마지막에 가까우면 마지막 5개 표시
                         pageNumber = totalPages - 4 + index;
                       } else {
-                        // 그 외의 경우, 현재 페이지를 중심으로 앞뒤로 2개씩 표시
                         pageNumber = currentPage - 2 + index;
                       }
-                      
+
                       return (
                         <button
                           key={pageNumber}
                           onClick={() => handlePageChange(pageNumber)}
-                          className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${
-                            currentPage === pageNumber
-                              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
-                              : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 hover:border-indigo-300 hover:text-indigo-600'
+                          className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${currentPage === pageNumber
+                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+                            : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 hover:border-indigo-300 hover:text-indigo-600'
                           }`}
                         >
                           {pageNumber}
@@ -693,8 +674,8 @@ export default function RemoteProjectPage() {
                       );
                     })}
                   </div>
-                  
-                  <button 
+
+                  <button
                     className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-indigo-300 hover:text-indigo-600"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
@@ -721,12 +702,12 @@ export default function RemoteProjectPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             <div>
               <h2 className="text-3xl font-bold mb-8 text-gray-900 flex items-center">
-                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">재택/원격 프로젝트란?</span>
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 / 원격 프로젝트란 ? </span>
                 <div className="ml-4 h-1 w-24 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"></div>
               </h2>
               <div className="space-y-6 text-gray-600">
                 <p className="text-lg leading-relaxed">
-                  <span className="font-medium text-indigo-600">재택/원격 프로젝트</span>는 장소에 구애받지 않고 자유롭게 작업할 수 있는 프로젝트 형태입니다. 이랜서는 검증된 IT 프리랜서 전문가들이 원격으로 진행할 수 있는 다양한 프로젝트를 제공합니다.
+                  <span className="font-medium text-indigo-600"> 재택 / 원격 프로젝트 </span>는 장소에 구애받지 않고 자유롭게 작업할 수 있는 프로젝트 형태입니다. 이랜서는 검증된 IT 프리랜서 전문가들이 원격으로 진행할 수 있는 다양한 프로젝트를 제공합니다.
                 </p>
                 <ul className="list-none space-y-4">
                   <li className="flex items-start">
@@ -735,7 +716,7 @@ export default function RemoteProjectPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
                       </svg>
                     </div>
-                    <span>자유로운 시간과 장소에서 업무 진행 가능</span>
+                    <span> 자유로운 시간과 장소에서 업무 진행 가능 </span>
                   </li>
                   <li className="flex items-start">
                     <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
@@ -743,7 +724,7 @@ export default function RemoteProjectPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
                       </svg>
                     </div>
-                    <span>개인의 효율적인 작업 환경에서 높은 생산성 발휘</span>
+                    <span> 개인의 효율적인 작업 환경에서 높은 생산성 발휘 </span>
                   </li>
                   <li className="flex items-start">
                     <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
@@ -751,7 +732,7 @@ export default function RemoteProjectPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
                       </svg>
                     </div>
-                    <span>통근 시간 절약 및 워라밸 향상</span>
+                    <span> 통근 시간 절약 및 워라밸 향상 </span>
                   </li>
                   <li className="flex items-start">
                     <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
@@ -759,7 +740,7 @@ export default function RemoteProjectPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
                       </svg>
                     </div>
-                    <span>클라우드 기반 협업 도구를 통한 원활한 소통</span>
+                    <span> 클라우드 기반 협업 도구를 통한 원활한 소통 </span>
                   </li>
                   <li className="flex items-start">
                     <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
@@ -767,62 +748,62 @@ export default function RemoteProjectPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
                       </svg>
                     </div>
-                    <span>정기적인 화상 미팅과 결과물 보고로 프로젝트 관리</span>
+                    <span> 정기적인 화상 미팅과 결과물 보고로 프로젝트 관리 </span>
                   </li>
                 </ul>
                 <p className="text-lg leading-relaxed">
-                  재택/원격 프로젝트는 자기주도적인 업무 역량이 뛰어난 전문가에게 적합하며, 프로젝트 관리와 소통 능력이 중요합니다. 시간과 공간의 제약 없이 효율적으로 프로젝트를 진행하고 싶은 프리랜서에게 추천합니다.
+                  재택 / 원격 프로젝트는 자기주도적인 업무 역량이 뛰어난 전문가에게 적합하며, 프로젝트 관리와 소통 능력이 중요합니다.시간과 공간의 제약 없이 효율적으로 프로젝트를 진행하고 싶은 프리랜서에게 추천합니다.
                 </p>
               </div>
             </div>
-            
+
             <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-b from-indigo-100 to-purple-100 rounded-bl-full opacity-50 -z-10"></div>
               <h3 className="text-2xl font-bold mb-8 text-gray-900 pb-4 border-b flex items-center">
-                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">재택/원격 프로젝트 이용 안내</span>
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 / 원격 프로젝트 이용 안내 </span>
               </h3>
               <div className="space-y-10">
                 <div className="flex">
                   <div className="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center shadow-sm">
-                    <span className="text-indigo-600 font-bold text-2xl">1</span>
+                    <span className="text-indigo-600 font-bold text-2xl"> 1 </span>
                   </div>
                   <div className="ml-6">
-                    <h4 className="text-xl font-medium text-gray-900 mb-2">프로젝트 찾기</h4>
-                    <p className="text-gray-600 leading-relaxed">다양한 재택/원격 프로젝트 중 나의 기술 스택과 관심 분야에 맞는 프로젝트를 찾습니다.</p>
+                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 프로젝트 찾기 </h4>
+                    <p className="text-gray-600 leading-relaxed"> 다양한 재택 / 원격 프로젝트 중 나의 기술 스택과 관심 분야에 맞는 프로젝트를 찾습니다.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex">
                   <div className="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center shadow-sm">
-                    <span className="text-indigo-600 font-bold text-2xl">2</span>
+                    <span className="text-indigo-600 font-bold text-2xl"> 2 </span>
                   </div>
                   <div className="ml-6">
-                    <h4 className="text-xl font-medium text-gray-900 mb-2">지원 및 제안</h4>
-                    <p className="text-gray-600 leading-relaxed">프로젝트에 지원하거나, 견적과 포트폴리오를 포함한 제안서를 제출합니다.</p>
+                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 지원 및 제안 </h4>
+                    <p className="text-gray-600 leading-relaxed"> 프로젝트에 지원하거나, 견적과 포트폴리오를 포함한 제안서를 제출합니다.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex">
                   <div className="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center shadow-sm">
-                    <span className="text-indigo-600 font-bold text-2xl">3</span>
+                    <span className="text-indigo-600 font-bold text-2xl"> 3 </span>
                   </div>
                   <div className="ml-6">
-                    <h4 className="text-xl font-medium text-gray-900 mb-2">미팅 및 계약</h4>
-                    <p className="text-gray-600 leading-relaxed">화상 미팅을 통해 클라이언트와 소통한 후, 이랜서 플랫폼을 통해 안전하게 계약을 체결합니다.</p>
+                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 미팅 및 계약 </h4>
+                    <p className="text-gray-600 leading-relaxed"> 화상 미팅을 통해 클라이언트와 소통한 후, 이랜서 플랫폼을 통해 안전하게 계약을 체결합니다.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex">
                   <div className="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center shadow-sm">
-                    <span className="text-indigo-600 font-bold text-2xl">4</span>
+                    <span className="text-indigo-600 font-bold text-2xl"> 4 </span>
                   </div>
                   <div className="ml-6">
-                    <h4 className="text-xl font-medium text-gray-900 mb-2">작업 및 협업</h4>
-                    <p className="text-gray-600 leading-relaxed">협업 도구를 활용하여 정기적으로 진행 상황을 공유하고, 원격으로 프로젝트를 완성합니다.</p>
+                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 작업 및 협업 </h4>
+                    <p className="text-gray-600 leading-relaxed"> 협업 도구를 활용하여 정기적으로 진행 상황을 공유하고, 원격으로 프로젝트를 완성합니다.</p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-12">
                 <Link
                   href="/freelancers/profile"
@@ -845,13 +826,13 @@ export default function RemoteProjectPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">이랜서 재택/원격 프로젝트의 장점</span>
+              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 이랜서 재택 / 원격 프로젝트의 장점 </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              이랜서는 다양한 산업 분야의 재택/원격 프로젝트를 제공하며, 믿을 수 있는 플랫폼을 통해 안전한 거래를 보장합니다.
+              이랜서는 다양한 산업 분야의 재택 / 원격 프로젝트를 제공하며, 믿을 수 있는 플랫폼을 통해 안전한 거래를 보장합니다.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
               <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -859,47 +840,47 @@ export default function RemoteProjectPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors">유연한 근무 환경</h3>
-              <p className="text-gray-600 leading-relaxed">장소와 시간에 구애받지 않고 자신에게 가장 효율적인 환경에서 업무를 수행할 수 있습니다.</p>
+              <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors"> 유연한 근무 환경 </h3>
+              <p className="text-gray-600 leading-relaxed"> 장소와 시간에 구애받지 않고 자신에게 가장 효율적인 환경에서 업무를 수행할 수 있습니다.</p>
             </div>
-            
+
             <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
               <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors">안전한 계약과 대금</h3>
-              <p className="text-gray-600 leading-relaxed">이랜서의 안전한 계약 시스템과 대금보호 서비스로 안심하고 프로젝트를 진행할 수 있습니다.</p>
+              <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors"> 안전한 계약과 대금 </h3>
+              <p className="text-gray-600 leading-relaxed"> 이랜서의 안전한 계약 시스템과 대금보호 서비스로 안심하고 프로젝트를 진행할 수 있습니다.</p>
             </div>
-            
+
             <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
               <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors">검증된 고객사</h3>
-              <p className="text-gray-600 leading-relaxed">이랜서에 등록된 모든 프로젝트와 고객사는 검증 과정을 거쳐 신뢰할 수 있는 파트너입니다.</p>
+              <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors"> 검증된 고객사 </h3>
+              <p className="text-gray-600 leading-relaxed"> 이랜서에 등록된 모든 프로젝트와 고객사는 검증 과정을 거쳐 신뢰할 수 있는 파트너입니다.</p>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 bg-gradient-to-r from-indigo-50 to-purple-50 p-10 rounded-2xl shadow-lg">
             <div className="text-center transform hover:scale-105 transition-transform duration-300">
-              <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3">94%</p>
-              <p className="text-gray-700 font-medium">프로젝트 완료율</p>
+              <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3"> 94 % </p>
+              <p className="text-gray-700 font-medium"> 프로젝트 완료율 </p>
             </div>
             <div className="text-center transform hover:scale-105 transition-transform duration-300">
-              <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3">15,000+</p>
-              <p className="text-gray-700 font-medium">등록된 프리랜서</p>
+              <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3"> 15,000 + </p>
+              <p className="text-gray-700 font-medium"> 등록된 프리랜서 </p>
             </div>
             <div className="text-center transform hover:scale-105 transition-transform duration-300">
-              <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3">3,500+</p>
-              <p className="text-gray-700 font-medium">완료된 원격 프로젝트</p>
+              <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3"> 3,500 + </p>
+              <p className="text-gray-700 font-medium"> 완료된 원격 프로젝트 </p>
             </div>
             <div className="text-center transform hover:scale-105 transition-transform duration-300">
-              <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3">4.8/5</p>
-              <p className="text-gray-700 font-medium">고객 만족도</p>
+              <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3"> 4.8 / 5 </p>
+              <p className="text-gray-700 font-medium"> 고객 만족도 </p>
             </div>
           </div>
         </div>

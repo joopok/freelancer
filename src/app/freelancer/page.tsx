@@ -316,32 +316,26 @@ const getNameByIndex = (index: number): string => {
       </div>
 
       {/* 탭 네비게이션 */}
-      <div className="border-b bg-white sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="border-b bg-white sticky top-0 md:top-0 bottom-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto">
           <nav className="flex relative">
             {tabs.map((tab, index) => (
               <button
                 key={tab}
                 ref={(el) => (tabsRef.current[index] = el)}
                 onClick={() => handleTabChange(tab)}
-                className={`py-4 px-6 relative group ${
+                className={`flex-1 py-3 md:py-4 px-2 md:px-6 text-sm md:text-base text-center relative group ${
                   activeTab === tab
                     ? "text-purple-600 font-medium"
                     : "text-gray-500 hover:text-purple-500"
                 } transition-colors duration-300`}
               >
                 {tab}
+                {activeTab === tab && (
+                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-purple-600"></div>
+                )}
               </button>
             ))}
-            {/* 슬라이딩 인디케이터 */}
-            <div 
-              className="absolute bottom-0 bg-purple-600 transition-all duration-300 ease-in-out"
-              style={{
-                left: `${indicatorStyle.left}px`,
-                width: `${indicatorStyle.width}px`,
-                height: '3px'
-              }}
-            />
           </nav>
         </div>
       </div>

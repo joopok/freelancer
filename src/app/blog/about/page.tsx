@@ -1,22 +1,27 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLoading } from '@/components/layout/Loading';
 
 export default function BlogAboutPage() {
   const { setLoading } = useLoading();
+  const loadingExecutedRef = useRef(false);
   
   // 페이지 로드 시 로딩 효과 표시
   useEffect(() => {
-    setLoading(true);
-    
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000); // 1초 로딩 효과로 줄임
-    
-    return () => clearTimeout(timer);
+    if (!loadingExecutedRef.current) {
+      loadingExecutedRef.current = true;
+      setLoading(true, '소개 페이지 로딩 중...');
+      
+      // 페이지 로딩이 완료되면 로딩 상태 해제
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
   }, [setLoading]);
 
   return (

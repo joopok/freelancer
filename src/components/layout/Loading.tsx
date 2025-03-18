@@ -21,7 +21,7 @@ const LoadingContext = createContext<LoadingContextType>({
 export const useLoading = () => useContext(LoadingContext);
 
 // 3초 로딩 상수
-const LOADING_DURATION = 7000;
+const LOADING_DURATION = 3000;
 
 // 로딩 UI 컴포넌트
 const LoadingUI = ({ debugInfo }: { debugInfo?: string }) => (

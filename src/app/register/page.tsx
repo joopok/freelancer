@@ -83,6 +83,20 @@ export default function RegisterPage() {
   });
   
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [headerScroll, setHeaderScroll] = useState(0);
+  const [showHeader, setShowHeader] = useState(true);
+
+  // 헤더 스크롤 효과
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setHeaderScroll(scrollPosition);
+      setShowHeader(scrollPosition < 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -779,65 +793,101 @@ export default function RegisterPage() {
         onLoad={() => setIsScriptLoaded(true)}
       />
         
-      <div className="w-full h-full min-h-screen bg-gray-50 px-4 py-8">
-        <div className="flex flex-col lg:flex-row max-w-[1252px] mx-auto relative">
-          {/* 왼쪽 사이드바 (고정 위치) */}
-          <div className="w-full lg:w-64 mb-6 lg:mb-0">
-            <div className="lg:fixed lg:w-60 bg-white shadow-md rounded-lg z-20">
-              <div className="p-4 border-b border-gray-200">
-                <h3 className="text-lg font-bold text-gray-800 mb-2">회원가입 유형</h3>
-                <p className="text-sm text-gray-600">원하시는 회원 유형을 선택해주세요</p>
-              </div>
-              <div className="p-4 space-y-3">
-                <button
-                  type="button"
-                  onClick={() => setFormType('company')}
-                  className={`w-full py-3 px-3 rounded-md font-bold text-left transition-all duration-200 flex items-center ${
-                    formType === 'company' 
-                      ? 'bg-orange-50 text-orange-600 border-l-4 border-orange-500' 
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                  </svg>
-                  기업 회원가입
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormType('individual')}
-                  className={`w-full py-3 px-3 rounded-md font-bold text-left transition-all duration-200 flex items-center ${
-                    formType === 'individual' 
-                      ? 'bg-orange-50 text-orange-600 border-l-4 border-orange-500' 
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                  </svg>
-                  개인 회원가입
-                </button>
-              </div>
-              <div className="p-4 bg-gray-50 rounded-b-lg">
-                <p className="text-xs text-gray-500">회원가입 후 다양한 서비스를 이용하실 수 있습니다.</p>
+      <div className="w-full h-full min-h-screen bg-gray-50">
+        {/* 히어로 섹션 */}
+        <div className="relative h-[400px] bg-gradient-to-br from-blue-600 to-indigo-800">
+          <div className="absolute inset-0 bg-black opacity-20"></div>
+          <div className="absolute inset-0">
+            <div className="absolute inset-0 bg-[url('/images/pattern.svg')] opacity-10"></div>
+          </div>
+          <div className="relative max-w-[1252px] mx-auto px-4 h-full flex items-center">
+            <div className="text-white">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                함께 성장하는<br />
+                <span className="text-blue-300">디지털 혁신</span>
+              </h1>
+              <p className="text-lg md:text-xl text-blue-100 mb-8">
+                Huware와 함께 새로운 가능성을 시작하세요
+              </p>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-sm">실시간 지원</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                  <span className="text-sm">24/7 서비스</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                  <span className="text-sm">보안 인증</span>
+                </div>
               </div>
             </div>
           </div>
-          
-          {/* 메인 콘텐츠 영역 (사이드바 너비만큼 마진 추가) */}
-          <div className="flex-1 w-full lg:pl-64">
-            <div className="bg-white rounded-lg p-5 lg:p-7 shadow-md h-full pr-2">
-              <h2 className="text-xl lg:text-2xl font-bold mb-6">
-                {formType === 'company' ? '기업 회원가입' : '개인 회원가입'}
-              </h2>
-              
-              {formType === 'company' && (
-                <p className="text-gray-600 mb-6 text-sm">
-                  (*)표시는 필수입력 사항입니다. 입력하신 정보는 프로젝트 등록 시 자동 입력됩니다
-                </p>
-              )}
+        </div>
 
-              {formType === 'company' ? renderCompanyForm() : renderIndividualForm()}
+        {/* 회원가입 폼 컨텐츠 */}
+        <div className="px-4 py-8">
+          <div className="flex flex-col lg:flex-row max-w-[1252px] mx-auto relative">
+            {/* 왼쪽 사이드바 (고정 위치) */}
+            <div className="w-full lg:w-64 mb-6 lg:mb-0">
+              <div className="lg:fixed lg:w-60 bg-white shadow-md rounded-lg z-20">
+                <div className="p-4 border-b border-gray-200">
+                  <h3 className="text-lg font-bold text-gray-800 mb-2">회원가입 유형</h3>
+                  <p className="text-sm text-gray-600">원하시는 회원 유형을 선택해주세요</p>
+                </div>
+                <div className="p-4 space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormType('company')}
+                    className={`w-full py-3 px-3 rounded-md font-bold text-left transition-all duration-200 flex items-center ${
+                      formType === 'company' 
+                        ? 'bg-orange-50 text-orange-600 border-l-4 border-orange-500' 
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                    기업 회원가입
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormType('individual')}
+                    className={`w-full py-3 px-3 rounded-md font-bold text-left transition-all duration-200 flex items-center ${
+                      formType === 'individual' 
+                        ? 'bg-orange-50 text-orange-600 border-l-4 border-orange-500' 
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    개인 회원가입
+                  </button>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-b-lg">
+                  <p className="text-xs text-gray-500">회원가입 후 다양한 서비스를 이용하실 수 있습니다.</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* 메인 콘텐츠 영역 */}
+            <div className="flex-1 w-full lg:pl-64">
+              <div className="bg-white rounded-lg p-5 lg:p-7 shadow-md h-full pr-2">
+                <h2 className="text-xl lg:text-2xl font-bold mb-6">
+                  {formType === 'company' ? '기업 회원가입' : '개인 회원가입'}
+                </h2>
+                
+                {formType === 'company' && (
+                  <p className="text-gray-600 mb-6 text-sm">
+                    (*)표시는 필수입력 사항입니다. 입력하신 정보는 프로젝트 등록 시 자동 입력됩니다
+                  </p>
+                )}
+
+                {formType === 'company' ? renderCompanyForm() : renderIndividualForm()}
+              </div>
             </div>
           </div>
         </div>

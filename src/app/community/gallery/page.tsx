@@ -20,6 +20,160 @@ interface GalleryItem {
   isFeatured?: boolean;
 }
 
+// 배경 애니메이션 컴포넌트
+const BackgroundAnimation = () => (
+  <div className="absolute inset-0">
+    <motion.div
+      animate={{
+        scale: [1, 1.2, 1],
+        opacity: [0.3, 0.2, 0.3],
+      }}
+      transition={{
+        duration: 8,
+        repeat: Infinity,
+        ease: "linear"
+      }}
+      className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-400/20 to-transparent rounded-full"
+    />
+    <motion.div
+      animate={{
+        scale: [1.2, 1, 1.2],
+        opacity: [0.2, 0.3, 0.2],
+      }}
+      transition={{
+        duration: 8,
+        repeat: Infinity,
+        ease: "linear"
+      }}
+      className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-blue-400/20 to-transparent rounded-full"
+    />
+  </div>
+);
+
+// 실시간 배지 컴포넌트
+const LiveBadge = () => (
+  <motion.div
+    initial={{ opacity: 0, x: -20 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay: 0.2, duration: 0.5 }}
+    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white bg-opacity-10 backdrop-blur-lg text-white mb-6"
+  >
+    <span className="relative flex h-2 w-2 mr-2">
+      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+    </span>
+    실시간 갤러리
+  </motion.div>
+);
+
+// 통계 카드 컴포넌트
+interface StatCardProps {
+  value: string;
+  label: string;
+  delay: number;
+}
+
+const StatCard = ({ value, label, delay }: StatCardProps) => (
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 shadow-xl hover:shadow-2xl transition-all duration-300"
+  >
+    <motion.div
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      transition={{ delay, type: "spring", stiffness: 200 }}
+      className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200"
+    >
+      {value}
+    </motion.div>
+    <p className="text-blue-100">{label}</p>
+  </motion.div>
+);
+
+// 공유 버튼 컴포넌트
+const ShareButton = () => (
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    className="group inline-flex items-center px-6 py-3 rounded-full bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 text-white hover:bg-opacity-20 transition-all duration-300 shadow-lg hover:shadow-xl"
+  >
+    <motion.svg
+      whileHover={{ rotate: 180 }}
+      transition={{ duration: 0.3 }}
+      className="w-5 h-5 mr-2 transform group-hover:scale-110"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </motion.svg>
+    작품 공유하기
+  </motion.button>
+);
+
+// 헤더 섹션 컴포넌트
+const HeaderSection = () => (
+  <div className="relative bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 py-16 px-4 sm:px-6 lg:px-8 text-white overflow-hidden">
+    <BackgroundAnimation />
+    
+    <div className="relative max-w-7xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-center"
+      >
+        <LiveBadge />
+
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-100 to-blue-100"
+        >
+          갤러리
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="text-xl opacity-90 max-w-2xl mx-auto mb-8 text-blue-100"
+        >
+          포트폴리오, 작업물, 취업 성공 스토리 등 다양한 이미지를 공유해보세요
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+        >
+          <ShareButton />
+        </motion.div>
+
+        {/* 통계 카드 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+          className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
+        >
+          <StatCard value="1,234" label="총 작품수" delay={0.7} />
+          <StatCard value="89" label="오늘 새 작품" delay={0.8} />
+          <StatCard value="4,567" label="활성 작가" delay={0.9} />
+        </motion.div>
+      </motion.div>
+    </div>
+
+    {/* 곡선 구분선 */}
+    <div className="absolute bottom-0 left-0 right-0 overflow-hidden leading-none">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-10">
+        <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#F9FAFB"></path>
+      </svg>
+    </div>
+  </div>
+);
+
 export default function CommunityGalleryPage() {
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -212,27 +366,7 @@ export default function CommunityGalleryPage() {
   
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 헤더 섹션 */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 py-16 px-4 sm:px-6 lg:px-8 text-white">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-3xl font-extrabold sm:text-4xl mb-4">갤러리</h1>
-          <p className="text-xl opacity-90 max-w-2xl mx-auto">
-            포트폴리오, 작업물, 취업 성공 스토리 등 다양한 이미지를 공유해보세요
-          </p>
-          
-          <div className="mt-8">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-indigo-600 bg-white hover:bg-gray-50 transition-colors"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              작품 공유하기
-            </motion.button>
-          </div>
-        </div>
-      </div>
+      <HeaderSection />
       
       {/* 필터 및 레이아웃 옵션 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

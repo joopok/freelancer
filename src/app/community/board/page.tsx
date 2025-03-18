@@ -231,61 +231,124 @@ export default function CommunityBoardPage() {
             className="md:flex md:items-center md:justify-between"
           >
             <div className="md:max-w-2xl">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-4">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white bg-opacity-20 text-white mb-4"
+              >
+                <span className="relative flex h-2 w-2 mr-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                실시간 커뮤니티
+              </motion.div>
+              
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100"
+              >
                 자유게시판
-              </h1>
-              <p className="text-blue-100 text-lg sm:text-xl mb-6">
+              </motion.h1>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                className="text-blue-100 text-lg sm:text-xl mb-6 leading-relaxed"
+              >
                 다양한 주제에 대해 자유롭게 의견을 나눌 수 있는 공간입니다.
                 직장생활, 취업/이직, 커리어 등 자유롭게 이야기해보세요.
-              </p>
+              </motion.p>
               
-              <div className="flex flex-wrap gap-3 mb-6 md:mb-0">
-                <Link href="/community" className="inline-flex items-center text-sm bg-white bg-opacity-20 text-white px-3 py-1 rounded-full hover:bg-opacity-30 transition-colors">
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="flex flex-wrap gap-3 mb-6 md:mb-0"
+              >
+                <Link href="/community" className="group inline-flex items-center text-sm bg-white bg-opacity-20 text-white px-4 py-2 rounded-full hover:bg-opacity-30 transition-all duration-300 hover:scale-105">
+                  <svg className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                   커뮤니티홈
                 </Link>
-                <Link href="/community/free" className="inline-flex items-center text-sm bg-white bg-opacity-20 text-white px-3 py-1 rounded-full hover:bg-opacity-30 transition-colors">
+                <Link href="/community/free" className="group inline-flex items-center text-sm bg-white bg-opacity-20 text-white px-4 py-2 rounded-full hover:bg-opacity-30 transition-all duration-300 hover:scale-105">
+                  <svg className="w-4 h-4 mr-2 transform group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
                   자유주제
                 </Link>
-                <Link href="/community/qna" className="inline-flex items-center text-sm bg-white bg-opacity-20 text-white px-3 py-1 rounded-full hover:bg-opacity-30 transition-colors">
+                <Link href="/community/qna" className="group inline-flex items-center text-sm bg-white bg-opacity-20 text-white px-4 py-2 rounded-full hover:bg-opacity-30 transition-all duration-300 hover:scale-105">
+                  <svg className="w-4 h-4 mr-2 transform group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                   질문&답변
                 </Link>
-                <Link href="/community/gallery" className="inline-flex items-center text-sm bg-white bg-opacity-20 text-white px-3 py-1 rounded-full hover:bg-opacity-30 transition-colors">
+                <Link href="/community/gallery" className="group inline-flex items-center text-sm bg-white bg-opacity-20 text-white px-4 py-2 rounded-full hover:bg-opacity-30 transition-all duration-300 hover:scale-105">
+                  <svg className="w-4 h-4 mr-2 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
                   갤러리
                 </Link>
-              </div>
+              </motion.div>
             </div>
             
             <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
               className="mt-8 md:mt-0"
             >
-              <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-5 border border-white border-opacity-20">
+              <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 shadow-xl hover:shadow-2xl transition-all duration-300">
                 <div className="text-white text-center">
-                  <div className="flex justify-center">
-                    <div className="bg-blue-500 rounded-full p-3 mb-3">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <motion.div 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.7, type: "spring", stiffness: 200 }}
+                    className="flex justify-center"
+                  >
+                    <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full p-4 mb-4 shadow-lg">
+                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                       </svg>
                     </div>
-                  </div>
-                  <div className="text-xl font-bold mb-1">8,245</div>
-                  <div className="text-sm text-blue-100">전체 게시글</div>
+                  </motion.div>
                   
-                  <div className="mt-4 grid grid-cols-2 gap-3 text-center">
-                    <div>
-                      <div className="text-lg font-semibold">127</div>
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8, duration: 0.5 }}
+                    className="text-2xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100"
+                  >
+                    8,245
+                  </motion.div>
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.9, duration: 0.5 }}
+                    className="text-sm text-blue-100"
+                  >
+                    전체 게시글
+                  </motion.div>
+                  
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1, duration: 0.5 }}
+                    className="mt-6 grid grid-cols-2 gap-4 text-center"
+                  >
+                    <div className="bg-white bg-opacity-5 rounded-xl p-3 hover:bg-opacity-10 transition-colors">
+                      <div className="text-lg font-semibold text-white">127</div>
                       <div className="text-xs text-blue-100">오늘 새글</div>
                     </div>
-                    <div>
-                      <div className="text-lg font-semibold">4,562</div>
+                    <div className="bg-white bg-opacity-5 rounded-xl p-3 hover:bg-opacity-10 transition-colors">
+                      <div className="text-lg font-semibold text-white">4,562</div>
                       <div className="text-xs text-blue-100">총 회원수</div>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
