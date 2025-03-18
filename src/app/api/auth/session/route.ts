@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/utils/session';
+import { corsOptionsHandler, addCorsHeaders } from '../../cors';
+
+// OPTIONS 요청 처리 - CORS 프리플라이트 요청 대응
+export async function OPTIONS() {
+  return corsOptionsHandler();
+}
 
 export async function GET(request: Request) {
   try {
@@ -17,7 +23,7 @@ export async function GET(request: Request) {
     }
 
     // 세션에서 사용자 정보 반환
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       user: {
         id: session.userId,
@@ -25,6 +31,8 @@ export async function GET(request: Request) {
         isLoggedIn: session.isLoggedIn,
       }
     });
+    
+    return addCorsHeaders(response);
 
   } catch (error) {
     console.error('Session check error:', error);

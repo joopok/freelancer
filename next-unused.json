@@ -1,0 +1,20 @@
+{
+  "include": [
+    "public/**/*",
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules/**/*",
+    ".next/**/*",
+    ".git/**/*",
+    "src/app/layout.tsx",
+    "src/app/page.tsx"
+  ],
+  "entrypoints": [
+    "src/app/**/*.tsx",
+    "src/app/**/*.ts",
+    "src/components/**/*.tsx",
+    "src/components/**/*.ts",
+    "next.config.mjs"
+  ]
+} 

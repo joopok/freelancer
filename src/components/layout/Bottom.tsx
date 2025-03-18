@@ -14,10 +14,10 @@ export default function Bottom() {
     setLoading(true);
     router.push(href);
     
-    // 로딩 상태 1초 후 해제 (페이지 전환 효과를 위해)
+    // 로딩 상태 3초 후 해제 (페이지 전환 효과를 위해)
     setTimeout(() => {
       setLoading(false);
-    }, 1000);
+    }, 3000);
   };
 
   const footerLinks = {
@@ -89,6 +89,7 @@ export default function Bottom() {
             </ul>
           </div>
 
+
           {/* 고객센터 */}
           <div>
             <h3 className="font-semibold mb-4">고객센터</h3>
@@ -107,13 +108,13 @@ export default function Bottom() {
           <div>
             <div className="flex items-center mb-4">
               <Image
-                src="/images/logo-gray.png"
-                alt="Logo"
+                src="/images/jobkorea-logo.png"
+                alt="JobKorea Logo"
                 width={120}
                 height={30}
                 className="mr-4"
               />
-              <span className="text-gray-500">(주)잡코리아</span>
+              <span className="text-gray-500">(주)잡코리아 빌보드에</span>
             </div>
             <p className="text-sm text-gray-500 mb-2">{footerLinks.contact.address}</p>
             <p className="text-sm text-gray-500 mb-2">{footerLinks.contact.business}</p>

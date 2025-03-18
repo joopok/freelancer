@@ -11,8 +11,10 @@ export interface SessionUser {
 
 export interface AuthResponse {
   success: boolean;
-  user?: SessionUser;
+  user?: User;
+  token?: string;
   error?: string;
+  message?: string;
 }
 
 export interface Session {
@@ -20,4 +22,18 @@ export interface Session {
   userType: 'individual' | 'company';
   isLoggedIn: boolean;
   expiresAt: number;
+}
+
+export interface User {
+  id: string;
+  username1: string;
+  name?: string;
+  email?: string;
+  role?: string;
+  profileImage?: string;
+}
+
+export interface LoginRequest {
+  username1: string;
+  password: string;
 } 

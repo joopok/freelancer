@@ -19,16 +19,17 @@ interface Project {
 }
 
 export default function RemoteProjectPage() {
+  // 로컬 상태만 사용
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [localLoading, setLocalLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [selectedDuration, setSelectedDuration] = useState<string>('');
   const [selectedBudget, setSelectedBudget] = useState<string>('');
   
-  // 페이지네이션을 위한 상태 추가
+  // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const projectsPerPage = 10; // 페이지당 10개 항목으로 설정
+  const projectsPerPage = 10;
 
   // 모든 기술 스택 목록
   const allSkills = [
@@ -37,159 +38,169 @@ export default function RemoteProjectPage() {
     'Django', 'PHP', 'JavaScript', 'Vue.js', 'Angular'
   ];
 
-  // 재택 프로젝트 데이터
+  // 재택 프로젝트 데이터 로드 - 컴포넌트 마운트 시 한 번만 실행
   useEffect(() => {
-    // 실제 프로덕션에서는 API 요청으로 데이터를 가져오게 됩니다
-    const projectsData: Project[] = [
-      {
-        id: "1",
-        title: "AI 기반 추천 시스템 개발",
-        company: "(주)테크인사이트",
-        skills: ["Python", "TensorFlow", "AWS"],
-        duration: "4개월",
-        budget: "4,500만원", 
-        deadline: "D-3",
-        type: "재택",
-        description: "사용자 행동 패턴 분석을 통한 맞춤형 상품 추천 시스템 개발 프로젝트입니다.",
-        level: "중급"
-      },
-      {
-        id: "3",
-        title: "블록체인 기반 결제 시스템 구축",
-        company: "(주)블록테크",
-        skills: ["Solidity", "Web3.js", "Node.js"],
-        duration: "6개월", 
-        budget: "7,000만원",
-        deadline: "D-7",
-        type: "재택",
-        description: "블록체인 기술을 활용한 안전한 결제 시스템 개발 프로젝트입니다.",
-        level: "고급"
-      },
-      {
-        id: "6",
-        title: "IoT 디바이스 모니터링 앱 개발",
-        company: "(주)스마트테크",
-        skills: ["Flutter", "Firebase", "MQTT"],
-        duration: "4개월",
-        budget: "4,000만원",
-        deadline: "D-6",
-        type: "재택",
-        description: "다양한 IoT 디바이스 상태를 실시간으로 모니터링하는 모바일 앱 개발 프로젝트입니다.",
-        level: "중급"
-      },
-      {
-        id: "8",
-        title: "SNS 플랫폼 API 개발",
-        company: "(주)소셜미디어",
-        skills: ["Node.js", "GraphQL", "MongoDB"],
-        duration: "4개월",
-        budget: "4,200만원",
-        deadline: "D-2",
-        type: "재택",
-        description: "소셜 미디어 플랫폼의 효율적인 데이터 처리를 위한 API 개발 프로젝트입니다.",
-        level: "중급"
-      },
-      {
-        id: "10",
-        title: "메타버스 플랫폼 개발",
-        company: "(주)메타랩스",
-        skills: ["Unity", "WebGL", "Three.js"],
-        duration: "6개월",
-        budget: "8,000만원",
-        deadline: "D-1",
-        type: "재택",
-        description: "가상 현실 기반의 메타버스 플랫폼 프론트엔드 개발 프로젝트입니다.",
-        level: "고급"
-      },
-      {
-        id: "11",
-        title: "AI 챗봇 시스템 개발",
-        company: "(주)인텔리봇",
-        skills: ["NLP", "Python", "TensorFlow"],
-        duration: "5개월",
-        budget: "5,800만원", 
-        deadline: "D-2",
-        type: "재택",
-        description: "자연어 처리 기술을 활용한 고객 응대용 AI 챗봇 시스템 개발 프로젝트입니다.",
-        level: "중급"
-      },
-      {
-        id: "13",
-        title: "보안 시스템 강화 프로젝트",
-        company: "(주)시큐리티솔루션",
-        skills: ["Java", "Spring Security", "Penetration Testing"],
-        duration: "3개월", 
-        budget: "4,200만원",
-        deadline: "D-6",
-        type: "재택",
-        description: "기업 보안 시스템 취약점 분석 및 보안 강화 솔루션 개발 프로젝트입니다.",
-        level: "고급"
-      },
-      {
-        id: "15",
-        title: "CRM 시스템 개발",
-        company: "(주)고객관리시스템",
-        skills: ["React", "GraphQL", "PostgreSQL"],
-        duration: "5개월",
-        budget: "6,000만원",
-        deadline: "D-5",
-        type: "재택",
-        description: "기업 고객 관리를 위한 대시보드 및 관리 시스템 개발 프로젝트입니다.",
-        level: "중급"
-      },
-      {
-        id: "21",
-        title: "온라인 교육 플랫폼 개발",
-        company: "(주)에듀테크",
-        skills: ["React", "Node.js", "MongoDB"],
-        duration: "4개월",
-        budget: "5,000만원",
-        deadline: "D-8",
-        type: "재택",
-        description: "실시간 강의 및 학습 관리 기능을 제공하는 온라인 교육 플랫폼 개발 프로젝트입니다.",
-        level: "중급"
-      },
-      {
-        id: "22",
-        title: "디지털 헬스케어 앱 개발",
-        company: "(주)헬스케어솔루션",
-        skills: ["React Native", "Firebase", "Node.js"],
-        duration: "5개월",
-        budget: "6,500만원",
-        deadline: "D-4",
-        type: "재택",
-        description: "사용자 건강 데이터 분석 및 맞춤형 건강 관리 서비스를 제공하는 모바일 앱 개발 프로젝트입니다.",
-        level: "중급"
-      },
-      {
-        id: "23",
-        title: "실시간 협업 툴 개발",
-        company: "(주)팀워크솔루션",
-        skills: ["Vue.js", "WebSocket", "Node.js"],
-        duration: "6개월",
-        budget: "7,200만원",
-        deadline: "D-3",
-        type: "재택",
-        description: "실시간 문서 공유 및 협업 기능을 제공하는 웹 애플리케이션 개발 프로젝트입니다.",
-        level: "중급"
-      },
-      {
-        id: "24",
-        title: "AI 이미지 처리 서비스 개발",
-        company: "(주)비전테크",
-        skills: ["Python", "TensorFlow", "OpenCV"],
-        duration: "5개월",
-        budget: "6,800만원",
-        deadline: "D-9",
-        type: "재택",
-        description: "인공지능 기술을 활용한 이미지 분석 및 처리 서비스 개발 프로젝트입니다.",
-        level: "고급"
-      }
-    ];
+    // 로컬 로딩 상태만 설정
+    setLocalLoading(true);
     
-    setProjects(projectsData);
-    setLoading(false);
-  }, []);
+    // 데이터 로딩 시뮬레이션 (실제로는 API 호출)
+    const timer = setTimeout(() => {
+      // 실제 프로덕션에서는 API 요청으로 데이터를 가져오게 됩니다
+      const projectsData: Project[] = [
+        {
+          id: "1",
+          title: "AI 기반 추천 시스템 개발",
+          company: "(주)테크인사이트",
+          skills: ["Python", "TensorFlow", "AWS"],
+          duration: "4개월",
+          budget: "4,500만원", 
+          deadline: "D-3",
+          type: "재택",
+          description: "사용자 행동 패턴 분석을 통한 맞춤형 상품 추천 시스템 개발 프로젝트입니다.",
+          level: "중급"
+        },
+        {
+          id: "3",
+          title: "블록체인 기반 결제 시스템 구축",
+          company: "(주)블록테크",
+          skills: ["Solidity", "Web3.js", "Node.js"],
+          duration: "6개월", 
+          budget: "7,000만원",
+          deadline: "D-7",
+          type: "재택",
+          description: "블록체인 기술을 활용한 안전한 결제 시스템 개발 프로젝트입니다.",
+          level: "고급"
+        },
+        {
+          id: "6",
+          title: "IoT 디바이스 모니터링 앱 개발",
+          company: "(주)스마트테크",
+          skills: ["Flutter", "Firebase", "MQTT"],
+          duration: "4개월",
+          budget: "4,000만원",
+          deadline: "D-6",
+          type: "재택",
+          description: "다양한 IoT 디바이스 상태를 실시간으로 모니터링하는 모바일 앱 개발 프로젝트입니다.",
+          level: "중급"
+        },
+        {
+          id: "8",
+          title: "SNS 플랫폼 API 개발",
+          company: "(주)소셜미디어",
+          skills: ["Node.js", "GraphQL", "MongoDB"],
+          duration: "4개월",
+          budget: "4,200만원",
+          deadline: "D-2",
+          type: "재택",
+          description: "소셜 미디어 플랫폼의 효율적인 데이터 처리를 위한 API 개발 프로젝트입니다.",
+          level: "중급"
+        },
+        {
+          id: "10",
+          title: "메타버스 플랫폼 개발",
+          company: "(주)메타랩스",
+          skills: ["Unity", "WebGL", "Three.js"],
+          duration: "6개월",
+          budget: "8,000만원",
+          deadline: "D-1",
+          type: "재택",
+          description: "가상 현실 기반의 메타버스 플랫폼 프론트엔드 개발 프로젝트입니다.",
+          level: "고급"
+        },
+        {
+          id: "11",
+          title: "AI 챗봇 시스템 개발",
+          company: "(주)인텔리봇",
+          skills: ["NLP", "Python", "TensorFlow"],
+          duration: "5개월",
+          budget: "5,800만원", 
+          deadline: "D-2",
+          type: "재택",
+          description: "자연어 처리 기술을 활용한 고객 응대용 AI 챗봇 시스템 개발 프로젝트입니다.",
+          level: "중급"
+        },
+        {
+          id: "13",
+          title: "보안 시스템 강화 프로젝트",
+          company: "(주)시큐리티솔루션",
+          skills: ["Java", "Spring Security", "Penetration Testing"],
+          duration: "3개월", 
+          budget: "4,200만원",
+          deadline: "D-6",
+          type: "재택",
+          description: "기업 보안 시스템 취약점 분석 및 보안 강화 솔루션 개발 프로젝트입니다.",
+          level: "고급"
+        },
+        {
+          id: "15",
+          title: "CRM 시스템 개발",
+          company: "(주)고객관리시스템",
+          skills: ["React", "GraphQL", "PostgreSQL"],
+          duration: "5개월",
+          budget: "6,000만원",
+          deadline: "D-5",
+          type: "재택",
+          description: "기업 고객 관리를 위한 대시보드 및 관리 시스템 개발 프로젝트입니다.",
+          level: "중급"
+        },
+        {
+          id: "21",
+          title: "온라인 교육 플랫폼 개발",
+          company: "(주)에듀테크",
+          skills: ["React", "Node.js", "MongoDB"],
+          duration: "4개월",
+          budget: "5,000만원",
+          deadline: "D-8",
+          type: "재택",
+          description: "실시간 강의 및 학습 관리 기능을 제공하는 온라인 교육 플랫폼 개발 프로젝트입니다.",
+          level: "중급"
+        },
+        {
+          id: "22",
+          title: "디지털 헬스케어 앱 개발",
+          company: "(주)헬스케어솔루션",
+          skills: ["React Native", "Firebase", "Node.js"],
+          duration: "5개월",
+          budget: "6,500만원",
+          deadline: "D-4",
+          type: "재택",
+          description: "사용자 건강 데이터 분석 및 맞춤형 건강 관리 서비스를 제공하는 모바일 앱 개발 프로젝트입니다.",
+          level: "중급"
+        },
+        {
+          id: "23",
+          title: "실시간 협업 툴 개발",
+          company: "(주)팀워크솔루션",
+          skills: ["Vue.js", "WebSocket", "Node.js"],
+          duration: "6개월",
+          budget: "7,200만원",
+          deadline: "D-3",
+          type: "재택",
+          description: "실시간 문서 공유 및 협업 기능을 제공하는 웹 애플리케이션 개발 프로젝트입니다.",
+          level: "중급"
+        },
+        {
+          id: "24",
+          title: "AI 이미지 처리 서비스 개발",
+          company: "(주)비전테크",
+          skills: ["Python", "TensorFlow", "OpenCV"],
+          duration: "5개월",
+          budget: "6,800만원",
+          deadline: "D-9",
+          type: "재택",
+          description: "인공지능 기술을 활용한 이미지 분석 및 처리 서비스 개발 프로젝트입니다.",
+          level: "고급"
+        }
+      ];
+      
+      setProjects(projectsData);
+      setLocalLoading(false);
+    }, 800);
+    
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []); // 빈 의존성 배열로 컴포넌트 마운트 시 한 번만 실행
 
   // 필터링된 프로젝트 계산
   const filteredProjects = useMemo(() => {
@@ -234,86 +245,205 @@ export default function RemoteProjectPage() {
   // 총 페이지 수 계산
   const totalPages = Math.ceil(filteredProjects.length / projectsPerPage);
 
-  // 페이지 변경 핸들러
+  // 이벤트 핸들러
   const handlePageChange = (pageNumber: number) => {
+    if (pageNumber === currentPage) return;
     setCurrentPage(pageNumber);
-    // 페이지 상단으로 스크롤
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 검색어 변경 핸들러
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    // 검색어를 변경하면 첫 페이지로 돌아가기
-    setCurrentPage(1);
+    setCurrentPage(1); // 검색어 변경 시 첫 페이지로
   };
 
-  // 기술 스택 필터 토글 핸들러
   const toggleSkillFilter = (skill: string) => {
     setSelectedSkills(prev => 
       prev.includes(skill) 
         ? prev.filter(s => s !== skill) 
         : [...prev, skill]
     );
-    // 필터 변경 시 첫 페이지로 돌아가기
-    setCurrentPage(1);
+    setCurrentPage(1); // 필터 변경 시 첫 페이지로
   };
 
-  // 개발 기간 필터 핸들러
   const handleDurationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedDuration(e.target.value);
-    // 필터 변경 시 첫 페이지로 돌아가기
     setCurrentPage(1);
   };
 
-  // 예산 필터 핸들러
   const handleBudgetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedBudget(e.target.value);
-    // 필터 변경 시 첫 페이지로 돌아가기
+    setCurrentPage(1);
+  };
+
+  // 필터 초기화 함수
+  const resetFilters = () => {
+    setSelectedSkills([]);
+    setSelectedDuration('');
+    setSelectedBudget('');
+    setSearchTerm('');
     setCurrentPage(1);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 상단 배너 */}
-      <div className="bg-indigo-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">재택/원격 프로젝트</h1>
-          <p className="text-xl md:text-2xl mb-6 text-indigo-100">
+      <div className="bg-gradient-to-r from-indigo-800 via-purple-700 to-pink-600 text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20">
+          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+              <radialGradient id="radialGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                <stop offset="0%" stopColor="white" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="white" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+            <circle cx="0" cy="0" r="20" fill="url(#radialGradient)">
+              <animateMotion path="M 50 50 L 90 30 L 50 70 L 10 50 Z" dur="15s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="0" cy="0" r="15" fill="url(#radialGradient)">
+              <animateMotion path="M 50 50 L 10 30 L 50 10 L 90 50 Z" dur="12s" repeatCount="indefinite" />
+            </circle>
+          </svg>
+        </div>
+        
+        {/* 배너 콘텐츠 */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative z-10">
+          <h1 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight leading-tight">
+            재택/원격 <span className="text-pink-300">프로젝트</span>
+          </h1>
+          <p className="text-xl md:text-2xl mb-10 text-indigo-100 max-w-3xl font-light">
             장소에 구애받지 않고 자유롭게 진행할 수 있는 원격 프로젝트를 찾아보세요
           </p>
-          <div className="bg-white rounded-lg p-2 flex items-center max-w-3xl">
+          
+          {/* 검색창 */}
+          <div className="bg-white/10 backdrop-blur-md p-2 flex items-center max-w-3xl rounded-2xl shadow-lg border border-white/20">
             <input
               type="text"
               placeholder="기술 스택, 프로젝트명, 회사명으로 검색..."
-              className="flex-1 px-4 py-2 outline-none text-gray-800"
+              className="flex-1 px-6 py-4 outline-none text-gray-800 text-lg bg-white rounded-xl"
               value={searchTerm}
               onChange={handleSearchChange}
             />
-            <button className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition">
+            <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all font-medium shadow-md ml-2">
               검색
             </button>
           </div>
         </div>
+        
+        {/* 인터랙티브 애니메이션 요소 */}
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden">
+          <div className="relative h-16">
+            {/* 웨이브 애니메이션 */}
+            <div className="absolute bottom-0 left-0 w-full">
+              <svg className="w-full h-12" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path 
+                  d="M0,0 C150,90 350,0 500,80 C650,160 750,40 900,100 C1050,160 1150,60 1200,80 L1200,120 L0,120 Z" 
+                  className="fill-white opacity-70"
+                >
+                  <animate 
+                    attributeName="d" 
+                    dur="10s"
+                    repeatCount="indefinite"
+                    values="
+                      M0,0 C150,90 350,0 500,80 C650,160 750,40 900,100 C1050,160 1150,60 1200,80 L1200,120 L0,120 Z;
+                      M0,0 C150,40 350,80 500,20 C650,60 750,120 900,40 C1050,20 1150,80 1200,60 L1200,120 L0,120 Z;
+                      M0,0 C150,90 350,0 500,80 C650,160 750,40 900,100 C1050,160 1150,60 1200,80 L1200,120 L0,120 Z"
+                  />
+                </path>
+              </svg>
+            </div>
+            
+            {/* 부유하는 아이콘들 */}
+            <div className="absolute bottom-4 left-1/4 animate-bounce-slow opacity-80">
+              <div className="bg-white p-2 rounded-full shadow-lg">
+                <svg className="w-6 h-6 text-indigo-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            
+            <div className="absolute bottom-8 left-1/2 animate-float opacity-80">
+              <div className="bg-white p-2 rounded-full shadow-lg">
+                <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            
+            <div className="absolute bottom-6 left-3/4 animate-pulse opacity-80">
+              <div className="bg-white p-2 rounded-full shadow-lg">
+                <svg className="w-6 h-6 text-pink-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* 애니메이션 스타일 */}
+        <style jsx>{`
+          @keyframes bounce-slow {
+            0%, 100% {
+              transform: translateY(0);
+            }
+            50% {
+              transform: translateY(-10px);
+            }
+          }
+          
+          @keyframes float {
+            0%, 100% {
+              transform: translateY(0) translateX(0);
+            }
+            25% {
+              transform: translateY(-8px) translateX(5px);
+            }
+            50% {
+              transform: translateY(0) translateX(10px);
+            }
+            75% {
+              transform: translateY(8px) translateX(5px);
+            }
+          }
+          
+          .animate-bounce-slow {
+            animation: bounce-slow 3s infinite;
+          }
+          
+          .animate-float {
+            animation: float 6s ease-in-out infinite;
+          }
+        `}</style>
       </div>
 
+      {/* 메인 콘텐츠 영역 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* 왼쪽 사이드바 - 필터 */}
-          <div className="lg:w-72 bg-white p-6 rounded-lg shadow-sm h-fit">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">프로젝트 필터</h3>
+          <div className="lg:w-80 bg-white p-8 rounded-2xl shadow-md h-fit border border-gray-100 sticky top-8">
+            <h3 className="text-xl font-bold mb-8 text-gray-900 border-b pb-4 flex items-center">
+              <svg className="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              프로젝트 필터
+            </h3>
             
             {/* 기술 스택 필터 */}
-            <div className="mb-6">
-              <h4 className="font-medium text-gray-900 mb-2">기술 스택</h4>
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 mb-4 flex items-center">
+                <svg className="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+                기술 스택
+              </h4>
               <div className="flex flex-wrap gap-2">
                 {allSkills.map(skill => (
                   <button
                     key={skill}
                     onClick={() => toggleSkillFilter(skill)}
-                    className={`text-xs px-2 py-1 rounded-md transition-colors ${
+                    className={`text-xs px-3 py-1.5 rounded-full transition-all ${
                       selectedSkills.includes(skill)
-                        ? 'bg-indigo-600 text-white'
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm'
                         : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
                     }`}
                   >
@@ -324,10 +454,16 @@ export default function RemoteProjectPage() {
             </div>
             
             {/* 개발 기간 필터 */}
-            <div className="mb-6">
-              <h4 className="font-medium text-gray-900 mb-2">개발 기간</h4>
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 mb-4 flex items-center">
+                <svg className="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+                개발 기간
+              </h4>
               <select
-                className="w-full p-2 border rounded text-gray-800"
+                className="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
                 value={selectedDuration}
                 onChange={handleDurationChange}
               >
@@ -339,10 +475,16 @@ export default function RemoteProjectPage() {
             </div>
             
             {/* 예산 필터 */}
-            <div className="mb-6">
-              <h4 className="font-medium text-gray-900 mb-2">예산</h4>
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 mb-4 flex items-center">
+                <svg className="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                예산
+              </h4>
               <select
-                className="w-full p-2 border rounded text-gray-800"
+                className="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
                 value={selectedBudget}
                 onChange={handleBudgetChange}
               >
@@ -355,6 +497,7 @@ export default function RemoteProjectPage() {
               </select>
             </div>
             
+            {/* 필터 초기화 버튼 */}
             <button
               onClick={() => {
                 setSelectedSkills([]);
@@ -362,35 +505,51 @@ export default function RemoteProjectPage() {
                 setSelectedBudget('');
                 setSearchTerm('');
               }}
-              className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded transition-colors text-sm font-medium"
+              className="w-full py-3 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-800 rounded-xl transition-all text-sm font-medium border border-gray-200 hover:shadow-sm flex items-center justify-center"
             >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
               필터 초기화
             </button>
           </div>
 
           {/* 오른쪽 메인 콘텐츠 - 프로젝트 목록 */}
           <div className="flex-1">
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">재택/원격 프로젝트 목록</h2>
-                <p className="text-gray-600 mt-1">총 {filteredProjects.length}개의 프로젝트가 있습니다</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center">
+                  <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">재택/원격 프로젝트</span>
+                  <span className="ml-2 text-sm font-normal bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full">NEW</span>
+                </h2>
+                <p className="text-gray-600">총 <span className="font-semibold text-indigo-600">{filteredProjects.length}</span>개의 프로젝트가 있습니다</p>
               </div>
-              <div className="flex space-x-2">
-                <button className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-gray-700">
+              <div className="flex flex-wrap gap-2">
+                <button className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 transition-all flex items-center gap-1 shadow-sm">
+                  <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                   최신순
                 </button>
-                <button className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-gray-700">
+                <button className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 transition-all flex items-center gap-1 shadow-sm">
+                  <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                   마감임박순
                 </button>
-                <button className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-gray-700">
+                <button className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 transition-all flex items-center gap-1 shadow-sm">
+                  <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                   금액순
                 </button>
               </div>
             </div>
 
-            {loading ? (
+            {/* 로딩 인디케이터 - 로컬 로딩만 사용하고 전역 로딩은 StateProvider에서 처리 */}
+            {localLoading ? (
               <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600"></div>
               </div>
             ) : (
               filteredProjects.length > 0 ? (
@@ -398,46 +557,62 @@ export default function RemoteProjectPage() {
                   {paginatedProjects.map((project) => (
                     <div 
                       key={project.id} 
-                      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 overflow-hidden"
+                      className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group relative"
                     >
+                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 to-purple-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                       <div className="p-6">
                         <div className="flex justify-between items-start mb-4">
-                          <span className="bg-rose-500 text-white text-xs px-2 py-1 rounded-full">
+                          <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">
                             {project.deadline}
                           </span>
-                          <span className="text-sm font-medium text-violet-600 bg-violet-50 px-3 py-1 rounded-full">
+                          <span className="text-sm font-medium text-violet-700 bg-violet-50 px-3 py-1 rounded-full border border-violet-100">
                             {project.type}
                           </span>
                         </div>
-                        <h3 className="text-lg font-bold mb-2 text-gray-900 hover:text-indigo-600 transition-colors">
+                        <h3 className="text-lg font-bold mb-2 text-gray-900 group-hover:text-indigo-600 transition-colors">
                           {project.title}
                         </h3>
-                        <p className="text-gray-600 mb-3">{project.company}</p>
+                        <p className="text-gray-600 mb-3 flex items-center">
+                          <svg className="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                          {project.company}
+                        </p>
                         
                         {project.description && (
-                          <p className="text-gray-700 mb-4 text-sm line-clamp-2">{project.description}</p>
+                          <p className="text-gray-700 mb-4 text-sm line-clamp-2 bg-gray-50 p-4 rounded-xl border border-gray-100">{project.description}</p>
                         )}
                         
                         <div className="mb-4">
-                          <div className="flex flex-wrap gap-2 mb-3">
+                          <div className="flex flex-wrap gap-2 mb-4">
                             {project.skills.map((skill) => (
                               <span 
                                 key={skill} 
-                                className="bg-indigo-50 text-indigo-600 text-xs px-2 py-1 rounded-md"
+                                className="bg-indigo-50 text-indigo-600 text-xs px-3 py-1 rounded-full border border-indigo-100"
                               >
                                 {skill}
                               </span>
                             ))}
                           </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">기간: {project.duration}</span>
-                            <span className="font-medium text-gray-900">예산: {project.budget}</span>
+                          <div className="flex justify-between text-sm bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <span className="text-gray-600 flex items-center">
+                              <svg className="w-4 h-4 mr-1 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zM9 9h6v6H9V9z" />
+                              </svg>
+                              {project.duration}
+                            </span>
+                            <span className="font-medium text-gray-900 flex items-center">
+                              <svg className="w-4 h-4 mr-1 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              {project.budget}
+                            </span>
                           </div>
                         </div>
                         
                         <Link
                           href={`/project/${project.id}`}
-                          className="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 rounded-md transition-colors mt-4"
+                          className="block w-full text-center bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 text-indigo-700 font-medium py-3 rounded-xl transition-all mt-4 group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:text-white border border-indigo-100 group-hover:border-transparent"
                         >
                           상세보기
                         </Link>
@@ -446,12 +621,26 @@ export default function RemoteProjectPage() {
                   ))}
                 </div>
               ) : (
-                <div className="bg-white rounded-lg p-8 text-center">
-                  <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+                  <svg className="w-20 h-20 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">일치하는 프로젝트가 없습니다</h3>
-                  <p className="text-gray-600">검색어나 필터 조건을 변경해 보세요.</p>
+                  <h3 className="text-xl font-medium text-gray-900 mb-3">일치하는 프로젝트가 없습니다</h3>
+                  <p className="text-gray-600 mb-6">검색어나 필터 조건을 변경해 보세요.</p>
+                  <button 
+                    onClick={() => {
+                      setSelectedSkills([]);
+                      setSelectedDuration('');
+                      setSelectedBudget('');
+                      setSearchTerm('');
+                    }}
+                    className="px-6 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors inline-flex items-center"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    필터 초기화
+                  </button>
                 </div>
               )
             )}
@@ -459,53 +648,61 @@ export default function RemoteProjectPage() {
             {/* 페이지네이션 */}
             {filteredProjects.length > 0 && (
               <div className="flex justify-center mt-12">
-                <nav className="flex items-center space-x-2">
+                <nav className="flex items-center space-x-3">
                   <button 
-                    className="px-3 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-indigo-300 hover:text-indigo-600"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                   >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
                     이전
                   </button>
                   
-                  {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
-                    // 현재 페이지 주변의 페이지 번호만 표시
-                    let pageNumber;
-                    if (totalPages <= 5) {
-                      // 전체 페이지가 5개 이하면 모든 페이지 번호 표시
-                      pageNumber = index + 1;
-                    } else if (currentPage <= 3) {
-                      // 현재 페이지가 3 이하면 1~5 표시
-                      pageNumber = index + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      // 현재 페이지가 마지막에 가까우면 마지막 5개 표시
-                      pageNumber = totalPages - 4 + index;
-                    } else {
-                      // 그 외의 경우, 현재 페이지를 중심으로 앞뒤로 2개씩 표시
-                      pageNumber = currentPage - 2 + index;
-                    }
-                    
-                    return (
-                      <button
-                        key={pageNumber}
-                        onClick={() => handlePageChange(pageNumber)}
-                        className={`px-3 py-2 border rounded-md ${
-                          currentPage === pageNumber
-                            ? 'bg-indigo-500 text-white border-indigo-500'
-                            : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300'
-                        }`}
-                      >
-                        {pageNumber}
-                      </button>
-                    );
-                  })}
+                  <div className="flex items-center space-x-2">
+                    {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
+                      // 현재 페이지 주변의 페이지 번호만 표시
+                      let pageNumber;
+                      if (totalPages <= 5) {
+                        // 전체 페이지가 5개 이하면 모든 페이지 번호 표시
+                        pageNumber = index + 1;
+                      } else if (currentPage <= 3) {
+                        // 현재 페이지가 3 이하면 1~5 표시
+                        pageNumber = index + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        // 현재 페이지가 마지막에 가까우면 마지막 5개 표시
+                        pageNumber = totalPages - 4 + index;
+                      } else {
+                        // 그 외의 경우, 현재 페이지를 중심으로 앞뒤로 2개씩 표시
+                        pageNumber = currentPage - 2 + index;
+                      }
+                      
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => handlePageChange(pageNumber)}
+                          className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${
+                            currentPage === pageNumber
+                              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+                              : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 hover:border-indigo-300 hover:text-indigo-600'
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    })}
+                  </div>
                   
                   <button 
-                    className="px-3 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-indigo-300 hover:text-indigo-600"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                   >
                     다음
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </button>
                 </nav>
               </div>
@@ -515,76 +712,121 @@ export default function RemoteProjectPage() {
       </div>
 
       {/* 재택 프로젝트 정보 */}
-      <div className="bg-gray-100 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="bg-gradient-to-b from-gray-50 to-white py-24 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-300 rounded-full filter blur-3xl opacity-20 -z-10"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-300 rounded-full filter blur-3xl opacity-20 -z-10"></div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             <div>
-              <h2 className="text-2xl font-bold mb-6 text-gray-900">재택/원격 프로젝트란?</h2>
-              <div className="space-y-4 text-gray-600">
-                <p>
+              <h2 className="text-3xl font-bold mb-8 text-gray-900 flex items-center">
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">재택/원격 프로젝트란?</span>
+                <div className="ml-4 h-1 w-24 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"></div>
+              </h2>
+              <div className="space-y-6 text-gray-600">
+                <p className="text-lg leading-relaxed">
                   <span className="font-medium text-indigo-600">재택/원격 프로젝트</span>는 장소에 구애받지 않고 자유롭게 작업할 수 있는 프로젝트 형태입니다. 이랜서는 검증된 IT 프리랜서 전문가들이 원격으로 진행할 수 있는 다양한 프로젝트를 제공합니다.
                 </p>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li>자유로운 시간과 장소에서 업무 진행 가능</li>
-                  <li>개인의 효율적인 작업 환경에서 높은 생산성 발휘</li>
-                  <li>통근 시간 절약 및 워라밸 향상</li>
-                  <li>클라우드 기반 협업 도구를 통한 원활한 소통</li>
-                  <li>정기적인 화상 미팅과 결과물 보고로 프로젝트 관리</li>
+                <ul className="list-none space-y-4">
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                      </svg>
+                    </div>
+                    <span>자유로운 시간과 장소에서 업무 진행 가능</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                      </svg>
+                    </div>
+                    <span>개인의 효율적인 작업 환경에서 높은 생산성 발휘</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                      </svg>
+                    </div>
+                    <span>통근 시간 절약 및 워라밸 향상</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                      </svg>
+                    </div>
+                    <span>클라우드 기반 협업 도구를 통한 원활한 소통</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                      </svg>
+                    </div>
+                    <span>정기적인 화상 미팅과 결과물 보고로 프로젝트 관리</span>
+                  </li>
                 </ul>
-                <p>
+                <p className="text-lg leading-relaxed">
                   재택/원격 프로젝트는 자기주도적인 업무 역량이 뛰어난 전문가에게 적합하며, 프로젝트 관리와 소통 능력이 중요합니다. 시간과 공간의 제약 없이 효율적으로 프로젝트를 진행하고 싶은 프리랜서에게 추천합니다.
                 </p>
               </div>
             </div>
             
-            <div className="bg-white p-8 rounded-xl shadow-sm">
-              <h3 className="text-xl font-bold mb-4 text-gray-900">재택/원격 프로젝트 이용 안내</h3>
-              <div className="space-y-6">
+            <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-b from-indigo-100 to-purple-100 rounded-bl-full opacity-50 -z-10"></div>
+              <h3 className="text-2xl font-bold mb-8 text-gray-900 pb-4 border-b flex items-center">
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">재택/원격 프로젝트 이용 안내</span>
+              </h3>
+              <div className="space-y-10">
                 <div className="flex">
-                  <div className="flex-shrink-0 h-12 w-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <span className="text-indigo-600 font-bold text-lg">1</span>
+                  <div className="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center shadow-sm">
+                    <span className="text-indigo-600 font-bold text-2xl">1</span>
                   </div>
-                  <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">프로젝트 찾기</h4>
-                    <p className="text-gray-600">다양한 재택/원격 프로젝트 중 나의 기술 스택과 관심 분야에 맞는 프로젝트를 찾습니다.</p>
+                  <div className="ml-6">
+                    <h4 className="text-xl font-medium text-gray-900 mb-2">프로젝트 찾기</h4>
+                    <p className="text-gray-600 leading-relaxed">다양한 재택/원격 프로젝트 중 나의 기술 스택과 관심 분야에 맞는 프로젝트를 찾습니다.</p>
                   </div>
                 </div>
                 
                 <div className="flex">
-                  <div className="flex-shrink-0 h-12 w-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <span className="text-indigo-600 font-bold text-lg">2</span>
+                  <div className="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center shadow-sm">
+                    <span className="text-indigo-600 font-bold text-2xl">2</span>
                   </div>
-                  <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">지원 및 제안</h4>
-                    <p className="text-gray-600">프로젝트에 지원하거나, 견적과 포트폴리오를 포함한 제안서를 제출합니다.</p>
-                  </div>
-                </div>
-                
-                <div className="flex">
-                  <div className="flex-shrink-0 h-12 w-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <span className="text-indigo-600 font-bold text-lg">3</span>
-                  </div>
-                  <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">미팅 및 계약</h4>
-                    <p className="text-gray-600">화상 미팅을 통해 클라이언트와 소통한 후, 이랜서 플랫폼을 통해 안전하게 계약을 체결합니다.</p>
+                  <div className="ml-6">
+                    <h4 className="text-xl font-medium text-gray-900 mb-2">지원 및 제안</h4>
+                    <p className="text-gray-600 leading-relaxed">프로젝트에 지원하거나, 견적과 포트폴리오를 포함한 제안서를 제출합니다.</p>
                   </div>
                 </div>
                 
                 <div className="flex">
-                  <div className="flex-shrink-0 h-12 w-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <span className="text-indigo-600 font-bold text-lg">4</span>
+                  <div className="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center shadow-sm">
+                    <span className="text-indigo-600 font-bold text-2xl">3</span>
                   </div>
-                  <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">작업 및 협업</h4>
-                    <p className="text-gray-600">협업 도구를 활용하여 정기적으로 진행 상황을 공유하고, 원격으로 프로젝트를 완성합니다.</p>
+                  <div className="ml-6">
+                    <h4 className="text-xl font-medium text-gray-900 mb-2">미팅 및 계약</h4>
+                    <p className="text-gray-600 leading-relaxed">화상 미팅을 통해 클라이언트와 소통한 후, 이랜서 플랫폼을 통해 안전하게 계약을 체결합니다.</p>
+                  </div>
+                </div>
+                
+                <div className="flex">
+                  <div className="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center shadow-sm">
+                    <span className="text-indigo-600 font-bold text-2xl">4</span>
+                  </div>
+                  <div className="ml-6">
+                    <h4 className="text-xl font-medium text-gray-900 mb-2">작업 및 협업</h4>
+                    <p className="text-gray-600 leading-relaxed">협업 도구를 활용하여 정기적으로 진행 상황을 공유하고, 원격으로 프로젝트를 완성합니다.</p>
                   </div>
                 </div>
               </div>
               
-              <div className="mt-8">
+              <div className="mt-12">
                 <Link
                   href="/freelancers/profile"
-                  className="block w-full bg-indigo-600 text-white text-center py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                  className="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center py-4 rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg"
                 >
                   프리랜서 프로필 등록하기
                 </Link>
@@ -595,63 +837,69 @@ export default function RemoteProjectPage() {
       </div>
 
       {/* 장점 및 통계 */}
-      <div className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">이랜서 재택/원격 프로젝트의 장점</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+      <div className="py-24 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-indigo-200 rounded-full filter blur-3xl opacity-20 -z-10"></div>
+          <div className="absolute bottom-1/3 right-1/4 w-72 h-72 bg-purple-200 rounded-full filter blur-3xl opacity-20 -z-10"></div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">이랜서 재택/원격 프로젝트의 장점</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               이랜서는 다양한 산업 분야의 재택/원격 프로젝트를 제공하며, 믿을 수 있는 플랫폼을 통해 안전한 거래를 보장합니다.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-gray-50 p-6 rounded-xl">
-              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">유연한 근무 환경</h3>
-              <p className="text-gray-600">장소와 시간에 구애받지 않고 자신에게 가장 효율적인 환경에서 업무를 수행할 수 있습니다.</p>
-            </div>
-            
-            <div className="bg-gray-50 p-6 rounded-xl">
-              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
+              <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold mb-2">안전한 계약과 대금</h3>
-              <p className="text-gray-600">이랜서의 안전한 계약 시스템과 대금보호 서비스로 안심하고 프로젝트를 진행할 수 있습니다.</p>
+              <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors">유연한 근무 환경</h3>
+              <p className="text-gray-600 leading-relaxed">장소와 시간에 구애받지 않고 자신에게 가장 효율적인 환경에서 업무를 수행할 수 있습니다.</p>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-xl">
-              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
+              <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors">안전한 계약과 대금</h3>
+              <p className="text-gray-600 leading-relaxed">이랜서의 안전한 계약 시스템과 대금보호 서비스로 안심하고 프로젝트를 진행할 수 있습니다.</p>
+            </div>
+            
+            <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
+              <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold mb-2">검증된 고객사</h3>
-              <p className="text-gray-600">이랜서에 등록된 모든 프로젝트와 고객사는 검증 과정을 거쳐 신뢰할 수 있는 파트너입니다.</p>
+              <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors">검증된 고객사</h3>
+              <p className="text-gray-600 leading-relaxed">이랜서에 등록된 모든 프로젝트와 고객사는 검증 과정을 거쳐 신뢰할 수 있는 파트너입니다.</p>
             </div>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-indigo-600 mb-2">94%</p>
-              <p className="text-gray-600">프로젝트 완료율</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 bg-gradient-to-r from-indigo-50 to-purple-50 p-10 rounded-2xl shadow-lg">
+            <div className="text-center transform hover:scale-105 transition-transform duration-300">
+              <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3">94%</p>
+              <p className="text-gray-700 font-medium">프로젝트 완료율</p>
             </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-indigo-600 mb-2">15,000+</p>
-              <p className="text-gray-600">등록된 프리랜서</p>
+            <div className="text-center transform hover:scale-105 transition-transform duration-300">
+              <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3">15,000+</p>
+              <p className="text-gray-700 font-medium">등록된 프리랜서</p>
             </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-indigo-600 mb-2">3,500+</p>
-              <p className="text-gray-600">완료된 원격 프로젝트</p>
+            <div className="text-center transform hover:scale-105 transition-transform duration-300">
+              <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3">3,500+</p>
+              <p className="text-gray-700 font-medium">완료된 원격 프로젝트</p>
             </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-indigo-600 mb-2">4.8/5</p>
-              <p className="text-gray-600">고객 만족도</p>
+            <div className="text-center transform hover:scale-105 transition-transform duration-300">
+              <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3">4.8/5</p>
+              <p className="text-gray-700 font-medium">고객 만족도</p>
             </div>
           </div>
         </div>

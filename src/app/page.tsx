@@ -304,7 +304,7 @@ export default function Home() {
                     <span>프리랜서 찾기</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
+                </svg>
                   </div>
                 </motion.button>
                 
@@ -318,8 +318,8 @@ export default function Home() {
                     <span>프로젝트 보기</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
+                </svg>
+            </div>
                 </motion.button>
               </div>
               
@@ -420,16 +420,16 @@ export default function Home() {
                           <div className="flex justify-between items-center mb-6">
                             <div className="bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-white text-sm">프리미엄 프로젝트</div>
                             <div className="bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-white text-sm">D-{10 + index}</div>
-                          </div>
+                    </div>
                           <h3 className="text-2xl font-bold text-white mb-2">{project.title}</h3>
                           <p className="text-blue-100 mb-4">{project.company}</p>
                           <div className="flex gap-2 mb-6">
                             {project.skills.map((skill, skillIndex) => (
                               <span key={skillIndex} className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded text-xs text-white">
                                 {skill}
-                              </span>
-                            ))}
-                          </div>
+                      </span>
+                ))}
+              </div>
                           <div className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm rounded-lg p-4">
                             <div className="flex justify-between text-white mb-2">
                               <span>예산</span>
@@ -444,8 +444,8 @@ export default function Home() {
                       </motion.div>
                     );
                   })}
-                </div>
-                
+            </div>
+
                 {/* 캐러셀 컨트롤 */}
                 <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-4 mt-8">
                   <button 
@@ -518,18 +518,18 @@ export default function Home() {
                     ease: "linear"
                   }}
                   className="absolute top-[40%] left-[22%] w-20 h-20 rounded-full border-4 border-dashed border-pink-400/30 z-10"
-                />
-              </div>
+                    />
+                  </div>
             </motion.div>
-          </div>
-        </div>
+                </div>
+              </div>
         
         {/* 하단 웨이브 효과 */}
         <div className="absolute bottom-0 left-0 right-0 h-16 overflow-hidden">
           <svg className="absolute bottom-0 w-full h-32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
             <path fill="#f9fafb" fillOpacity="1" d="M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,165.3C672,181,768,235,864,250.7C960,267,1056,245,1152,224C1248,203,1344,181,1392,170.7L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
           </svg>
-        </div>
+            </div>
       </section>
 
       {/* 검색 섹션 */}
@@ -545,7 +545,7 @@ export default function Home() {
                 placeholder="기술, 직무, 프로젝트 등을 검색해보세요"
                 className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
               />
-            </div>
+          </div>
             <button
               type="submit"
               className="bg-blue-600 hover:bg-blue-700 text-white py-4 px-8 rounded-lg font-bold text-lg transition-colors"
@@ -574,7 +574,7 @@ export default function Home() {
             </p>
             <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-indigo-500 mx-auto rounded-full mb-2"></div>
           </motion.div>
-        </div>
+              </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
           {categories.map((category) => (
@@ -598,8 +598,8 @@ export default function Home() {
                 <div className={`w-full h-full bg-gradient-to-br from-${category.id % 2 === 0 ? 'blue' : 'indigo'}-500 to-${category.id % 3 === 0 ? 'purple' : category.id % 2 === 0 ? 'indigo' : 'blue'}-700 group-hover:scale-110 transition-transform duration-700`}></div>
                 {/* 패턴 오버레이 효과 */}
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzR2LTRoLTJ2NGgtNHYyaDR2NGgydi00aDR2LTJoLTR6bTAtMzBWMGgtMnY0aC00djJoNHY0aDJWNmg0VjRoLTR6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRINnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30 mix-blend-overlay"></div>
-              </div>
-              
+        </div>
+
               {/* 빛나는 테두리 효과 */}
               <div className="absolute inset-0 border-2 border-transparent group-hover:border-white/30 group-hover:glow-white-sm rounded-2xl z-20 transition-all duration-500"></div>
               
@@ -621,8 +621,8 @@ export default function Home() {
                         {category.id === 6 && '📋'}
                       </span>
                     </div>
-                  </div>
-                  
+              </div>
+
                   <motion.h3 
                     className="text-white text-2xl lg:text-3xl font-bold mb-3 transform origin-left group-hover:translate-x-2 transition-transform duration-300"
                   >
@@ -632,19 +632,19 @@ export default function Home() {
                   <div className="flex justify-between items-center">
                     <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full text-white text-sm">
                       {category.count}+ 프로젝트
-                    </div>
+                </div>
                     <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center transform translate-x-0 group-hover:translate-x-2 transition-transform duration-300">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                       </svg>
-                    </div>
-                  </div>
                 </div>
+                </div>
+              </div>
               </motion.div>
             </motion.div>
           ))}
-        </div>
-        
+            </div>
+
         {/* 하단 전체보기 버튼 */}
         <div className="mt-14 text-center">
           <motion.button
@@ -660,7 +660,7 @@ export default function Home() {
               </svg>
             </span>
           </motion.button>
-        </div>
+              </div>
       </section>
 
       {/* 통계 섹션 */}
@@ -676,7 +676,7 @@ export default function Home() {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               우리는 신뢰할 수 있는 플랫폼을 통해 최고의 매칭을 제공합니다
             </p>
-          </div>
+            </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat) => (
@@ -689,10 +689,10 @@ export default function Home() {
                   <div className="mb-4">{stat.icon}</div>
                   <p className="text-4xl font-bold text-blue-600 mb-2">{stat.value}</p>
                   <p className="text-gray-600">{stat.label}</p>
-                </div>
+          </div>
               </motion.div>
             ))}
-          </div>
+        </div>
         </div>
       </motion.section>
 
@@ -705,18 +705,18 @@ export default function Home() {
               지금 가장 인기 있는 프로젝트를 만나보세요
             </p>
           </div>
-          <button 
+            <button
             onClick={() => navigateTo('/project')}
             className="hidden md:block text-blue-600 font-semibold hover:text-blue-800 transition-colors"
           >
             모든 프로젝트 보기 →
-          </button>
-        </div>
+            </button>
+          </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {featuredProjects.map((project) => (
             <motion.div
-              key={project.id}
+                key={project.id}
               whileHover={{ y: -5 }}
               className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
               onClick={() => navigateTo(`/project/${project.id}`)}
@@ -725,21 +725,21 @@ export default function Home() {
                 <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium mb-4 ${
                   project.type === '재택' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
                 }`}>
-                  {project.type}
-                </div>
+                        {project.type}
+                    </div>
                 <h3 className="text-xl font-bold mb-2 line-clamp-2">{project.title}</h3>
                 <p className="text-gray-500 mb-4">{project.company}</p>
                 
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {project.skills.map((skill, index) => (
-                    <span 
-                      key={index}
+                      {project.skills.map((skill, index) => (
+                        <span
+                          key={index}
                       className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
                 
                 <div className="border-t border-gray-100 pt-4">
                   <div className="flex justify-between text-sm">
@@ -750,17 +750,17 @@ export default function Home() {
                     <div>
                       <p className="text-gray-500">기간</p>
                       <p className="font-semibold">{project.duration}</p>
-                    </div>
+                  </div>
                     <div>
                       <p className="text-gray-500">마감일</p>
                       <p className="font-semibold">{project.deadline}</p>
-                    </div>
+                </div>
                   </div>
                 </div>
               </div>
             </motion.div>
-          ))}
-        </div>
+            ))}
+          </div>
         
         <div className="mt-8 text-center md:hidden">
           <button 
@@ -803,30 +803,30 @@ export default function Home() {
                     <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200">
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-200 to-blue-400">
                         <span className="text-white text-2xl font-bold">{freelancer.name.charAt(0)}</span>
-                      </div>
+                    </div>
                     </div>
                   </div>
-                </div>
+                      </div>
                 <div className="pt-16 p-6 text-center">
                   <div className="flex items-center justify-center mb-2">
                     <span className="text-yellow-500 mr-1">★</span>
                     <span className="font-medium">{freelancer.rating}</span>
-                  </div>
+                      </div>
                   <h3 className="text-xl font-bold mb-1">{freelancer.name}</h3>
                   <p className="text-gray-600 mb-3">{freelancer.position}</p>
                   <p className="text-sm text-gray-500 mb-4">경력 {freelancer.experience}</p>
                   
                   <div className="flex flex-wrap justify-center gap-2">
                     {freelancer.skills.map((skill, index) => (
-                      <span 
-                        key={index}
+                          <span
+                            key={index}
                         className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
               </motion.div>
             ))}
           </div>
@@ -849,7 +849,7 @@ export default function Home() {
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             우리는 프리랜서와 기업 모두에게 최고의 경험을 제공합니다
           </p>
-        </div>
+              </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           <motion.div
@@ -863,7 +863,7 @@ export default function Home() {
               <span className="text-blue-600 text-3xl">👥</span>
             </div>
             <h3 className="text-xl font-bold mb-4">검증된 프리랜서</h3>
-            <p className="text-gray-600">
+              <p className="text-gray-600">
               까다로운 심사를 통과한 검증된 프리랜서만 활동할 수 있어 프로젝트의 성공을 보장합니다.
             </p>
           </motion.div>
@@ -879,7 +879,7 @@ export default function Home() {
               <span className="text-blue-600 text-3xl">💼</span>
             </div>
             <h3 className="text-xl font-bold mb-4">안전한 계약 시스템</h3>
-            <p className="text-gray-600">
+              <p className="text-gray-600">
               표준 계약서와 에스크로 결제로 프리랜서와 클라이언트 모두가 안심하고 일할 수 있습니다.
             </p>
           </motion.div>
@@ -895,9 +895,9 @@ export default function Home() {
               <span className="text-blue-600 text-3xl">🏠</span>
             </div>
             <h3 className="text-xl font-bold mb-4">다양한 근무 방식</h3>
-            <p className="text-gray-600">
+              <p className="text-gray-600">
               상주, 재택, 부분 출근 등 다양한 근무 방식으로 유연하게 일할 수 있습니다.
-            </p>
+              </p>
           </motion.div>
         </div>
       </section>
@@ -926,18 +926,18 @@ export default function Home() {
                   <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-200 to-blue-400">
                       <span className="text-white font-bold">{testimonial.name.charAt(0)}</span>
-                    </div>
-                  </div>
+                </div>
+                </div>
                   <div>
                     <h3 className="font-bold">{testimonial.name}</h3>
                     <p className="text-sm text-gray-600">{testimonial.position}</p>
                   </div>
-                </div>
+                  </div>
                 <p className="text-gray-700 italic">"{testimonial.quote}"</p>
               </motion.div>
             ))}
-          </div>
-        </div>
+              </div>
+              </div>
       </section>
 
       {/* CTA 섹션 */}
@@ -950,7 +950,7 @@ export default function Home() {
               당신의 성공 스토리를 시작하세요.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <button 
+            <button
                 onClick={() => navigateTo('/register')}
                 className="bg-white text-blue-700 hover:bg-blue-50 px-8 py-4 rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl"
               >
@@ -961,10 +961,10 @@ export default function Home() {
                 className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-700 px-8 py-4 rounded-lg font-bold text-lg transition-all"
               >
                 로그인
-              </button>
-            </div>
+            </button>
           </div>
-        </section>
+    </div>
+      </section>
       )}
     </div>
   );
