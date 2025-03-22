@@ -10,7 +10,7 @@ import { AUTH_TOKEN_NAME } from '@/utils/env';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setUser } = useAuthStore();
+  const { setUser, checkSession } = useAuthStore();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -93,10 +93,16 @@ export default function LoginPage() {
     setError("");
 
     try {
+      // 개발 환경에서 로그인 정보 로깅
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`로그인 시도: 사용자명=${username1}, 비밀번호=*****`);
+      }
+
       let response;
       try {
         response = await authService.login(username1, password);
       } catch (apiError) {
+        console.error("API 호출 중 오류:", apiError);
         setError(apiError instanceof Error ? apiError.message : "로그인 중 오류가 발생했습니다.");
         throw apiError;
       }
@@ -108,20 +114,64 @@ export default function LoginPage() {
         에러메시지: response.error || '없음'
       });
 
-      if (response.success && response.user) {
+      if (response.success) {
+        // 성공 응답이 왔지만 데이터 체크
         if (response.token) {
+          // 토큰이 있으면 로컬 스토리지에 저장
           localStorage.setItem(AUTH_TOKEN_NAME, response.token);
+          console.log("인증 토큰이 저장되었습니다:", response.token.substring(0, 15) + '...');
+          
+          // 토큰 저장 후 세션 체크를 즉시 수행
+          try {
+            const sessionResult = await checkSession();
+            console.log("로그인 직후 세션 체크 결과:", sessionResult);
+          } catch (sessionErr) {
+            console.warn("로그인 직후 세션 체크 중 오류:", sessionErr);
+          }
+          
+          if (response.user) {
+            // 사용자 정보도 있으면 상태에 저장
+            setUser(response.user);
+            
+            // 개발 모드에서 추가 로깅
+            if (process.env.NODE_ENV !== 'production') {
+              console.log("로그인 성공:", {
+                사용자: response.user,
+                토큰유무: !!response.token,
+                리디렉션: "/"
+              });
+            }
+            
+            setTimeout(() => router.push("/"), 500);
+          } else {
+            console.warn("토큰은 있지만 사용자 정보가 없습니다");
+            setError("사용자 정보를 가져오는데 실패했습니다. 다시 시도해주세요.");
+          }
+        } else if (response.user) {
+          // 토큰은 없지만 사용자 정보는 있는 경우 (부분 로그인)
+          console.warn("사용자 정보는 있지만 토큰이 없습니다.");
+          setUser(response.user);
+          setError("로그인이 부분적으로 완료되었습니다. 일부 기능이 제한될 수 있습니다.");
+          setTimeout(() => router.push("/"), 1500);
         } else {
-          console.warn("주의: 토큰이 제공되지 않았습니다!");
+          // 성공 응답이지만 토큰과 사용자 정보 둘 다 없는 경우
+          console.error("로그인 성공 응답이지만 토큰과 사용자 정보가 모두 없습니다:", response);
+          setError("로그인은 성공했지만 필요한 정보를 가져오지 못했습니다.");
         }
-
-        setUser(response.user);
-        setTimeout(() => router.push("/"), 500);
       } else {
-        setError(response.error || "로그인에 실패했습니다.");
+        // 실패 응답
+        if (response.error) {
+          setError(response.error);
+          console.warn("서버 응답으로 로그인 실패:", response.error);
+        } else {
+          // 기본 오류 메시지
+          setError("로그인에 실패했습니다.");
+          console.warn("알 수 없는 이유로 로그인 실패");
+        }
       }
     } catch (error) {
       console.error("로그인 프로세스 중 오류 발생:", error);
+      setError("로그인 처리 중 예기치 않은 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
