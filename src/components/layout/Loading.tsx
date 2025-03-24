@@ -20,8 +20,8 @@ const LoadingContext = createContext<LoadingContextType>({
 // 로딩 상태를 사용하기 위한 커스텀 훅
 export const useLoading = () => useContext(LoadingContext);
 
-// 3초 로딩 상수
-const LOADING_DURATION = 3000;
+// 1초 로딩 상수 (기존 3초에서 1초로 단축)
+const LOADING_DURATION = 1000;
 
 // 로딩 UI 컴포넌트
 const LoadingUI = ({ debugInfo }: { debugInfo?: string }) => (
@@ -102,12 +102,14 @@ export default function LoadingProvider({ children }: { children: ReactNode }) {
     setLoading(isLoading);
     if (info) {
       setDebugInfo(info);
-      // 개발 모드에서만 로깅
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(`로딩 상태 변경: ${isLoading ? '시작' : '종료'} - ${info}`);
-      }
     } else {
       setDebugInfo(undefined);
+    }
+
+    // 이전 타이머가 있다면 초기화
+    if ((window as any).__loadingTimer) {
+      clearTimeout((window as any).__loadingTimer);
+      (window as any).__loadingTimer = null;
     }
 
     // 로딩 시작 시 타이머 설정
@@ -115,39 +117,45 @@ export default function LoadingProvider({ children }: { children: ReactNode }) {
       const timer = setTimeout(() => {
         setLoading(false);
         setDebugInfo('타이머 종료로 인한 로딩 해제');
-        if (process.env.NODE_ENV !== 'production') {
-          console.log('로딩 상태 변경: 종료 - 타이머 종료');
-        }
       }, LOADING_DURATION);
 
       // 타이머 ID를 전역 변수로 저장
       (window as any).__loadingTimer = timer;
-      
-      return () => clearTimeout(timer);
-    } else {
-      // 로딩이 명시적으로 false로 설정된 경우 이전 타이머 취소
-      if ((window as any).__loadingTimer) {
-        clearTimeout((window as any).__loadingTimer);
-        (window as any).__loadingTimer = null;
-      }
     }
   };
   
   // 로딩 이벤트 리스너 추가
   useEffect(() => {
+    // 브라우저 환경에서만 실행
+    if (typeof window === 'undefined') return;
+    
+    // 이미 리스너가 등록되어 있는지 확인 (전역 플래그 사용)
+    if ((window as any).__loadingListenersAttached) return;
+    
     const startLoading = () => setLoading(true);
     const stopLoading = () => {
       setTimeout(() => {
         setLoading(false);
-      }, LOADING_DURATION);
+      }, 200); // 로딩 지속 시간 단축 (500ms에서 200ms로)
     };
 
     window.addEventListener('beforeunload', startLoading);
     window.addEventListener('load', stopLoading);
+    
+    // 리스너 등록 플래그 설정
+    (window as any).__loadingListenersAttached = true;
 
     return () => {
       window.removeEventListener('beforeunload', startLoading);
       window.removeEventListener('load', stopLoading);
+      // 플래그 제거
+      (window as any).__loadingListenersAttached = false;
+      
+      // 컴포넌트 언마운트 시 로딩 타이머 제거
+      if ((window as any).__loadingTimer) {
+        clearTimeout((window as any).__loadingTimer);
+        (window as any).__loadingTimer = null;
+      }
     };
   }, []);
   
