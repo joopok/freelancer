@@ -5,7 +5,10 @@ export interface LoginFormData {
 
 export interface SessionUser {
   id: string;
+  username1?: string;
   name?: string;
+  email?: string;
+  role?: string;
   type: 'individual' | 'company';
 }
 
@@ -18,10 +21,18 @@ export interface AuthResponse {
 }
 
 export interface Session {
+  id: string;
   userId: string;
   userType: 'individual' | 'company';
   isLoggedIn: boolean;
-  expiresAt: number;
+  created: number;
+  expires: number;
+  lastActive: number;
+  userData?: {
+    name?: string;
+    email?: string;
+    role?: string;
+  };
 }
 
 export interface User {

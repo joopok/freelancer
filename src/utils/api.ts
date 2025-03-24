@@ -38,14 +38,6 @@ const apiConfig: ApiConfig = {
   tokenName: AUTH_TOKEN_NAME
 };
 
-console.log('API 설정:', {
-  baseURL: apiConfig.baseURL,
-  timeout: apiConfig.timeout,
-  withCredentials: apiConfig.withCredentials,
-  useMock: apiConfig.useMock,
-  useCache: apiConfig.useCache
-});
-
 // 인증이 필요한 API 경로 패턴
 export const PROTECTED_API_PATTERNS = [
   '/auth/user',         // 사용자 정보
@@ -62,6 +54,7 @@ export const PROTECTED_API_PATTERNS = [
 
 // 캐시 스토리지
 const apiCache: Map<string, {data: any, timestamp: number}> = new Map();
+const MAX_CACHE_SIZE = 100; // 최대 캐시 항목 수 제한
 
 // 요청 URL이 캐시 가능한 GET 요청인지 확인
 const isCacheable = (config: AxiosRequestConfig): boolean => {
@@ -71,6 +64,34 @@ const isCacheable = (config: AxiosRequestConfig): boolean => {
 // 요청 URL에 대한 캐시 키 생성
 const getCacheKey = (config: AxiosRequestConfig): string => {
   return `${config.method}_${config.url}_${JSON.stringify(config.params)}`;
+};
+
+// 캐시 크기 관리 함수 추가
+const manageCacheSize = (): void => {
+  if (apiCache.size > MAX_CACHE_SIZE) {
+    // 가장 오래된 캐시 항목 찾기
+    let oldestKey: string | null = null;
+    let oldestTimestamp = Date.now();
+    
+    apiCache.forEach((value, key) => {
+      if (value.timestamp < oldestTimestamp) {
+        oldestTimestamp = value.timestamp;
+        oldestKey = key;
+      }
+    });
+    
+    // 가장 오래된 항목 제거
+    if (oldestKey) {
+      apiCache.delete(oldestKey);
+    }
+  }
+};
+
+// 개발 환경에서만 로깅하는 유틸리티 함수
+const devLog = (callback: () => void): void => {
+  if (process.env.NODE_ENV !== 'production' && typeof window !== 'undefined') {
+    callback();
+  }
 };
 
 // API 경로가 보호된 패턴과 일치하는지 확인
@@ -186,7 +207,7 @@ const createApiInstance = (): AxiosInstance => {
   instance.interceptors.response.use(
     (response) => {
       // 개발 모드에서 응답 로깅
-      if (process.env.NODE_ENV !== 'production' && typeof window !== 'undefined') {
+      devLog(() => {
         const statusColor = getStatusColor(response.status);
         console.group(`%c✅ API 응답: ${response.status} ${response.config.url}`, 
           `color: ${statusColor}; font-weight: bold;`);
@@ -206,15 +227,23 @@ const createApiInstance = (): AxiosInstance => {
         });
         
         console.groupEnd();
-      }
+      });
 
       // 응답 캐싱 (GET 요청인 경우)
       if (isCacheable(response.config) && response.statusText !== 'OK (cached)') {
         const cacheKey = getCacheKey(response.config);
-        apiCache.set(cacheKey, {
-          data: response.data,
-          timestamp: Date.now()
-        });
+        
+        // 데이터 크기 검사 추가 (큰 응답은 캐시하지 않음)
+        const dataSize = JSON.stringify(response.data).length;
+        if (dataSize <= 1024 * 50) { // 50KB 이하만 캐시
+          apiCache.set(cacheKey, {
+            data: response.data,
+            timestamp: Date.now()
+          });
+          
+          // 캐시 크기 관리
+          manageCacheSize();
+        }
       }
 
       return response;
@@ -285,21 +314,42 @@ const api = createApiInstance();
 
 // API 유틸리티 클래스 - 추가적인 기능 제공
 export class ApiUtils {
-  // 캐시 삭제 기능
+  // 캐시 정리 함수
   static clearCache(url?: string): void {
     if (url) {
       // 특정 URL 관련 캐시만 삭제
+      const urlPattern = new RegExp(url);
+      const keysToDelete: string[] = [];
+      
       apiCache.forEach((_, key) => {
-        if (key.includes(url)) {
-          apiCache.delete(key);
+        if (urlPattern.test(key)) {
+          keysToDelete.push(key);
         }
       });
-      console.log(`🧹 캐시 삭제 완료: ${url} 관련`);
+      
+      keysToDelete.forEach(key => apiCache.delete(key));
     } else {
-      // 전체 캐시 삭제
+      // 모든 캐시 삭제
       apiCache.clear();
-      console.log('🧹 전체 캐시 삭제 완료');
     }
+  }
+  
+  // 캐시 통계 확인 (개발용)
+  static getCacheStats(): { size: number, totalBytes: number, items: Record<string, string> } {
+    let totalBytes = 0;
+    const items: Record<string, string> = {};
+    
+    apiCache.forEach((value, key) => {
+      const dataSize = JSON.stringify(value.data).length;
+      totalBytes += dataSize;
+      items[key] = `${dataSize > 1024 ? (dataSize / 1024).toFixed(2) + ' KB' : dataSize + ' bytes'}`;
+    });
+    
+    return {
+      size: apiCache.size,
+      totalBytes,
+      items
+    };
   }
 
   // 에러 메시지 추출 헬퍼 함수

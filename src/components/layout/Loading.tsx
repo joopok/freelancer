@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 
 // 로딩 상태를 위한 컨텍스트 인터페이스
@@ -23,8 +23,8 @@ export const useLoading = () => useContext(LoadingContext);
 // 1초 로딩 상수 (기존 3초에서 1초로 단축)
 const LOADING_DURATION = 1000;
 
-// 로딩 UI 컴포넌트
-const LoadingUI = ({ debugInfo }: { debugInfo?: string }) => (
+// 로딩 UI 컴포넌트 메모이제이션
+const LoadingUI = memo(({ debugInfo }: { debugInfo?: string }) => (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -36,8 +36,7 @@ const LoadingUI = ({ debugInfo }: { debugInfo?: string }) => (
       {/* 로고 */}
       <motion.div 
         animate={{ 
-          scale: [1, 1.1, 1],
-          rotate: [0, 0, 0],
+          scale: [1, 1.05, 1], // 애니메이션 효과 축소
         }}
         transition={{ 
           duration: 2,
@@ -68,7 +67,7 @@ const LoadingUI = ({ debugInfo }: { debugInfo?: string }) => (
       
       {/* 로딩 메시지와 디버그 정보 */}
       <motion.div 
-        animate={{ opacity: [0.5, 1, 0.5] }}
+        animate={{ opacity: [0.7, 1, 0.7] }} // 애니메이션 효과 축소
         transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
         className="mt-6 text-center text-white"
       >
@@ -79,26 +78,28 @@ const LoadingUI = ({ debugInfo }: { debugInfo?: string }) => (
       </motion.div>
     </div>
     
-    {/* 배경 요소 */}
+    {/* 배경 요소 - 성능 이슈가 될 수 있는 복잡한 그라데이션 및 효과 단순화 */}
     <div className="absolute inset-0 opacity-10">
       <div className="absolute inset-0" style={{ 
         backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
         backgroundSize: '60px 60px'
       }}></div>
-      {/* 빛나는 원형 요소 */}
-      <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-purple-500 opacity-20 blur-3xl"></div>
-      <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-500 opacity-20 blur-3xl"></div>
+      {/* 빛나는 원형 요소 축소 */}
+      <div className="absolute top-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full bg-purple-500 opacity-20 blur-2xl"></div>
+      <div className="absolute bottom-[-20%] left-[-10%] w-[400px] h-[400px] rounded-full bg-blue-500 opacity-20 blur-2xl"></div>
     </div>
   </motion.div>
-);
+));
+
+LoadingUI.displayName = 'LoadingUI';
 
 // 로딩 컴포넌트
 export default function LoadingProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string | undefined>(undefined);
   
-  // 로딩 상태 설정 함수를 확장
-  const handleSetLoading = (isLoading: boolean, info?: string) => {
+  // 로딩 상태 설정 함수를 확장 - useCallback으로 메모이제이션
+  const handleSetLoading = useCallback((isLoading: boolean, info?: string) => {
     setLoading(isLoading);
     if (info) {
       setDebugInfo(info);
@@ -122,7 +123,7 @@ export default function LoadingProvider({ children }: { children: ReactNode }) {
       // 타이머 ID를 전역 변수로 저장
       (window as any).__loadingTimer = timer;
     }
-  };
+  }, []);
   
   // 로딩 이벤트 리스너 추가
   useEffect(() => {
@@ -132,6 +133,7 @@ export default function LoadingProvider({ children }: { children: ReactNode }) {
     // 이미 리스너가 등록되어 있는지 확인 (전역 플래그 사용)
     if ((window as any).__loadingListenersAttached) return;
     
+    // 함수 메모이제이션
     const startLoading = () => setLoading(true);
     const stopLoading = () => {
       setTimeout(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLoading } from '@/components/layout/Loading';
@@ -9,9 +9,11 @@ import { getAllTechNews, getLatestTechNews, getPopularTechNews } from '@/service
 
 export default function TechNewsPage() {
   const { setLoading } = useLoading();
-  const allNews = getAllTechNews();
-  const latestNews = getLatestTechNews(3);
-  const popularNews = getPopularTechNews(3);
+  
+  // 데이터 호출 결과 메모이제이션
+  const allNews = useMemo(() => getAllTechNews(), []);
+  const latestNews = useMemo(() => getLatestTechNews(3), []);
+  const popularNews = useMemo(() => getPopularTechNews(3), []);
 
   // 페이지 로딩 효과
   useEffect(() => {
@@ -36,6 +38,8 @@ export default function TechNewsPage() {
             src="/images/tech-news/headline-bg.jpg"
             alt="최신 기술 트렌드"
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 60vw"
+            priority
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
@@ -87,6 +91,8 @@ export default function TechNewsPage() {
                   src={news.thumbnail || '/images/tech-news/default-thumbnail.jpg'}
                   alt={news.title}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
+                  loading="lazy"
                   className="object-cover transition-transform group-hover:scale-105"
                 />
                 <div className="absolute top-3 left-3 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">

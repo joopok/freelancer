@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { TechNewsItem, TechNewsCategory } from '@/types/techNews';
 import TechNewsCard from './TechNewsCard';
 
@@ -18,21 +18,36 @@ export default function TechNewsList({
   const [activeCategory, setActiveCategory] = useState<TechNewsCategory>('전체');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // 카테고리 필터링
-  const filteredItems = items.filter(item => {
-    // 카테고리 필터
-    const categoryMatch = activeCategory === '전체' || item.category === activeCategory;
-    
-    // 검색어 필터
-    const searchMatch = !searchTerm || 
-      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.tags && item.tags.some(tag => 
-        tag.toLowerCase().includes(searchTerm.toLowerCase())
-      ));
-    
-    return categoryMatch && searchMatch;
-  });
+  // 카테고리 변경 핸들러 메모이제이션
+  const handleCategoryChange = useCallback((category: TechNewsCategory) => {
+    setActiveCategory(category);
+  }, []);
+
+  // 검색어 변경 핸들러 메모이제이션
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
+  // 필터링된 아이템 메모이제이션
+  const filteredItems = useMemo(() => {
+    return items.filter(item => {
+      // 카테고리 필터
+      const categoryMatch = activeCategory === '전체' || item.category === activeCategory;
+      
+      // 검색어 필터 (검색어가 있을 때만 검색 수행)
+      const searchMatch = !searchTerm || 
+        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.tags && item.tags.some(tag => 
+          tag.toLowerCase().includes(searchTerm.toLowerCase())
+        ));
+      
+      return categoryMatch && searchMatch;
+    });
+  }, [items, activeCategory, searchTerm]);
+
+  // 검색 결과 없음 상태 메모이제이션
+  const hasNoResults = useMemo(() => filteredItems.length === 0, [filteredItems]);
 
   return (
     <div className="w-full">
@@ -43,7 +58,7 @@ export default function TechNewsList({
             {categories.map(category => (
               <button
                 key={category}
-                onClick={() => setActiveCategory(category)}
+                onClick={() => handleCategoryChange(category)}
                 className={`px-4 py-2 text-sm rounded-full transition-colors ${
                   activeCategory === category
                     ? 'bg-blue-600 text-white'
@@ -61,7 +76,7 @@ export default function TechNewsList({
               type="text"
               placeholder="검색어를 입력하세요"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
               className="w-full px-4 py-2 pl-10 bg-gray-100 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             />
             <svg
@@ -81,7 +96,7 @@ export default function TechNewsList({
         </div>
       )}
 
-      {filteredItems.length === 0 ? (
+      {hasNoResults ? (
         <div className="text-center py-12 text-gray-500">
           <p>검색 결과가 없습니다.</p>
         </div>
