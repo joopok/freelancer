@@ -36,14 +36,12 @@ export function verifyToken(token: string): boolean {
   try {
     // 토큰이 없으면 false 반환
     if (!token || typeof token !== 'string') {
-      console.warn('JWT 검증 실패: 토큰이 없거나 문자열이 아닙니다.', typeof token);
       return false;
     }
 
     // 토큰 형식 기본 검증 (3개 파트로 구성되어 있는지)
     const parts = token.split('.');
     if (parts.length !== 3) {
-      console.warn('JWT 검증 실패: 올바른 JWT 형식이 아닙니다.');
       return false;
     }
 
@@ -54,21 +52,14 @@ export function verifyToken(token: string): boolean {
       
       // 만료 시간 확인
       if (payload.exp && payload.exp * 1000 < Date.now()) {
-        console.warn('JWT 검증 실패: 토큰이 만료되었습니다.', new Date(payload.exp * 1000));
         return false;
       }
       
       return true;
     } catch (parseError) {
-      console.error('JWT 페이로드 파싱 오류:', parseError);
       return false;
     }
   } catch (error) {
-    // 모든 다른 오류 처리
-    const errorName = error instanceof Error ? error.name : '알 수 없는 오류';
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    
-    console.error(`JWT 검증 중 오류 발생 (${errorName}):`, errorMessage);
     return false;
   }
 }
@@ -100,14 +91,12 @@ export function decodeToken(token: string): JwtPayload | null {
   try {
     // 토큰이 없으면 null 반환
     if (!token || typeof token !== 'string') {
-      console.warn('JWT 디코딩 실패: 토큰이 없거나 문자열이 아닙니다.');
       return null;
     }
 
     // 토큰 형식 기본 검증 (3개 파트로 구성되어 있는지)
     const parts = token.split('.');
     if (parts.length !== 3) {
-      console.warn('JWT 디코딩 실패: 올바른 JWT 형식이 아닙니다.');
       return null;
     }
 
@@ -117,15 +106,9 @@ export function decodeToken(token: string): JwtPayload | null {
       const payload = JSON.parse(base64UrlDecode(parts[1]));
       return payload as JwtPayload;
     } catch (parseError) {
-      console.error('JWT 페이로드 파싱 오류:', parseError);
       return null;
     }
   } catch (error) {
-    // 오류 처리
-    const errorName = error instanceof Error ? error.name : '알 수 없는 오류';
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    
-    console.error(`JWT 디코딩 중 오류 발생 (${errorName}):`, errorMessage);
     return null;
   }
 }
@@ -139,14 +122,12 @@ export function isTokenExpired(token: string): boolean {
   try {
     // 토큰이 없으면 만료된 것으로 간주
     if (!token || typeof token !== 'string') {
-      console.warn('JWT 만료 확인 실패: 토큰이 없거나 문자열이 아닙니다.');
       return true;
     }
 
     // 토큰 형식 기본 검증 (3개 파트로 구성되어 있는지)
     const parts = token.split('.');
     if (parts.length !== 3) {
-      console.warn('JWT 만료 확인 실패: 올바른 JWT 형식이 아닙니다.');
       return true;
     }
 
@@ -157,7 +138,6 @@ export function isTokenExpired(token: string): boolean {
       
       // exp 필드가 없으면 만료되지 않는 토큰으로 간주
       if (!payload.exp) {
-        console.warn('JWT에 만료 시간(exp)이 없습니다.');
         return false;
       }
       
@@ -165,24 +145,11 @@ export function isTokenExpired(token: string): boolean {
       const now = Date.now() / 1000;
       const expired = payload.exp < now;
       
-      if (expired) {
-        console.log('JWT가 만료되었습니다.', {
-          만료시간: new Date(payload.exp * 1000).toISOString(),
-          현재시간: new Date().toISOString()
-        });
-      }
-      
       return expired;
     } catch (parseError) {
-      console.error('JWT 페이로드 파싱 오류:', parseError);
       return true;
     }
   } catch (error) {
-    // 오류 처리
-    const errorName = error instanceof Error ? error.name : '알 수 없는 오류';
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    
-    console.error(`JWT 만료 확인 중 오류 발생 (${errorName}):`, errorMessage);
     return true;
   }
 }

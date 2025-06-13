@@ -1,10 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { useLoading } from '@/components/layout/Loading';
+import { useAuthStore } from '@/store/auth';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import { useRouter } from 'next/navigation';
 
 // 통계 데이터
 const stats = [
@@ -177,7 +184,8 @@ export default function Home() {
   const { setLoading } = useLoading();
   const [isVisible, setIsVisible] = useState(false);
   const [activeCardIndex, setActiveCardIndex] = useState(0); // 현재 활성화된 카드 인덱스
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태 관리
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn); // 로그인 상태 관리
+  const router = useRouter();
 
   // 스크롤 위치에 따라 애니메이션 활성화
   useEffect(() => {
@@ -190,14 +198,6 @@ export default function Home() {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // 로그인 상태 확인
-  useEffect(() => {
-    // 실제 구현에서는 쿠키, 로컬 스토리지, 또는 전역 상태 관리를 통해 로그인 상태를 가져옵니다
-    // 여기서는 예시로 로컬 스토리지에서 토큰 유무로 확인합니다
-    const token = localStorage.getItem('auth_token');
-    setIsLoggedIn(!!token);
   }, []);
 
   // 캐러셀 자동 회전
@@ -230,7 +230,7 @@ export default function Home() {
     if (searchQuery.trim()) {
       setLoading(true);
       // 검색 페이지로 이동
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
       
       // 로딩 상태 1초 후 해제 (페이지 전환 효과를 위해)
       setTimeout(() => {
@@ -242,7 +242,7 @@ export default function Home() {
   // 페이지 이동 함수
   const navigateTo = (href: string) => {
     setLoading(true);
-    window.location.href = href;
+    router.push(href);
     
     // 로딩 상태 1초 후 해제 (페이지 전환 효과를 위해)
     setTimeout(() => {
@@ -260,7 +260,7 @@ export default function Home() {
         {/* 배경 패턴 */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 opacity-10" style={{ 
-            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
             backgroundSize: '60px 60px'
           }}></div>
           {/* 빛나는 원형 요소 */}

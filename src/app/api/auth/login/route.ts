@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createSession, setSessionCookie } from '@/utils/session';
-import { corsHeaders, addCorsHeaders, corsOptionsHandler } from '../../cors';
+import { corsOptionsHandler, addCorsHeaders } from '../../cors';
+import { generateToken } from '@/utils/jwt';
 
 // OPTIONS 요청 처리 - CORS 프리플라이트 요청 대응
 export async function OPTIONS() {
@@ -20,9 +20,16 @@ export async function POST(request: Request) {
         type: 'individual' as const,
       };
 
-      const session = await createSession(user.id, user.type as 'individual' | 'company');
-      setSessionCookie(session);
-
+      // JWT 토큰 생성
+      const token = generateToken({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        type: user.type
+      });
+      
+      console.log('로그인 성공, JWT 토큰 생성:', token.substring(0, 15) + '...');
+      
       const response = NextResponse.json({ 
         success: true, 
         user: {
@@ -30,7 +37,8 @@ export async function POST(request: Request) {
           name: user.name,
           email: user.email,
           type: user.type,
-        }
+        },
+        token: token // JWT 토큰 응답에 포함
       });
       
       return addCorsHeaders(response);

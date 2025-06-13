@@ -1,4 +1,4 @@
-import { AuthResponse, LoginRequest } from '@/types/auth';
+import { AuthResponse, LoginRequest, User } from '@/types/auth';
 import axios from 'axios';
 import api, { ApiUtils } from '@/utils/api';
 import { AUTH_TOKEN_NAME, USE_MOCK_API, API_URL } from '@/utils/env';
@@ -21,68 +21,38 @@ export const authService = {
       
       // 로그인 API 호출
       const loginData: LoginRequest = { username1, password };
-      const response = await api.post<AuthResponse>('/auth/login', loginData);
-      
-      // 응답 로깅
-      console.log('로그인 API 응답 받음: '+JSON.stringify(response, null, 4));
+      const response = await api.post<any>('/auth/login', loginData);
       
       // 응답 데이터 검증
       if (!response.data) {
-        console.error('서버 응답에 데이터가 없음:', response);
         throw new Error('서버 응답 오류가 발생했습니다.');
       }
       
-      // 개발 모드에서 응답 데이터 로깅 (민감 정보 제외)
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('로그인 응답 데이터:', {
-          success: response.data.success,
-          hasUser: !!response.data.user,
-          hasToken: !!response.data.token,
-          errorMessage: response.data.error || '없음'
-        });
-      }
+      // API 응답 구조에 맞게 데이터 변환
+      const responseData = response.data;
       
-      // 로그인 성공/실패 처리
-      if (response.data.success && response.data.token) {
-        console.log('로그인 성공, 토큰 발급됨');
-      } else if (!response.data.success) {
-        console.warn('서버에서 로그인 실패 응답:', response.data.error || '오류 메시지 없음');
-      }
+      // API 응답 구조 매핑
+      const authResponse: AuthResponse = {
+        success: responseData.success,
+        error: responseData.message || null,
+        token: responseData.data?.access_token || null,
+        user: responseData.data ? {
+          id: responseData.data.username1 || responseData.data.username || '',
+          username1: responseData.data.username1 || responseData.data.username || '',
+          name: responseData.data.name || responseData.data.username || responseData.data.username1 || '',
+          email: responseData.data.email || '',
+          role: responseData.data.role || ''
+        } : undefined
+      };
       
-      return response.data;
+      return authResponse;
     } catch (error: unknown) {
       // 에러 처리 (중앙화된 유틸리티 활용)
       const errorMessage = ApiUtils.getErrorMessage(error);
-      console.error('로그인 중 오류 발생:', errorMessage);
       
-      // 자세한 로깅 (개발 모드)
-      if (process.env.NODE_ENV !== 'production' && axios.isAxiosError(error)) {
-        console.error('로그인 API 호출 실패 상세:', {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          message: error.message,
-          config: {
-            url: error.config?.url,
-            baseURL: error.config?.baseURL,
-            method: error.config?.method,
-            timeout: error.config?.timeout
-          }
-        });
-        
-        // Network Error인 경우 추가 정보 제공
-        if (error.message === 'Network Error') {
-          console.error('네트워크 오류 추가 정보:', {
-            현재API설정: API_URL,
-            모의데이터사용: USE_MOCK_API,
-            서버URL: error.config?.baseURL,
-            요청경로: error.config?.url,
-            모드: process.env.NODE_ENV
-          });
-          
-          // 사용자 친화적 오류 메시지로 변환
-          return Promise.reject(new Error('서버에 연결할 수 없습니다. 서버가 실행 중인지 확인하거나 네트워크 연결을 확인해주세요.'));
-        }
+      // Network Error인 경우 사용자 친화적 오류 메시지로 변환
+      if (axios.isAxiosError(error) && error.message === 'Network Error') {
+        return Promise.reject(new Error('서버에 연결할 수 없습니다. 서버가 실행 중인지 확인하거나 네트워크 연결을 확인해주세요.'));
       }
       
       throw new Error(errorMessage);
@@ -106,24 +76,18 @@ export const authService = {
         // 추가 안전장치: 세션 스토리지 정리
         sessionStorage.clear();
         
-        // 개발 모드에서 로그 출력
-        if (process.env.NODE_ENV !== 'production') {
-          console.log('로그아웃 완료: 로컬 스토리지에서 인증 토큰 제거됨');
-        }
-        
         // API 캐시 초기화 (인증 관련 캐시만)
         ApiUtils.clearCache('/auth/');
       }
     } catch (error: unknown) {
-      // 로그아웃 실패 시에도 로컬 상태 정리 진행
-      console.warn('로그아웃 중 오류가 발생했지만, 로컬 세션은 정리합니다:', ApiUtils.getErrorMessage(error));
-      
-      // 클라이언트 측 상태 정리
+      // 로그아웃 실패 시에도 클라이언트 상태는 정리
       if (typeof window !== 'undefined') {
         localStorage.removeItem(AUTH_TOKEN_NAME);
         sessionStorage.clear();
-        ApiUtils.clearCache('/auth/');
       }
+      
+      // 오류를 다시 던져 호출자가 처리할 수 있게 함
+      throw new Error(ApiUtils.getErrorMessage(error));
     }
   },
 

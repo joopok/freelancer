@@ -18,7 +18,6 @@ if (apiUrl.startsWith('http')) {
       apiUrl = apiUrl.slice(0, -1);
     }
   } catch (e) {
-    console.error('잘못된 API URL 형식:', apiUrl);
     // 오류 발생 시 상대 경로로 대체
     apiUrl = '/api';
   }
@@ -27,16 +26,14 @@ if (apiUrl.startsWith('http')) {
   if (apiUrl.endsWith('/') && apiUrl !== '/') {
     apiUrl = apiUrl.slice(0, -1);
   }
-  console.log('상대 경로 API URL 사용:', apiUrl);
 }
 
 // 브라우저 환경에서는 상대 경로를 사용하고, 서버 환경에서는 절대 경로를 사용
 if (typeof window !== 'undefined' && apiUrl.startsWith('/')) {
-  console.log('브라우저 환경에서 상대 경로 API URL 사용');
+  // 브라우저 환경에서 상대 경로 사용
 } else if (typeof window === 'undefined' && !apiUrl.startsWith('http')) {
   // 서버 사이드에서 상대 경로가 지정된 경우 절대 URL로 변환
   apiUrl = `http://localhost:8081${apiUrl.startsWith('/') ? apiUrl : `/${apiUrl}`}`;
-  console.log('서버 환경에서 절대 경로로 변환:', apiUrl);
 }
 
 export const API_URL = apiUrl;
@@ -60,6 +57,10 @@ export const API_TIMEOUT = parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '3000
 // API 인증 설정
 export const AUTH_TOKEN_NAME = process.env.NEXT_PUBLIC_AUTH_TOKEN_NAME || 'auth_token';
 export const AUTH_REFRESH_TOKEN_NAME = process.env.NEXT_PUBLIC_AUTH_REFRESH_TOKEN_NAME || 'refresh_token';
+
+// JWT 설정
+export const JWT_SECRET = process.env.JWT_SECRET || 'jobkorea-billboard-secret-key-2024';
+export const JWT_EXPIRY = process.env.JWT_EXPIRY || '30d'; // 30일
 
 // 기타 환경 변수들
 export const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0';
@@ -105,6 +106,8 @@ const env = {
   API_TIMEOUT,
   AUTH_TOKEN_NAME,
   AUTH_REFRESH_TOKEN_NAME,
+  JWT_SECRET,
+  JWT_EXPIRY,
   APP_VERSION
 };
 
