@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import ThemeToggle from '@/components/common/ThemeToggle';
 import MultiSearchInput from '@/components/common/MultiSearchInput';
 
 // 프리랜서 타입 정의
@@ -587,7 +588,7 @@ const getNameByIndex = (index: number): string => {
                   <span className="bg-gradient-to-r from-blue-600 to-blue-700 text-transparent bg-clip-text"> 프리랜서 </span>
                   <span className="ml-2 text-sm font-normal bg-blue-100 text-blue-800 px-2 py-1 rounded-full"> NEW </span>
                 </h2>
-                <p className="text-gray-600"> 총 <span className="font-semibold text-blue-600">{filteredFreelancers.length}</span>명의 프리랜서가 있습니다</p>
+                <p className="text-gray-600 dark:text-gray-300"> 총 <span className="font-semibold text-blue-600">{filteredFreelancers.length}</span>명의 프리랜서가 있습니다</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 transition-all flex items-center gap-1 shadow-sm">
@@ -797,15 +798,15 @@ const getNameByIndex = (index: number): string => {
             </div>
             
             <div className="bg-white p-8 rounded-xl shadow-sm">
-              <h3 className="text-xl font-bold mb-4 text-gray-900">프리랜서 이용 안내</h3>
+              <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">프리랜서 이용 안내</h3>
               <div className="space-y-6">
                 <div className="flex">
                   <div className="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="text-blue-600 font-bold text-lg">1</span>
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">전문가 프로필 확인</h4>
-                    <p className="text-gray-600">각 프리랜서의 경력, 포트폴리오, 평점을 꼼꼼히 확인하세요.</p>
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white">전문가 프로필 확인</h4>
+                    <p className="text-gray-600 dark:text-gray-300">각 프리랜서의 경력, 포트폴리오, 평점을 꼼꼼히 확인하세요.</p>
                   </div>
                 </div>
                 
@@ -814,8 +815,8 @@ const getNameByIndex = (index: number): string => {
                     <span className="text-blue-600 font-bold text-lg">2</span>
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">프로젝트 제안</h4>
-                    <p className="text-gray-600">마음에 드는 프리랜서에게 프로젝트를 제안하고 상세 내용을 협의하세요.</p>
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white">프로젝트 제안</h4>
+                    <p className="text-gray-600 dark:text-gray-300">마음에 드는 프리랜서에게 프로젝트를 제안하고 상세 내용을 협의하세요.</p>
                   </div>
                 </div>
                 
@@ -824,8 +825,8 @@ const getNameByIndex = (index: number): string => {
                     <span className="text-blue-600 font-bold text-lg">3</span>
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">계약 체결</h4>
-                    <p className="text-gray-600">표준 계약서를 통해 안전하게 계약을 체결하고 작업을 시작합니다.</p>
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white">계약 체결</h4>
+                    <p className="text-gray-600 dark:text-gray-300">표준 계약서를 통해 안전하게 계약을 체결하고 작업을 시작합니다.</p>
                   </div>
                 </div>
                 
@@ -834,8 +835,8 @@ const getNameByIndex = (index: number): string => {
                     <span className="text-blue-600 font-bold text-lg">4</span>
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">작업 완료 및 결제</h4>
-                    <p className="text-gray-600">작업이 완료되면 검수 후 안전하게 대금을 지급합니다.</p>
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white">작업 완료 및 결제</h4>
+                    <p className="text-gray-600 dark:text-gray-300">작업이 완료되면 검수 후 안전하게 대금을 지급합니다.</p>
                   </div>
                 </div>
               </div>

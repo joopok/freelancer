@@ -263,12 +263,6 @@ export default function Home() {
       <main>
         {/* 히어로 섹션 */}
         <section className="relative overflow-hidden">
-          {/* 다크모드 토글 버튼 */}
-          <div className="absolute top-4 right-4 md:top-6 md:right-6 z-50">
-            <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-lg rounded-xl p-2 border border-white/20 dark:border-gray-600/30">
-              <ThemeToggle />
-            </div>
-          </div>
 
           {/* 배경 그라데이션 */}
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-800 to-blue-900 dark:from-gray-900 dark:via-purple-900 dark:to-black transition-colors duration-300"></div>

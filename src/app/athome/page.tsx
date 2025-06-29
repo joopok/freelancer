@@ -4,6 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+
+
 // 프로젝트 타입 정의
 interface Project {
   id: string;
@@ -279,7 +281,7 @@ export default function RemoteProjectPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 상단 배너 */}
       <div className="bg-gradient-to-r from-indigo-800 via-purple-700 to-pink-600 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
@@ -344,6 +346,8 @@ export default function RemoteProjectPage() {
             </polygon>
           </svg>
         </div>
+
+        
 
         {/* 배너 콘텐츠 */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative z-10">
@@ -648,8 +652,8 @@ export default function RemoteProjectPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* 왼쪽 사이드바 - 필터 */}
-          <div className="lg:w-80 bg-white p-8 rounded-2xl shadow-md h-fit border border-gray-100 sticky top-8">
-            <h3 className="text-xl font-bold mb-8 text-gray-900 border-b pb-4 flex items-center">
+          <div className="lg:w-80 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-md h-fit border border-gray-100 dark:border-gray-700 sticky top-8 transition-colors duration-300">
+            <h3 className="text-xl font-bold mb-8 text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-4 flex items-center transition-colors duration-300">
               <svg className="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
@@ -658,7 +662,7 @@ export default function RemoteProjectPage() {
 
             {/* 기술 스택 필터 */}
             <div className="mb-8">
-              <h4 className="font-medium text-gray-900 mb-4 flex items-center">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
                 <svg className="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                 </svg>
@@ -671,7 +675,7 @@ export default function RemoteProjectPage() {
                     onClick={() => toggleSkillFilter(skill)}
                     className={`text-xs px-3 py-1.5 rounded-full transition-all ${selectedSkills.includes(skill)
                       ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+                      : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200'
                     }`}
                   >
                     {skill}
@@ -682,14 +686,14 @@ export default function RemoteProjectPage() {
 
             {/* 개발 기간 필터 */}
             <div className="mb-8">
-              <h4 className="font-medium text-gray-900 mb-4 flex items-center">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
                 <svg className="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zM9 9h6v6H9V9z" />
                 </svg>
                 개발 기간
               </h4>
               <select
-                className="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
                 style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
                 value={selectedDuration}
                 onChange={handleDurationChange}
@@ -703,14 +707,14 @@ export default function RemoteProjectPage() {
 
             {/* 예산 필터 */}
             <div className="mb-8">
-              <h4 className="font-medium text-gray-900 mb-4 flex items-center">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
                 <svg className="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 예산
               </h4>
               <select
-                className="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
                 style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
                 value={selectedBudget}
                 onChange={handleBudgetChange}
@@ -727,7 +731,7 @@ export default function RemoteProjectPage() {
             {/* 필터 초기화 버튼 */}
             <button
               onClick={resetFilters}
-              className="w-full py-3 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-800 rounded-xl transition-all text-sm font-medium border border-gray-200 hover:shadow-sm flex items-center justify-center"
+              className="w-full py-3 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 text-gray-800 dark:text-gray-200 rounded-xl transition-all text-sm font-medium border border-gray-200 dark:border-gray-600 hover:shadow-sm flex items-center justify-center"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -740,26 +744,26 @@ export default function RemoteProjectPage() {
           <div className="flex-1">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center transition-colors duration-300">
                   <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 프로젝트 </span>
-                  <span className="ml-2 text-sm font-normal bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full"> NEW </span>
+                  <span className="ml-2 text-sm font-normal bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded-full transition-colors duration-300"> NEW </span>
                 </h2>
-                <p className="text-gray-600"> 총 <span className="font-semibold text-indigo-600">{filteredProjects.length}</span>개의 프로젝트가 있습니다</p>
+                <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300"> 총 <span className="font-semibold text-indigo-600 dark:text-indigo-400">{filteredProjects.length}</span>개의 프로젝트가 있습니다</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <button className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 transition-all flex items-center gap-1 shadow-sm">
+                <button className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all duration-300 flex items-center gap-1 shadow-sm">
                   <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   최신순
                 </button>
-                <button className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 transition-all flex items-center gap-1 shadow-sm">
+                <button className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all duration-300 flex items-center gap-1 shadow-sm">
                   <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   마감임박순
                 </button>
-                <button className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 transition-all flex items-center gap-1 shadow-sm">
+                <button className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all duration-300 flex items-center gap-1 shadow-sm">
                   <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -779,7 +783,7 @@ export default function RemoteProjectPage() {
                   {paginatedProjects.map((project) => (
                     <div
                       key={project.id}
-                      className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group relative"
+                      className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden group relative"
                     >
                       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 to-purple-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                       <div className="p-6">
@@ -791,10 +795,10 @@ export default function RemoteProjectPage() {
                             {project.type}
                           </span>
                         </div>
-                        <h3 className="text-lg font-bold mb-2 text-gray-900 group-hover:text-indigo-600 transition-colors">
+                        <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors">
                           {project.title}
                         </h3>
-                        <p className="text-gray-600 mb-3 flex items-center">
+                        <p className="text-gray-600 dark:text-gray-300 mb-3 flex items-center transition-colors duration-300">
                           <svg className="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                           </svg>
@@ -802,7 +806,7 @@ export default function RemoteProjectPage() {
                         </p>
 
                         {project.description && (
-                          <p className="text-gray-700 mb-4 text-sm line-clamp-2 bg-gray-50 p-4 rounded-xl border border-gray-100"> {project.description} </p>
+                          <p className="text-gray-700 dark:text-gray-300 mb-4 text-sm line-clamp-2 bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600 transition-colors duration-300"> {project.description} </p>
                         )}
 
                         <div className="mb-4">
@@ -816,14 +820,14 @@ export default function RemoteProjectPage() {
                               </span>
                             ))}
                           </div>
-                          <div className="flex justify-between text-sm bg-gray-50 p-4 rounded-xl border border-gray-100">
-                            <span className="text-gray-600 flex items-center">
+                          <div className="flex justify-between text-sm bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600 transition-colors duration-300">
+                            <span className="text-gray-600 dark:text-gray-300 flex items-center transition-colors duration-300">
                               <svg className="w-4 h-4 mr-1 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zM9 9h6v6H9V9z" />
                               </svg>
                               {project.duration}
                             </span>
-                            <span className="font-medium text-gray-900 flex items-center">
+                            <span className="font-medium text-gray-900 dark:text-white flex items-center transition-colors duration-300">
                               <svg className="w-4 h-4 mr-1 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
@@ -843,12 +847,12 @@ export default function RemoteProjectPage() {
                   ))}
                 </div>
               ) : (
-                <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-300">
                   <svg className="w-20 h-20 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <h3 className="text-xl font-medium text-gray-900 mb-3"> 일치하는 프로젝트가 없습니다 </h3>
-                  <p className="text-gray-600 mb-6"> 검색어나 필터 조건을 변경해 보세요.</p>
+                  <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-3 transition-colors duration-300"> 일치하는 프로젝트가 없습니다 </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6 transition-colors duration-300"> 검색어나 필터 조건을 변경해 보세요.</p>
                   <button
                     onClick={() => {
                       setSelectedSkills([]);
@@ -872,7 +876,7 @@ export default function RemoteProjectPage() {
               <div className="flex justify-center mt-12">
                 <nav className="flex items-center space-x-3">
                   <button
-                    className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-indigo-300 hover:text-indigo-600"
+                    className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-indigo-300 hover:text-indigo-600"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                   >
@@ -901,7 +905,7 @@ export default function RemoteProjectPage() {
                           onClick={() => handlePageChange(pageNumber)}
                           className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${currentPage === pageNumber
                             ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
-                            : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 hover:border-indigo-300 hover:text-indigo-600'
+                            : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:border-indigo-300 hover:text-indigo-600'
                           }`}
                         >
                           {pageNumber}
@@ -911,7 +915,7 @@ export default function RemoteProjectPage() {
                   </div>
 
                   <button
-                    className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-indigo-300 hover:text-indigo-600"
+                    className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-indigo-300 hover:text-indigo-600"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                   >
@@ -928,7 +932,7 @@ export default function RemoteProjectPage() {
       </div>
 
       {/* 재택 프로젝트 정보 */}
-      <div className="bg-gradient-to-b from-gray-50 to-white py-24 relative overflow-hidden">
+      <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 py-24 relative overflow-hidden transition-colors duration-300">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-300 rounded-full filter blur-3xl opacity-20 -z-10"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-300 rounded-full filter blur-3xl opacity-20 -z-10"></div>
@@ -936,11 +940,11 @@ export default function RemoteProjectPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             <div>
-              <h2 className="text-3xl font-bold mb-8 text-gray-900 flex items-center">
+              <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white flex items-center transition-colors duration-300">
                 <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 프로젝트란? </span>
                 <div className="ml-4 h-1 w-24 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"></div>
               </h2>
-              <div className="space-y-6 text-gray-600">
+              <div className="space-y-6 text-gray-600 dark:text-gray-300 transition-colors duration-300">
                 <p className="text-lg leading-relaxed">
                   <span className="font-medium text-indigo-600"> 재택 프로젝트 </span>는 장소에 구애받지 않고 온라인으로 진행하는 프로젝트입니다. AI 개발, 웹/앱 개발, 블록체인, IoT 등 다양한 IT 분야의 전문 프로젝트를 재택근무로 수행할 수 있습니다.
                 </p>
@@ -956,7 +960,7 @@ export default function RemoteProjectPage() {
                   <li className="flex items-start">
                     <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
                       <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <span> 월 평균 3,000만원 ~ 8,000만원 고수익 </span>
@@ -964,7 +968,7 @@ export default function RemoteProjectPage() {
                   <li className="flex items-start">
                     <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
                       <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <span> Slack, Zoom, Git 등 협업 도구 활용 </span>
@@ -972,7 +976,7 @@ export default function RemoteProjectPage() {
                   <li className="flex items-start">
                     <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
                       <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <span> 주간 진행상황 보고 및 정기 미팅 </span>
@@ -980,7 +984,7 @@ export default function RemoteProjectPage() {
                   <li className="flex items-start">
                     <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
                       <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <span> 대기업부터 스타트업까지 다양한 클라이언트 </span>
@@ -992,9 +996,9 @@ export default function RemoteProjectPage() {
               </div>
             </div>
 
-            <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 relative overflow-hidden transition-colors duration-300">
               <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-b from-indigo-100 to-purple-100 rounded-bl-full opacity-50 -z-10"></div>
-              <h3 className="text-2xl font-bold mb-8 text-gray-900 pb-4 border-b flex items-center">
+              <h3 className="text-2xl font-bold mb-8 text-gray-900 dark:text-white pb-4 border-b border-gray-200 dark:border-gray-600 flex items-center transition-colors duration-300">
                 <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 프로젝트 시작하기 </span>
               </h3>
               <div className="space-y-10">
@@ -1003,8 +1007,8 @@ export default function RemoteProjectPage() {
                     <span className="text-indigo-600 font-bold text-2xl"> 1 </span>
                   </div>
                   <div className="ml-6">
-                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 프로젝트 탐색 </h4>
-                    <p className="text-gray-600 leading-relaxed"> AI, 블록체인, IoT 등 내 전문 분야의 재택 프로젝트를 검색하고 상세 정보를 확인합니다.</p>
+                    <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-2 transition-colors duration-300"> 프로젝트 탐색 </h4>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300"> AI, 블록체인, IoT 등 내 전문 분야의 재택 프로젝트를 검색하고 상세 정보를 확인합니다.</p>
                   </div>
                 </div>
 
@@ -1013,8 +1017,8 @@ export default function RemoteProjectPage() {
                     <span className="text-indigo-600 font-bold text-2xl"> 2 </span>
                   </div>
                   <div className="ml-6">
-                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 포트폴리오 제출 </h4>
-                    <p className="text-gray-600 leading-relaxed"> 관련 경험과 포트폴리오를 포함한 제안서를 작성하여 클라이언트에게 지원합니다.</p>
+                    <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-2 transition-colors duration-300"> 포트폴리오 제출 </h4>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300"> 관련 경험과 포트폴리오를 포함한 제안서를 작성하여 클라이언트에게 지원합니다.</p>
                   </div>
                 </div>
 
@@ -1023,8 +1027,8 @@ export default function RemoteProjectPage() {
                     <span className="text-indigo-600 font-bold text-2xl"> 3 </span>
                   </div>
                   <div className="ml-6">
-                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 화상 면접 및 계약 </h4>
-                    <p className="text-gray-600 leading-relaxed"> 온라인 면접을 통해 프로젝트 세부사항을 논의하고 안전한 계약을 체결합니다.</p>
+                    <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-2 transition-colors duration-300"> 화상 면접 및 계약 </h4>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300"> 온라인 면접을 통해 프로젝트 세부사항을 논의하고 안전한 계약을 체결합니다.</p>
                   </div>
                 </div>
 
@@ -1033,8 +1037,8 @@ export default function RemoteProjectPage() {
                     <span className="text-indigo-600 font-bold text-2xl"> 4 </span>
                   </div>
                   <div className="ml-6">
-                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 원격 개발 및 납품 </h4>
-                    <p className="text-gray-600 leading-relaxed"> 정해진 일정에 따라 원격으로 개발하고, 정기 보고를 통해 프로젝트를 완성합니다.</p>
+                    <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-2 transition-colors duration-300"> 원격 개발 및 납품 </h4>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300"> 정해진 일정에 따라 원격으로 개발하고, 정기 보고를 통해 프로젝트를 완성합니다.</p>
                   </div>
                 </div>
               </div>
@@ -1048,7 +1052,7 @@ export default function RemoteProjectPage() {
                 </Link>
                 <Link
                   href="/jobs"
-                  className="block w-full bg-gray-100 hover:bg-gray-200 text-gray-800 text-center py-4 rounded-xl font-medium transition-all border border-gray-200 hover:border-gray-300"
+                  className="block w-full bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 text-gray-800 dark:text-white text-center py-4 rounded-xl font-medium transition-all border border-gray-200 dark:border-gray-500 hover:border-gray-300 dark:hover:border-gray-400"
                 >
                   모든 프로젝트 보기
                 </Link>
@@ -1059,69 +1063,69 @@ export default function RemoteProjectPage() {
       </div>
 
       {/* 장점 및 통계 */}
-      <div className="py-24 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
+      <div className="py-24 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden transition-colors duration-300">
         <div className="absolute inset-0">
           <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-indigo-200 rounded-full filter blur-3xl opacity-20 -z-10"></div>
           <div className="absolute bottom-1/3 right-1/4 w-72 h-72 bg-purple-200 rounded-full filter blur-3xl opacity-20 -z-10"></div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">
               <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 이랜서 재택 프로젝트의 장점 </span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed transition-colors duration-300">
               이랜서는 다양한 산업 분야의 재택 프로젝트를 제공하며, 믿을 수 있는 플랫폼을 통해 안전한 거래를 보장합니다.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
+            <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-600 group">
               <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors"> 유연한 근무 환경 </h3>
-              <p className="text-gray-600 leading-relaxed"> 장소와 시간에 구애받지 않고 자신에게 가장 효율적인 환경에서 업무를 수행할 수 있습니다.</p>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors"> 유연한 근무 환경 </h3>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300"> 장소와 시간에 구애받지 않고 자신에게 가장 효율적인 환경에서 업무를 수행할 수 있습니다.</p>
             </div>
 
-            <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
+            <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-600 group">
               <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors"> 안전한 계약과 대금 </h3>
-              <p className="text-gray-600 leading-relaxed"> 이랜서의 안전한 계약 시스템과 대금보호 서비스로 안심하고 프로젝트를 진행할 수 있습니다.</p>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors"> 안전한 계약과 대금 </h3>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300"> 이랜서의 안전한 계약 시스템과 대금보호 서비스로 안심하고 프로젝트를 진행할 수 있습니다.</p>
             </div>
 
-            <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
+            <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-600 group">
               <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors"> 검증된 고객사 </h3>
-              <p className="text-gray-600 leading-relaxed"> 이랜서에 등록된 모든 프로젝트와 고객사는 검증 과정을 거쳐 신뢰할 수 있는 파트너입니다.</p>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors"> 검증된 고객사 </h3>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300"> 이랜서에 등록된 모든 프로젝트와 고객사는 검증 과정을 거쳐 신뢰할 수 있는 파트너입니다.</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 bg-gradient-to-r from-indigo-50 to-purple-50 p-10 rounded-2xl shadow-lg">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 p-10 rounded-2xl shadow-lg transition-colors duration-300">
             <div className="text-center transform hover:scale-105 transition-transform duration-300">
               <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3"> 94 % </p>
-              <p className="text-gray-700 font-medium"> 프로젝트 완료율 </p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium transition-colors duration-300"> 프로젝트 완료율 </p>
             </div>
             <div className="text-center transform hover:scale-105 transition-transform duration-300">
               <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3"> 15,000 + </p>
-              <p className="text-gray-700 font-medium"> 등록된 프리랜서 </p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium transition-colors duration-300"> 등록된 프리랜서 </p>
             </div>
             <div className="text-center transform hover:scale-105 transition-transform duration-300">
               <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3"> 3,500 + </p>
-              <p className="text-gray-700 font-medium"> 완료된 원격 프로젝트 </p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium transition-colors duration-300"> 완료된 원격 프로젝트 </p>
             </div>
             <div className="text-center transform hover:scale-105 transition-transform duration-300">
               <p className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3"> 4.8 / 5 </p>
-              <p className="text-gray-700 font-medium"> 고객 만족도 </p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium transition-colors duration-300"> 고객 만족도 </p>
             </div>
           </div>
         </div>
