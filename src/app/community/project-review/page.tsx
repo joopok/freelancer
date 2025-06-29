@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
@@ -30,6 +30,9 @@ export default function ProjectReviewPage() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const { scrollY } = useScroll();
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const loader = useRef(null);
   
   // 스크롤 기반 애니메이션 값
   const headerOpacity = useTransform(scrollY, [0, 200], [1, 0.8]);
@@ -84,13 +87,14 @@ export default function ProjectReviewPage() {
           thumbnailImage: `/images/project-${(i % 6) + 1}.jpg`
         }));
         
-        setReviews(dummyReviews);
+        setReviews(prevReviews => [...prevReviews, ...dummyReviews]);
+        setHasMore(dummyReviews.length > 0);
         setLoading(false);
       }, 1000);
     };
     
     fetchData();
-  }, []);
+  }, [page]);
   
   // 필터링된 리뷰 목록
   const filteredReviews = reviews.filter(review => {
@@ -353,29 +357,22 @@ export default function ProjectReviewPage() {
         )}
         
         {/* 페이지네이션 */}
-        {!loading && filteredReviews.length > 0 && (
-          <div className="mt-12 flex justify-center">
-            <nav className="inline-flex rounded-md shadow">
-              <a href="#" className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <span className="sr-only">이전</span>
-                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </a>
-              <a href="#" className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">1</a>
-              <a href="#" className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-indigo-50 text-sm font-medium text-indigo-600 hover:bg-indigo-100">2</a>
-              <a href="#" className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</a>
-              <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
-              <a href="#" className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">8</a>
-              <a href="#" className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">9</a>
-              <a href="#" className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">10</a>
-              <a href="#" className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <span className="sr-only">다음</span>
-                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                </svg>
-              </a>
-            </nav>
+        {!loading && hasMore && (
+          <div ref={loader} className="flex justify-center mt-12">
+            <button
+              onClick={() => setPage(prevPage => prevPage + 1)}
+              className="inline-flex items-center px-6 py-3 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              더 많은 후기 보기
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
+        )}
+        {!loading && !hasMore && filteredReviews.length > 0 && (
+          <div className="text-center mt-12 text-gray-500 dark:text-gray-400">
+            모든 후기를 불러왔습니다.
           </div>
         )}
       </div>

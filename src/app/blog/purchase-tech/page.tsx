@@ -176,7 +176,7 @@ export default function PurchaseTechPage() {
           </p>
         </div>
               
-        <BlogMenuSearch />
+        <BlogMenuSearch currentPage="purchase-tech" />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 메인 콘텐츠 영역 */}

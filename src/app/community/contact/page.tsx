@@ -42,12 +42,10 @@ export default function BlogContactPage() {
   // 폼 제출 핸들러
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true, '문의 제출 중...');
     
     // 폼 제출 시뮬레이션 (실제로는 API 호출)
     setTimeout(() => {
       setFormSubmitted(true);
-      setLoading(false);
     }, 1000);
   };
   

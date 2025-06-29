@@ -29,42 +29,66 @@ export default function LoginPage() {
   const [showContent, setShowContent] = useState(false);
   useEffect(() => setShowContent(true), []);
 
-  // Adjust viewport height and scale
+  // Adjust viewport height and scale based on screen resolution
   useEffect(() => {
     const updateViewportDimensions = () => {
       const currentViewportHeight = window.innerHeight;
+      const currentViewportWidth = window.innerWidth;
       setViewportHeight(currentViewportHeight);
 
       if (containerRef.current) {
         const containerHeight = containerRef.current.scrollHeight;
-        const footerMargin = 40; // Increased bottom margin
-        const minPadding = 20; // Minimum padding
+        const headerFooterSpace = Math.min(120, currentViewportHeight * 0.15); // Dynamic spacing based on viewport
+        const availableHeight = currentViewportHeight - headerFooterSpace;
 
-        const availableHeight = currentViewportHeight - footerMargin;
-
+        // Calculate scale based on both height and width constraints
+        let newScale = 1;
+        
+        // Height-based scaling with better responsiveness
         if (containerHeight > availableHeight) {
-          const newScale = Math.max(0.85, availableHeight / containerHeight);
-          setScale(newScale);
-          const maxHeightValue = currentViewportHeight - (minPadding * 2);
-          document.documentElement.style.setProperty('--login-max-height', `${maxHeightValue}px`);
-        } else {
-          setScale(1);
-          document.documentElement.style.setProperty('--login-max-height', `${containerHeight}px`);
+          newScale = Math.max(0.7, availableHeight / containerHeight);
         }
+        
+        // Width-based scaling for different screen sizes
+        if (currentViewportWidth < 320) {
+          newScale = Math.min(newScale, 0.85);
+        } else if (currentViewportWidth < 380) {
+          newScale = Math.min(newScale, 0.9);
+        } else if (currentViewportWidth < 450) {
+          newScale = Math.min(newScale, 0.95);
+        }
+        
+        // Height-based scaling for different orientations
+        if (currentViewportHeight < 400) {
+          newScale = Math.max(0.65, Math.min(newScale, 0.8));
+        } else if (currentViewportHeight < 500) {
+          newScale = Math.max(0.7, Math.min(newScale, 0.85));
+        } else if (currentViewportHeight < 600) {
+          newScale = Math.max(0.8, Math.min(newScale, 0.9));
+        }
+        
+        setScale(newScale);
       }
     };
 
-    const initialTimer = setTimeout(updateViewportDimensions, 50);
+    const initialTimer = setTimeout(updateViewportDimensions, 100);
     let resizeTimer: NodeJS.Timeout;
+    
     const handleResize = () => {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(updateViewportDimensions, 100);
+      resizeTimer = setTimeout(updateViewportDimensions, 150);
+    };
+
+    const handleOrientationChange = () => {
+      setTimeout(updateViewportDimensions, 300);
     };
 
     window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleOrientationChange);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleOrientationChange);
       clearTimeout(resizeTimer);
       clearTimeout(initialTimer);
     };
@@ -147,46 +171,50 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      {/* 기존 로그인 컨텐츠 */}
-      <div className="flex-1 flex flex-col justify-center">
+    <div 
+      className="w-full relative overflow-hidden flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300"
+      style={{ 
+        minHeight: '100vh',
+        height: `${viewportHeight}px` 
+      }}
+    >
+      {/* Background effect */}
+      <div className="flex-1 w-full relative overflow-hidden flex flex-col justify-center">
         {/* Background effect */}
-        <div className="h-screen w-full relative overflow-hidden flex flex-col justify-center">
-          {/* Background effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-blue-800 to-purple-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-            <div className="absolute w-full h-full opacity-10">
-              <div className="absolute top-0 left-0 w-full h-full">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full">
-                  <defs>
-                    <radialGradient id="radialGradient" cx="50%" cy="50%" r="70%" fx="50%" fy="50%">
-                      <stop offset="0%" stopColor="white" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="white" stopOpacity="0" />
-                    </radialGradient>
-                    <pattern id="pattern-circles" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse" patternContentUnits="userSpaceOnUse">
-                      <circle id="pattern-circle" cx="10" cy="10" r="1" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill="url(#radialGradient)" />
-                  <rect width="100%" height="100%" fill="url(#pattern-circles)" />
-                </svg>
-              </div>
-              <div className="absolute w-64 h-64 rounded-full bg-blue-500 opacity-10 top-10 left-10 animate-pulse-slow" />
-              <div className="absolute w-96 h-96 rounded-full bg-purple-500 opacity-10 bottom-10 right-20 animate-pulse-slow" />
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-blue-800 to-purple-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+          <div className="absolute w-full h-full opacity-10">
+            <div className="absolute top-0 left-0 w-full h-full">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full">
+                <defs>
+                  <radialGradient id="radialGradient" cx="50%" cy="50%" r="70%" fx="50%" fy="50%">
+                    <stop offset="0%" stopColor="white" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="white" stopOpacity="0" />
+                  </radialGradient>
+                  <pattern id="pattern-circles" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse" patternContentUnits="userSpaceOnUse">
+                    <circle id="pattern-circle" cx="10" cy="10" r="1" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#radialGradient)" />
+                <rect width="100%" height="100%" fill="url(#pattern-circles)" />
+              </svg>
             </div>
+            <div className="absolute w-64 h-64 rounded-full bg-blue-500 opacity-10 top-10 left-10 animate-pulse-slow" />
+            <div className="absolute w-96 h-96 rounded-full bg-purple-500 opacity-10 bottom-10 right-20 animate-pulse-slow" />
           </div>
+        </div>
 
-          {/* Login form */}
-          <div className="relative flex justify-center items-center px-4 sm:px-6 lg:px-8 z-10 py-2" style={{ overflow: 'hidden' }}>
-            <div
-              ref={containerRef}
-              className={`w-full max-w-md transition-all duration-1000 transform ${showContent ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
-              style={{
-                transform: `${showContent ? 'translateY(0)' : 'translateY(2rem)'} scale(${scale})`,
-                transformOrigin: 'center',
-                maxHeight: 'calc(100vh - 2rem)',
-                overflowY: 'auto'
-              }}
-            >
+        {/* Login form */}
+        <div className="relative flex justify-center items-center px-4 sm:px-6 lg:px-8 z-10 py-4 sm:py-6 lg:py-8">
+          <div
+            ref={containerRef}
+            className={`w-full max-w-md transition-all duration-1000 transform ${showContent ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
+            style={{
+              transform: `${showContent ? 'translateY(0)' : 'translateY(2rem)'} scale(${scale})`,
+              transformOrigin: 'center',
+              maxHeight: `${viewportHeight - 120}px`,
+              overflowY: 'auto'
+            }}
+          >
               <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-lg rounded-2xl shadow-2xl p-4 md:p-6 transition-all border border-white/20 dark:border-gray-600/30">
                 <div className="text-center mb-4 md:mb-6">
                   <h2 className="text-2xl md:text-3xl font-bold text-white dark:text-gray-100 mb-2">로그인</h2>
@@ -347,7 +375,6 @@ export default function LoginPage() {
                   </Link>
                 </div>
               </div>
-            </div>
           </div>
         </div>
 

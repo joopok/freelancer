@@ -28,6 +28,7 @@ export default function ProjectPage() {
   const [selectedBudget, setSelectedBudget] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState("전체");
+  const [sortBy, setSortBy] = useState<string>(''); // 정렬 기준 상태
 
   const itemsPerPage = 10;
   const tabs = ["전체", "웹개발", "앱개발", "시스템", "데이터", "AI/ML", "기타"];
@@ -200,9 +201,9 @@ export default function ProjectPage() {
     };
   }, []);
 
-  // 필터링된 프로젝트 계산
+  // 필터링 및 정렬된 프로젝트 계산
   const filteredProjects = useMemo(() => {
-    return projects.filter(project => {
+    let filtered = projects.filter(project => {
       // 검색어 필터링
       const matchesSearch = searchTerm === '' ||
         project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -213,10 +214,11 @@ export default function ProjectPage() {
       const matchesSkills = selectedSkills.length === 0 ||
         selectedSkills.every(skill => project.skills.includes(skill));
 
+      const projectDuration = parseInt(project.duration.replace(/[^0-9]/g, ''));
       const matchesDuration = selectedDuration === '' ||
-        (selectedDuration === '3' && parseInt(project.duration) <= 3) ||
-        (selectedDuration === '6' && parseInt(project.duration) <= 6) ||
-        (selectedDuration === '12' && parseInt(project.duration) <= 12);
+        (selectedDuration === '3' && projectDuration <= 3) ||
+        (selectedDuration === '6' && projectDuration <= 6) ||
+        (selectedDuration === '12' && projectDuration <= 12);
 
       const projectBudget = parseInt(project.budget.replace(/[^0-9]/g, ''));
       const matchesBudget = selectedBudget === '' ||
@@ -228,7 +230,33 @@ export default function ProjectPage() {
 
       return matchesSearch && matchesSkills && matchesDuration && matchesBudget;
     });
-  }, [projects, searchTerm, selectedSkills, selectedDuration, selectedBudget]);
+
+    // 정렬 적용
+    if (sortBy) {
+      filtered = filtered.sort((a, b) => {
+        switch (sortBy) {
+          case 'latest':
+            return parseInt(a.id) - parseInt(b.id); // 최신순 (ID 역순)
+          case 'budget':
+            const budgetA = parseInt(a.budget.replace(/[^0-9]/g, ''));
+            const budgetB = parseInt(b.budget.replace(/[^0-9]/g, ''));
+            return budgetB - budgetA; // 금액 높은순
+          case 'duration':
+            const durationA = parseInt(a.duration.replace(/[^0-9]/g, ''));
+            const durationB = parseInt(b.duration.replace(/[^0-9]/g, ''));
+            return durationB - durationA; // 기간 긴순
+          case 'deadline':
+            const deadlineA = parseInt(a.deadline.replace('D-', ''));
+            const deadlineB = parseInt(b.deadline.replace('D-', ''));
+            return deadlineA - deadlineB; // 마감일 임박순
+          default:
+            return 0;
+        }
+      });
+    }
+
+    return filtered;
+  }, [projects, searchTerm, selectedSkills, selectedDuration, selectedBudget, sortBy]);
 
   // 페이지네이션된 프로젝트 계산
   const paginatedProjects = useMemo(() => {
@@ -277,6 +305,7 @@ export default function ProjectPage() {
     setSelectedDuration('');
     setSelectedBudget('');
     setSearchTerm('');
+    setSortBy('');
     setCurrentPage(1);
   };
 
@@ -726,6 +755,31 @@ export default function ProjectPage() {
               </select>
             </div>
 
+            {/* 정렬 필터 */}
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                </svg>
+                정렬
+              </h4>
+              <select
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500 focus:border-blue-400 dark:focus:border-blue-500 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
+                value={sortBy}
+                onChange={(e) => {
+                  setSortBy(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="">기본 정렬</option>
+                <option value="latest">최신순</option>
+                <option value="budget">금액 높은순</option>
+                <option value="duration">기간 긴순</option>
+                <option value="deadline">마감일 임박순</option>
+              </select>
+            </div>
+
             {/* 필터 초기화 버튼 */}
             <button
               onClick={resetFilters}
@@ -749,20 +803,50 @@ export default function ProjectPage() {
                 <p className="text-gray-600 dark:text-gray-300"> 총 <span className="font-semibold text-blue-600 dark:text-blue-400">{filteredProjects.length}</span>개의 프로젝트가 있습니다</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <button className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all flex items-center gap-1 shadow-sm">
-                  <svg className="w-4 h-4 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <button 
+                  onClick={() => {
+                    setSortBy('latest');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm ${
+                    sortBy === 'latest' 
+                      ? 'bg-blue-500 text-white border-blue-500' 
+                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   최신순
                 </button>
-                <button className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all flex items-center gap-1 shadow-sm">
-                  <svg className="w-4 h-4 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <button 
+                  onClick={() => {
+                    setSortBy('deadline');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm ${
+                    sortBy === 'deadline' 
+                      ? 'bg-blue-500 text-white border-blue-500' 
+                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   마감임박순
                 </button>
-                <button className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all flex items-center gap-1 shadow-sm">
-                  <svg className="w-4 h-4 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <button 
+                  onClick={() => {
+                    setSortBy('budget');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm ${
+                    sortBy === 'budget' 
+                      ? 'bg-blue-500 text-white border-blue-500' 
+                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   금액순
@@ -773,7 +857,7 @@ export default function ProjectPage() {
             {/* 로딩 인디케이터 - 로컬 로딩만 사용하고 전역 로딩은 StateProvider에서 처리 */}
             {localLoading ? (
               <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 dark:border-blue-400"></div>
               </div>
             ) : (
               filteredProjects.length > 0 ? (

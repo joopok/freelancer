@@ -176,7 +176,7 @@ export default function DesignTechPage() {
           </p>
         </div>
               
-        <BlogMenuSearch />
+        <BlogMenuSearch currentPage="design-tech" />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 메인 콘텐츠 영역 */}

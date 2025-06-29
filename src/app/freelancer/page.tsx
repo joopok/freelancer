@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import ThemeToggle from '@/components/common/ThemeToggle';
 import MultiSearchInput from '@/components/common/MultiSearchInput';
 
 // 프리랜서 타입 정의
@@ -31,6 +29,7 @@ export default function FreelancerPage() {
   const [selectedType, setSelectedType] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState("전체");
+  const [sortBy, setSortBy] = useState<string>(''); // 정렬 기준 상태
 
   const itemsPerPage = 10;
   const tabs = ["전체","PM/PL","PMO", "개발자", "기획자", "퍼블리셔", "디자이너", "기타"];
@@ -93,9 +92,9 @@ const getNameByIndex = (index: number): string => {
     };
   }, []);
 
-  // 필터링된 프리랜서 계산
+  // 필터링 및 정렬된 프리랜서 계산
   const filteredFreelancers = useMemo(() => {
-    return freelancers.filter(freelancer => {
+    let filtered = freelancers.filter(freelancer => {
       // 다중 검색어 필터링 - 모든 검색어가 포함되어야 함 (AND 조건)
       const matchesSearch = searchTerms.length === 0 ||
         searchTerms.every(term => {
@@ -125,7 +124,25 @@ const getNameByIndex = (index: number): string => {
 
       return matchesSearch && matchesSkills && matchesExperience && matchesType && matchesTab;
     });
-  }, [freelancers, searchTerms, selectedSkills, selectedExperience, selectedType, activeTab]);
+
+    // 정렬 적용
+    if (sortBy) {
+      filtered = filtered.sort((a, b) => {
+        switch (sortBy) {
+          case 'rating':
+            return b.rating - a.rating; // 평점 높은순
+          case 'experience':
+            return parseInt(b.experience) - parseInt(a.experience); // 경력 높은순
+          case 'viewCount':
+            return b.viewCount - a.viewCount; // 조회수 많은순
+          default:
+            return 0;
+        }
+      });
+    }
+
+    return filtered;
+  }, [freelancers, searchTerms, selectedSkills, selectedExperience, selectedType, activeTab, sortBy]);
 
   // 페이지네이션된 프리랜서 계산
   const paginatedFreelancers = useMemo(() => {
@@ -174,6 +191,7 @@ const getNameByIndex = (index: number): string => {
     setSelectedExperience('');
     setSelectedType('');
     setSearchTerms([]);
+    setSortBy('');
     setCurrentPage(1);
     setActiveTab("전체");
   };
@@ -187,9 +205,9 @@ const getNameByIndex = (index: number): string => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 상단 배너 */}
-      <div className="bg-gradient-to-r from-blue-800 via-blue-700 to-blue-600 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
@@ -275,19 +293,19 @@ const getNameByIndex = (index: number): string => {
                   <svg className="w-5 h-5 mr-2 text-blue-300" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>검증된 전문가</span>
+                  <span className="text-white dark:text-slate-100">검증된 전문가</span>
                 </div>
                 <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 flex items-center">
                   <svg className="w-5 h-5 mr-2 text-blue-300" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                   </svg>
-                  <span>100+ 프리랜서</span>
+                  <span className="text-white dark:text-slate-100">100+ 프리랜서</span>
                 </div>
                 <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 flex items-center">
                   <svg className="w-5 h-5 mr-2 text-blue-300" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
-                  <span>다양한 기술 스택</span>
+                  <span className="text-white dark:text-slate-100">다양한 기술 스택</span>
                 </div>
               </div>
             </div>
@@ -441,7 +459,7 @@ const getNameByIndex = (index: number): string => {
       </div>
 
       {/* 탭 네비게이션 */}
-      <div className="border-b bg-white sticky top-0 md:top-0 bottom-0 z-50 shadow-sm">
+      <div className="border-b bg-white dark:bg-gray-800 sticky top-0 md:top-0 bottom-0 z-50 shadow-sm border-gray-200 dark:border-gray-700 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
           {/* 모바일에서는 스크롤 가능한 탭 */}
           <div className="block sm:hidden">
@@ -452,13 +470,13 @@ const getNameByIndex = (index: number): string => {
                   onClick={() => handleTabChange(tab)}
                   className={`flex-shrink-0 py-3 px-4 text-sm text-center relative whitespace-nowrap ${
                     activeTab === tab
-                      ? "text-blue-600 font-medium"
-                      : "text-gray-500 hover:text-blue-500"
+                      ? "text-blue-600 dark:text-blue-400 font-medium"
+                      : "text-gray-500 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400"
                   } transition-colors duration-300`}
                 >
                   {tab}
                   {activeTab === tab && (
-                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"></div>
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 dark:bg-blue-400"></div>
                   )}
                 </button>
               ))}
@@ -474,13 +492,13 @@ const getNameByIndex = (index: number): string => {
                   onClick={() => handleTabChange(tab)}
                   className={`py-3 md:py-4 px-2 lg:px-4 text-xs sm:text-sm lg:text-base text-center relative group ${
                     activeTab === tab
-                      ? "text-blue-600 font-medium"
-                      : "text-gray-500 hover:text-blue-500"
+                      ? "text-blue-600 dark:text-blue-400 font-medium"
+                      : "text-gray-500 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400"
                   } transition-colors duration-300`}
                 >
                   <span className="block truncate">{tab}</span>
                   {activeTab === tab && (
-                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"></div>
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 dark:bg-blue-400"></div>
                   )}
                 </button>
               ))}
@@ -493,9 +511,9 @@ const getNameByIndex = (index: number): string => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* 왼쪽 사이드바 - 필터 */}
-          <div className="lg:w-80 bg-white p-8 rounded-2xl shadow-md h-fit border border-gray-100 sticky top-8">
-            <h3 className="text-xl font-bold mb-8 text-gray-900 border-b pb-4 flex items-center">
-              <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <div className="lg:w-80 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-md h-fit border border-gray-100 dark:border-gray-700 sticky top-8 transition-colors duration-300">
+            <h3 className="text-xl font-bold mb-8 text-gray-900 dark:text-white border-b dark:border-gray-700 pb-4 flex items-center transition-colors duration-300">
+              <svg className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
               프리랜서 필터
@@ -503,8 +521,8 @@ const getNameByIndex = (index: number): string => {
 
             {/* 기술 스택 필터 */}
             <div className="mb-8">
-              <h4 className="font-medium text-gray-900 mb-4 flex items-center">
-                <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+                <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                 </svg>
                 기술 스택
@@ -516,7 +534,7 @@ const getNameByIndex = (index: number): string => {
                     onClick={() => toggleSkillFilter(skill)}
                     className={`text-xs px-3 py-1.5 rounded-full transition-all ${selectedSkills.includes(skill)
                       ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-sm'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+                      : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200'
                     }`}
                   >
                     {skill}
@@ -527,14 +545,14 @@ const getNameByIndex = (index: number): string => {
 
             {/* 경력 필터 */}
             <div className="mb-8">
-              <h4 className="font-medium text-gray-900 mb-4 flex items-center">
-                <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+                <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                 </svg>
                 경력
               </h4>
               <select
-                className="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
                 style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
                 value={selectedExperience}
                 onChange={handleExperienceChange}
@@ -549,14 +567,14 @@ const getNameByIndex = (index: number): string => {
 
             {/* 타입 필터 */}
             <div className="mb-8">
-              <h4 className="font-medium text-gray-900 mb-4 flex items-center">
-                <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+                <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 타입
               </h4>
               <select
-                className="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
                 style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
                 value={selectedType}
                 onChange={handleTypeChange}
@@ -568,10 +586,34 @@ const getNameByIndex = (index: number): string => {
               </select>
             </div>
 
+            {/* 정렬 필터 */}
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+                <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                </svg>
+                정렬
+              </h4>
+              <select
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
+                value={sortBy}
+                onChange={(e) => {
+                  setSortBy(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="">기본 정렬</option>
+                <option value="rating">평점 높은순</option>
+                <option value="experience">경력 높은순</option>
+                <option value="viewCount">조회수 많은순</option>
+              </select>
+            </div>
+
             {/* 필터 초기화 버튼 */}
             <button
               onClick={resetFilters}
-              className="w-full py-3 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-800 rounded-xl transition-all text-sm font-medium border border-gray-200 hover:shadow-sm flex items-center justify-center"
+              className="w-full py-3 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 text-gray-800 dark:text-gray-200 rounded-xl transition-all text-sm font-medium border border-gray-200 dark:border-gray-600 hover:shadow-sm flex items-center justify-center"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -584,39 +626,69 @@ const getNameByIndex = (index: number): string => {
           <div className="flex-1">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center transition-colors duration-300">
                   <span className="bg-gradient-to-r from-blue-600 to-blue-700 text-transparent bg-clip-text"> 프리랜서 </span>
-                  <span className="ml-2 text-sm font-normal bg-blue-100 text-blue-800 px-2 py-1 rounded-full"> NEW </span>
+                  <span className="ml-2 text-sm font-normal bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full"> NEW </span>
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300"> 총 <span className="font-semibold text-blue-600">{filteredFreelancers.length}</span>명의 프리랜서가 있습니다</p>
+                <p className="text-gray-600 dark:text-gray-300"> 총 <span className="font-semibold text-blue-600 dark:text-blue-400">{filteredFreelancers.length}</span>명의 프리랜서가 있습니다</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <button className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 transition-all flex items-center gap-1 shadow-sm">
-                  <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <button 
+                  onClick={() => {
+                    setSortBy('rating');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm ${
+                    sortBy === 'rating' 
+                      ? 'bg-blue-500 text-white border-blue-500' 
+                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-              평점 높은순
-            </button>
-                <button className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 transition-all flex items-center gap-1 shadow-sm">
-                  <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  평점 높은순
+                </button>
+                <button 
+                  onClick={() => {
+                    setSortBy('experience');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm ${
+                    sortBy === 'experience' 
+                      ? 'bg-blue-500 text-white border-blue-500' 
+                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-              경력 높은순
-            </button>
-                <button className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 transition-all flex items-center gap-1 shadow-sm">
-                  <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  경력 높은순
+                </button>
+                <button 
+                  onClick={() => {
+                    setSortBy('viewCount');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm ${
+                    sortBy === 'viewCount' 
+                      ? 'bg-blue-500 text-white border-blue-500' 
+                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                   조회수 많은순
-            </button>
+                </button>
               </div>
             </div>
 
             {/* 로딩 인디케이터 */}
             {localLoading ? (
           <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 dark:border-blue-400"></div>
           </div>
         ) : (
               filteredFreelancers.length > 0 ? (
@@ -624,7 +696,7 @@ const getNameByIndex = (index: number): string => {
                   {paginatedFreelancers.map((freelancer) => (
               <div
                 key={freelancer.id}
-                      className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group relative"
+                      className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden group relative"
               >
                       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-blue-700 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                 <div className="p-6">
@@ -634,8 +706,8 @@ const getNameByIndex = (index: number): string => {
                         {freelancer.name[0]}
                       </div>
                       <div className="ml-3">
-                              <h3 className="text-lg font-bold mb-1 text-gray-900 group-hover:text-blue-600 transition-colors">{freelancer.name}</h3>
-                        <div className="flex items-center text-sm text-gray-600">
+                              <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{freelancer.name}</h3>
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                           <span>{freelancer.experience}</span>
                           <span className="mx-2">•</span>
                           <span className="flex items-center">
@@ -647,12 +719,12 @@ const getNameByIndex = (index: number): string => {
                         </div>
                       </div>
                     </div>
-                          <span className="text-xs font-medium px-2 py-1 bg-blue-50 text-blue-600 rounded-full border border-blue-100">
+                          <span className="text-xs font-medium px-2 py-1 bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full border border-blue-100 dark:border-blue-800">
                       {freelancer.type}
                     </span>
                 </div>
                 
-                        <p className="text-gray-700 mb-4 text-sm line-clamp-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <p className="text-gray-700 dark:text-gray-300 mb-4 text-sm line-clamp-2 bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
                     {freelancer.description}
                   </p>
                 
@@ -661,22 +733,22 @@ const getNameByIndex = (index: number): string => {
                   {freelancer.skills.map((skill) => (
                     <span
                       key={skill}
-                                className="bg-blue-50 text-blue-600 text-xs px-3 py-1 rounded-full border border-blue-100"
+                                className="bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800"
                     >
                       {skill}
                     </span>
                   ))}
                     </div>
-                          <div className="flex justify-between text-sm bg-gray-50 p-4 rounded-xl border border-gray-100">
-                            <span className="text-gray-600 flex items-center">
-                              <svg className="w-4 h-4 mr-1 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <div className="flex justify-between text-sm bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
+                            <span className="text-gray-600 dark:text-gray-300 flex items-center">
+                              <svg className="w-4 h-4 mr-1 text-blue-400 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                               </svg>
                               조회 {freelancer.viewCount}회
                             </span>
-                            <span className="font-medium text-gray-900 flex items-center">
-                              <svg className="w-4 h-4 mr-1 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <span className="font-medium text-gray-900 dark:text-white flex items-center">
+                              <svg className="w-4 h-4 mr-1 text-blue-400 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                               </svg>
                               프로젝트 {freelancer.projectCount}건
@@ -686,7 +758,7 @@ const getNameByIndex = (index: number): string => {
                 
                     <Link
                       href={`/freelancer/${freelancer.id}`}
-                          className="block w-full text-center bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-700 font-medium py-3 rounded-xl transition-all mt-4 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-blue-700 group-hover:text-white border border-blue-100 group-hover:border-transparent"
+                          className="block w-full text-center bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/50 dark:to-blue-800/50 hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-800/50 dark:hover:to-blue-700/50 text-blue-700 dark:text-blue-300 font-medium py-3 rounded-xl transition-all mt-4 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-blue-700 group-hover:text-white border border-blue-100 dark:border-blue-800 group-hover:border-transparent"
                     >
                           상세보기
                     </Link>
@@ -695,15 +767,15 @@ const getNameByIndex = (index: number): string => {
             ))}
           </div>
               ) : (
-                <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
-                  <svg className="w-20 h-20 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-sm border border-gray-100 dark:border-gray-700">
+                  <svg className="w-20 h-20 mx-auto text-gray-300 dark:text-gray-600 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <h3 className="text-xl font-medium text-gray-900 mb-3"> 일치하는 프리랜서가 없습니다 </h3>
-                  <p className="text-gray-600 mb-6"> 검색어나 필터 조건을 변경해 보세요.</p>
+                  <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-3"> 일치하는 프리랜서가 없습니다 </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6"> 검색어나 필터 조건을 변경해 보세요.</p>
                   <button
                     onClick={resetFilters}
-                    className="px-6 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors inline-flex items-center"
+                    className="px-6 py-2 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors inline-flex items-center"
                   >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -719,7 +791,7 @@ const getNameByIndex = (index: number): string => {
         <div className="flex justify-center mt-12">
                 <nav className="flex items-center space-x-3">
               <button
-                    className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-blue-300 hover:text-blue-600"
+                    className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-blue-300 hover:text-blue-600 dark:hover:text-blue-400"
                     onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
@@ -748,7 +820,7 @@ const getNameByIndex = (index: number): string => {
                           onClick={() => handlePageChange(pageNumber)}
                           className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${currentPage === pageNumber
                             ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md'
-                            : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 hover:border-blue-300 hover:text-blue-600'
+                            : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:border-blue-300 hover:text-blue-600 dark:hover:text-blue-400'
                           }`}
                         >
                           {pageNumber}
@@ -758,7 +830,7 @@ const getNameByIndex = (index: number): string => {
                   </div>
 
               <button
-                    className="px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-blue-300 hover:text-blue-600"
+                    className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-blue-300 hover:text-blue-600 dark:hover:text-blue-400"
                     onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
               >
@@ -775,14 +847,14 @@ const getNameByIndex = (index: number): string => {
       </div>
 
       {/* 프리랜서 이용 안내 */}
-      <div className="bg-gray-100 py-16">
+      <div className="bg-gray-100 dark:bg-gray-800 py-16 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <h2 className="text-2xl font-bold mb-6 text-gray-900">프리랜서 소개</h2>
-              <div className="space-y-4 text-gray-600">
+              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">프리랜서 소개</h2>
+              <div className="space-y-4 text-gray-600 dark:text-gray-300">
                 <p>
-                  <span className="font-medium text-blue-600">프리랜서 매칭 서비스</span>는 검증된 IT 전문가와 프로젝트를 연결해주는 서비스입니다. 전문 심사를 통과한 개발자, 디자이너, 기획자들이 여러분의 프로젝트를 성공으로 이끌어 드립니다.
+                  <span className="font-medium text-blue-600 dark:text-blue-400">프리랜서 매칭 서비스</span>는 검증된 IT 전문가와 프로젝트를 연결해주는 서비스입니다. 전문 심사를 통과한 개발자, 디자이너, 기획자들이 여러분의 프로젝트를 성공으로 이끌어 드립니다.
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
                   <li>까다로운 포트폴리오 검수 및 실력 검증 시스템</li>
@@ -797,15 +869,15 @@ const getNameByIndex = (index: number): string => {
               </div>
             </div>
             
-            <div className="bg-white p-8 rounded-xl shadow-sm">
-              <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">프리랜서 이용 안내</h3>
+            <div className="bg-white dark:bg-gray-700 p-8 rounded-xl shadow-sm transition-colors duration-300">
+              <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white transition-colors duration-300">프리랜서 이용 안내</h3>
               <div className="space-y-6">
                 <div className="flex">
                   <div className="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="text-blue-600 font-bold text-lg">1</span>
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900 dark:text-white">전문가 프로필 확인</h4>
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white transition-colors duration-300">전문가 프로필 확인</h4>
                     <p className="text-gray-600 dark:text-gray-300">각 프리랜서의 경력, 포트폴리오, 평점을 꼼꼼히 확인하세요.</p>
                   </div>
                 </div>
@@ -815,7 +887,7 @@ const getNameByIndex = (index: number): string => {
                     <span className="text-blue-600 font-bold text-lg">2</span>
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900 dark:text-white">프로젝트 제안</h4>
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white transition-colors duration-300">프로젝트 제안</h4>
                     <p className="text-gray-600 dark:text-gray-300">마음에 드는 프리랜서에게 프로젝트를 제안하고 상세 내용을 협의하세요.</p>
                   </div>
                 </div>
@@ -825,7 +897,7 @@ const getNameByIndex = (index: number): string => {
                     <span className="text-blue-600 font-bold text-lg">3</span>
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900 dark:text-white">계약 체결</h4>
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white transition-colors duration-300">계약 체결</h4>
                     <p className="text-gray-600 dark:text-gray-300">표준 계약서를 통해 안전하게 계약을 체결하고 작업을 시작합니다.</p>
                   </div>
                 </div>
@@ -835,7 +907,7 @@ const getNameByIndex = (index: number): string => {
                     <span className="text-blue-600 font-bold text-lg">4</span>
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900 dark:text-white">작업 완료 및 결제</h4>
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white transition-colors duration-300">작업 완료 및 결제</h4>
                     <p className="text-gray-600 dark:text-gray-300">작업이 완료되면 검수 후 안전하게 대금을 지급합니다.</p>
                   </div>
                 </div>
@@ -844,7 +916,7 @@ const getNameByIndex = (index: number): string => {
               <div className="mt-8">
                 <Link
                   href="/project/register"
-                  className="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  className="block w-full bg-blue-600 dark:bg-blue-700 text-white text-center py-3 rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
                 >
                   프로젝트 등록하기
                 </Link>

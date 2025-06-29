@@ -32,6 +32,7 @@ export default function RemoteProjectPage() {
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState<number>(1);
   const projectsPerPage = 10;
+  const [sortBy, setSortBy] = useState<string>(''); // 정렬 기준 상태
 
   // 모든 기술 스택 목록
   const allSkills = [
@@ -201,9 +202,9 @@ export default function RemoteProjectPage() {
     };
   }, []); // 빈 의존성 배열로 컴포넌트 마운트 시 한 번만 실행
 
-  // 필터링된 프로젝트 계산
+  // 필터링 및 정렬된 프로젝트 계산
   const filteredProjects = useMemo(() => {
-    return projects.filter(project => {
+    let filtered = projects.filter(project => {
       const matchesSearch = searchTerm === '' ||
         project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -213,10 +214,11 @@ export default function RemoteProjectPage() {
       const matchesSkills = selectedSkills.length === 0 ||
         selectedSkills.every(skill => project.skills.includes(skill));
 
+      const projectDuration = parseInt(project.duration.replace(/[^0-9]/g, ''));
       const matchesDuration = selectedDuration === '' ||
-        (selectedDuration === '3' && parseInt(project.duration) <= 3) ||
-        (selectedDuration === '6' && parseInt(project.duration) <= 6) ||
-        (selectedDuration === '12' && parseInt(project.duration) <= 12);
+        (selectedDuration === '3' && projectDuration <= 3) ||
+        (selectedDuration === '6' && projectDuration <= 6) ||
+        (selectedDuration === '12' && projectDuration <= 12);
 
       const projectBudget = parseInt(project.budget.replace(/[^0-9]/g, ''));
       const matchesBudget = selectedBudget === '' ||
@@ -228,7 +230,33 @@ export default function RemoteProjectPage() {
 
       return matchesSearch && matchesSkills && matchesDuration && matchesBudget;
     });
-  }, [projects, searchTerm, selectedSkills, selectedDuration, selectedBudget]);
+
+    // 정렬 적용
+    if (sortBy) {
+      filtered = filtered.sort((a, b) => {
+        switch (sortBy) {
+          case 'latest':
+            return parseInt(a.id) - parseInt(b.id); // 최신순 (ID 역순)
+          case 'budget':
+            const budgetA = parseInt(a.budget.replace(/[^0-9]/g, ''));
+            const budgetB = parseInt(b.budget.replace(/[^0-9]/g, ''));
+            return budgetB - budgetA; // 금액 높은순
+          case 'duration':
+            const durationA = parseInt(a.duration.replace(/[^0-9]/g, ''));
+            const durationB = parseInt(b.duration.replace(/[^0-9]/g, ''));
+            return durationB - durationA; // 기간 긴순
+          case 'deadline':
+            const deadlineA = parseInt(a.deadline.replace('D-', ''));
+            const deadlineB = parseInt(b.deadline.replace('D-', ''));
+            return deadlineA - deadlineB; // 마감일 임박순
+          default:
+            return 0;
+        }
+      });
+    }
+
+    return filtered;
+  }, [projects, searchTerm, selectedSkills, selectedDuration, selectedBudget, sortBy]);
 
   // 페이지네이션된 프로젝트 계산
   const paginatedProjects = useMemo(() => {
@@ -277,13 +305,14 @@ export default function RemoteProjectPage() {
     setSelectedDuration('');
     setSelectedBudget('');
     setSearchTerm('');
+    setSortBy('');
     setCurrentPage(1);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 상단 배너 */}
-      <div className="bg-gradient-to-r from-indigo-800 via-purple-700 to-pink-600 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-r from-indigo-800 via-purple-700 to-pink-600 dark:from-gray-900 dark:via-purple-900 dark:to-black text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
@@ -347,7 +376,6 @@ export default function RemoteProjectPage() {
           </svg>
         </div>
 
-        
 
         {/* 배너 콘텐츠 */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative z-10">
@@ -367,15 +395,15 @@ export default function RemoteProjectPage() {
               </p>
 
               {/* 검색창 */}
-              <div className="bg-white/10 backdrop-blur-md p-2 flex items-center max-w-3xl rounded-2xl shadow-lg border border-white/20 hover:border-white/30 transition-all group">
+              <div className="bg-white/10 dark:bg-gray-800/50 backdrop-blur-md p-2 flex items-center max-w-3xl rounded-2xl shadow-lg border border-white/20 dark:border-gray-600/30 hover:border-white/30 dark:hover:border-gray-500/50 transition-all group">
                 <input
                   type="text"
                   placeholder="기술 스택, 프로젝트명, 회사명으로 검색..."
-                  className="flex-1 px-6 py-4 outline-none text-gray-800 text-lg bg-white rounded-xl shadow-inner"
+                  className="flex-1 px-6 py-4 outline-none text-gray-800 dark:text-white text-lg bg-white dark:bg-gray-700 rounded-xl shadow-inner dark:border-gray-600 dark:placeholder-gray-400"
                   value={searchTerm}
                   onChange={handleSearchChange}
                 />
-                <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all font-medium shadow-md ml-2 group-hover:shadow-lg transform group-hover:scale-[1.02] duration-200">
+                <button className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 text-white px-8 py-4 rounded-xl hover:from-indigo-700 hover:to-purple-700 dark:hover:from-indigo-600 dark:hover:to-purple-600 transition-all font-medium shadow-md ml-2 group-hover:shadow-lg transform group-hover:scale-[1.02] duration-200">
                   검색
                 </button>
               </div>
@@ -467,7 +495,7 @@ export default function RemoteProjectPage() {
                 </div>
               </div>
               
-              <div className="relative z-10 bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+              <div className="relative z-10 bg-white/10 dark:bg-gray-800/50 backdrop-blur-md p-6 rounded-2xl border border-white/20 dark:border-gray-600/30 shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center">
                     <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
@@ -475,7 +503,7 @@ export default function RemoteProjectPage() {
                     </div>
                     <div className="ml-3">
                       <h3 className="text-lg font-bold text-white">
-                        원격 프로젝트
+                        재택 프로젝트
                         <div className="relative inline-block">
                           <span className="absolute -right-5 top-0 w-6 h-6 bg-white rounded-full opacity-70 animate-pulse-scale"></span>
                         </div>
@@ -492,47 +520,47 @@ export default function RemoteProjectPage() {
                 </div>
                 
                 <div className="space-y-3 mt-4">
-                  <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl flex items-center group hover:bg-white/20 transition-all cursor-pointer">
-                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 mr-3 group-hover:scale-110 transition-transform">
+                  <div className="bg-white/10 dark:bg-gray-700/50 backdrop-blur-md p-3 rounded-xl flex items-center group hover:bg-white/20 dark:hover:bg-gray-600/50 transition-all cursor-pointer">
+                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/50 rounded-full flex items-center justify-center text-purple-600 dark:text-purple-300 mr-3 group-hover:scale-110 transition-transform">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                       </svg>
                     </div>
                     <div>
                       <span className="text-white text-sm">AI 추천 시스템</span>
-                      <div className="text-xs text-indigo-200 opacity-0 group-hover:opacity-100 transition-opacity">월 평균 4,500만원</div>
+                      <div className="text-xs text-indigo-200 dark:text-indigo-300 opacity-0 group-hover:opacity-100 transition-opacity">월 평균 4,500만원</div>
                     </div>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl flex items-center group hover:bg-white/20 transition-all cursor-pointer">
-                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 mr-3 group-hover:scale-110 transition-transform">
+                  <div className="bg-white/10 dark:bg-gray-700/50 backdrop-blur-md p-3 rounded-xl flex items-center group hover:bg-white/20 dark:hover:bg-gray-600/50 transition-all cursor-pointer">
+                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/50 rounded-full flex items-center justify-center text-purple-600 dark:text-purple-300 mr-3 group-hover:scale-110 transition-transform">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
                     </div>
                     <div>
                       <span className="text-white text-sm">블록체인 결제</span>
-                      <div className="text-xs text-indigo-200 opacity-0 group-hover:opacity-100 transition-opacity">월 평균 7,000만원</div>
+                      <div className="text-xs text-indigo-200 dark:text-indigo-300 opacity-0 group-hover:opacity-100 transition-opacity">월 평균 7,000만원</div>
                     </div>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl flex items-center group hover:bg-white/20 transition-all cursor-pointer">
-                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 mr-3 group-hover:scale-110 transition-transform">
+                  <div className="bg-white/10 dark:bg-gray-700/50 backdrop-blur-md p-3 rounded-xl flex items-center group hover:bg-white/20 dark:hover:bg-gray-600/50 transition-all cursor-pointer">
+                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/50 rounded-full flex items-center justify-center text-purple-600 dark:text-purple-300 mr-3 group-hover:scale-110 transition-transform">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clipRule="evenodd" />
                       </svg>
                     </div>
                     <div>
                       <span className="text-white text-sm">IoT 모니터링</span>
-                      <div className="text-xs text-indigo-200 opacity-0 group-hover:opacity-100 transition-opacity">월 평균 4,000만원</div>
+                      <div className="text-xs text-indigo-200 dark:text-indigo-300 opacity-0 group-hover:opacity-100 transition-opacity">월 평균 4,000만원</div>
                     </div>
                   </div>
                 </div>
                 
                 <div className="mt-6 relative">
-                  <button className="w-full bg-white/10 backdrop-blur-md border border-white/20 text-white py-3 rounded-xl hover:bg-white/20 transition-colors text-sm font-medium relative z-10 group">
+                  <button className="w-full bg-white/10 dark:bg-gray-700/50 backdrop-blur-md border border-white/20 dark:border-gray-600/30 text-white py-3 rounded-xl hover:bg-white/20 dark:hover:bg-gray-600/50 transition-colors text-sm font-medium relative z-10 group">
                     <span className="group-hover:scale-105 transition-transform inline-block">프로젝트 더보기</span>
                   </button>
                   {/* 강조 효과 */}
-                  <div className="absolute -bottom-1 -right-1 w-full h-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl -z-0 opacity-50 animate-pulse"></div>
+                  <div className="absolute -bottom-1 -right-1 w-full h-full bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 rounded-xl -z-0 opacity-50 animate-pulse"></div>
                 </div>
                 
                 {/* 프로젝트 통계 뱃지 */}
@@ -728,6 +756,31 @@ export default function RemoteProjectPage() {
               </select>
             </div>
 
+            {/* 정렬 필터 */}
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+                <svg className="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                </svg>
+                정렬
+              </h4>
+              <select
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
+                value={sortBy}
+                onChange={(e) => {
+                  setSortBy(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="">기본 정렬</option>
+                <option value="latest">최신순</option>
+                <option value="budget">금액 높은순</option>
+                <option value="duration">기간 긴순</option>
+                <option value="deadline">마감일 임박순</option>
+              </select>
+            </div>
+
             {/* 필터 초기화 버튼 */}
             <button
               onClick={resetFilters}
@@ -741,8 +794,65 @@ export default function RemoteProjectPage() {
           </div>
 
           {/* 오른쪽 메인 콘텐츠 - 프로젝트 목록 */}
-          <div className="flex-1">
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
+          <div className="flex-1 relative">
+            {/* 빛을 내는 배경 효과 */}
+            <div className="absolute inset-0 opacity-30 dark:opacity-20 pointer-events-none">
+              <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-indigo-200 to-purple-200 dark:from-indigo-800 dark:to-purple-800 rounded-full filter blur-3xl opacity-40"></div>
+              <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-gradient-to-br from-purple-200 to-pink-200 dark:from-purple-800 dark:to-pink-800 rounded-full filter blur-3xl opacity-30"></div>
+              
+              {/* 부유하는 빛나는 요소들 */}
+              <div className="absolute top-20 right-20 animate-float opacity-60">
+                <div className="w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 rounded-2xl shadow-lg rotate-12 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              
+              <div className="absolute top-1/2 right-32 animate-bounce-slow opacity-50">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 dark:from-purple-600 dark:to-pink-700 rounded-full shadow-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                  </svg>
+                </div>
+              </div>
+              
+              <div className="absolute bottom-40 right-16 animate-pulse opacity-40">
+                <div className="w-20 h-20 bg-gradient-to-br from-indigo-300 to-blue-400 dark:from-indigo-700 dark:to-blue-800 rounded-xl shadow-lg -rotate-12 flex items-center justify-center">
+                  <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              
+              {/* 빛나는 선 효과 */}
+              <div className="absolute top-1/3 left-1/2 w-96 h-96 opacity-20">
+                <svg width="100%" height="100%" viewBox="0 0 400 400">
+                  <defs>
+                    <linearGradient id="beam-gradient-remote" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.6" />
+                      <stop offset="50%" stopColor="#a855f7" stopOpacity="0.8" />
+                      <stop offset="100%" stopColor="#ec4899" stopOpacity="0.6" />
+                    </linearGradient>
+                    <filter id="glow-remote" x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur stdDeviation="3" result="blur" />
+                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                  </defs>
+                  
+                  <g filter="url(#glow-remote)">
+                    <path d="M 50,200 Q 200,50 350,200" stroke="url(#beam-gradient-remote)" strokeWidth="2" fill="none" opacity="0.6">
+                      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="4s" repeatCount="indefinite" />
+                    </path>
+                    <path d="M 200,50 Q 300,200 200,350" stroke="url(#beam-gradient-remote)" strokeWidth="2" fill="none" opacity="0.4">
+                      <animate attributeName="opacity" values="0.2;0.6;0.2" dur="5s" repeatCount="indefinite" />
+                    </path>
+                  </g>
+                </svg>
+              </div>
+            </div>
+            
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4 relative z-10">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center transition-colors duration-300">
                   <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 프로젝트 </span>
@@ -751,20 +861,50 @@ export default function RemoteProjectPage() {
                 <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300"> 총 <span className="font-semibold text-indigo-600 dark:text-indigo-400">{filteredProjects.length}</span>개의 프로젝트가 있습니다</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <button className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all duration-300 flex items-center gap-1 shadow-sm">
-                  <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <button 
+                  onClick={() => {
+                    setSortBy('latest');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 border rounded-xl transition-all duration-300 flex items-center gap-1 shadow-sm ${
+                    sortBy === 'latest' 
+                      ? 'bg-indigo-500 text-white border-indigo-500' 
+                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   최신순
                 </button>
-                <button className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all duration-300 flex items-center gap-1 shadow-sm">
-                  <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <button 
+                  onClick={() => {
+                    setSortBy('deadline');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 border rounded-xl transition-all duration-300 flex items-center gap-1 shadow-sm ${
+                    sortBy === 'deadline' 
+                      ? 'bg-indigo-500 text-white border-indigo-500' 
+                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   마감임박순
                 </button>
-                <button className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all duration-300 flex items-center gap-1 shadow-sm">
-                  <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <button 
+                  onClick={() => {
+                    setSortBy('budget');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 border rounded-xl transition-all duration-300 flex items-center gap-1 shadow-sm ${
+                    sortBy === 'budget' 
+                      ? 'bg-indigo-500 text-white border-indigo-500' 
+                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   금액순
@@ -775,7 +915,7 @@ export default function RemoteProjectPage() {
             {/* 로딩 인디케이터 - 로컬 로딩만 사용하고 전역 로딩은 StateProvider에서 처리 */}
             {localLoading ? (
               <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 dark:border-blue-400"></div>
               </div>
             ) : (
               filteredProjects.length > 0 ? (
@@ -785,50 +925,50 @@ export default function RemoteProjectPage() {
                       key={project.id}
                       className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden group relative"
                     >
-                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 to-purple-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-                      <div className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                          <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-indigo-500 dark:to-purple-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                    <div className="p-6">
+                                              <div className="flex justify-between items-start mb-4">
+                          <span className="bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-400 dark:to-red-400 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">
                             {project.deadline}
                           </span>
-                          <span className="text-sm font-medium text-violet-700 bg-violet-50 px-3 py-1 rounded-full border border-violet-100">
+                          <span className="text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-700">
                             {project.type}
                           </span>
                         </div>
-                        <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors">
+                        <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                           {project.title}
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-300 mb-3 flex items-center transition-colors duration-300">
+                        <p className="text-gray-600 dark:text-gray-300 mb-3 flex items-center">
                           <svg className="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                           </svg>
                           {project.company}
                         </p>
 
-                        {project.description && (
-                          <p className="text-gray-700 dark:text-gray-300 mb-4 text-sm line-clamp-2 bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600 transition-colors duration-300"> {project.description} </p>
+                                                                    {project.description && (
+                          <p className="text-gray-700 dark:text-gray-300 mb-4 text-sm line-clamp-2 bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600">{project.description}</p>
                         )}
 
-                        <div className="mb-4">
+                                                  <div className="mb-4">
                           <div className="flex flex-wrap gap-2 mb-4">
                             {project.skills.map((skill) => (
                               <span
                                 key={skill}
-                                className="bg-indigo-50 text-indigo-600 text-xs px-3 py-1 rounded-full border border-indigo-100"
+                                className="bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 text-xs px-3 py-1 rounded-full border border-blue-100 dark:border-blue-700"
                               >
                                 {skill}
                               </span>
                             ))}
                           </div>
-                          <div className="flex justify-between text-sm bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600 transition-colors duration-300">
-                            <span className="text-gray-600 dark:text-gray-300 flex items-center transition-colors duration-300">
-                              <svg className="w-4 h-4 mr-1 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <div className="flex justify-between text-sm bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
+                            <span className="text-gray-600 dark:text-gray-300 flex items-center">
+                              <svg className="w-4 h-4 mr-1 text-blue-400 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zM9 9h6v6H9V9z" />
                               </svg>
                               {project.duration}
                             </span>
-                            <span className="font-medium text-gray-900 dark:text-white flex items-center transition-colors duration-300">
-                              <svg className="w-4 h-4 mr-1 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <span className="font-medium text-gray-900 dark:text-white flex items-center">
+                              <svg className="w-4 h-4 mr-1 text-blue-400 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                               {project.budget}
@@ -836,18 +976,18 @@ export default function RemoteProjectPage() {
                           </div>
                         </div>
 
-                        <Link
+                                                <Link
                           href={`/project/${project.id}`}
-                          className="block w-full text-center bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 text-indigo-700 font-medium py-3 rounded-xl transition-all mt-4 group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:text-white border border-indigo-100 group-hover:border-transparent"
+                          className="block w-full text-center bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/50 dark:to-indigo-900/50 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-800/50 dark:hover:to-indigo-800/50 text-blue-700 dark:text-blue-300 font-medium py-3 rounded-xl transition-all mt-4 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-indigo-600 dark:group-hover:from-indigo-500 dark:group-hover:to-purple-500 group-hover:text-white border border-blue-100 dark:border-blue-700 group-hover:border-transparent"
                         >
-                          상세보기
+                      상세보기
                         </Link>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-300">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-300 relative z-10">
                   <svg className="w-20 h-20 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -873,7 +1013,7 @@ export default function RemoteProjectPage() {
 
             {/* 페이지네이션 */}
             {filteredProjects.length > 0 && (
-              <div className="flex justify-center mt-12">
+              <div className="flex justify-center mt-12 relative z-10">
                 <nav className="flex items-center space-x-3">
                   <button
                     className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-indigo-300 hover:text-indigo-600"
@@ -1071,10 +1211,10 @@ export default function RemoteProjectPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">
-              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 이랜서 재택 프로젝트의 장점 </span>
+              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 잡코리아 빌보드 재택 프로젝트의 장점 </span>
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed transition-colors duration-300">
-              이랜서는 다양한 산업 분야의 재택 프로젝트를 제공하며, 믿을 수 있는 플랫폼을 통해 안전한 거래를 보장합니다.
+             잡코리아 빌보드는 다양한 산업 분야의 재택 프로젝트를 제공하며, 믿을 수 있는 플랫폼을 통해 안전한 거래를 보장합니다.
             </p>
           </div>
 
@@ -1096,7 +1236,7 @@ export default function RemoteProjectPage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors"> 안전한 계약과 대금 </h3>
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300"> 이랜서의 안전한 계약 시스템과 대금보호 서비스로 안심하고 프로젝트를 진행할 수 있습니다.</p>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300">잡코리아 빌보드의 안전한 계약 시스템과 대금보호 서비스로 안심하고 프로젝트를 진행할 수 있습니다.</p>
             </div>
 
             <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-600 group">
@@ -1106,7 +1246,7 @@ export default function RemoteProjectPage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors"> 검증된 고객사 </h3>
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300"> 이랜서에 등록된 모든 프로젝트와 고객사는 검증 과정을 거쳐 신뢰할 수 있는 파트너입니다.</p>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-300">잡코리아 빌보드에 등록된 모든 프로젝트와 고객사는 검증 과정을 거쳐 신뢰할 수 있는 파트너입니다.</p>
             </div>
           </div>
 

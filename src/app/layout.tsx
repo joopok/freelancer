@@ -19,6 +19,20 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const theme = JSON.parse(localStorage.getItem('theme-storage'));
+                  if (theme.state.isDarkMode) {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
         <LoadingProvider>
           <div className="min-h-screen flex flex-col">
             <Header />

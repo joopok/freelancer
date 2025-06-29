@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -26,6 +26,9 @@ export default function CommunityFreePage() {
   const [activeFilter, setActiveFilter] = useState('trending');
   const [searchTerm, setSearchTerm] = useState('');
   const [scrollY, setScrollY] = useState(0);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const loader = useRef(null);
   
   // 필터 옵션
   const filters = [
@@ -59,111 +62,71 @@ export default function CommunityFreePage() {
       
       setTimeout(() => {
         const dummyPosts: Post[] = [
-          {
-            id: 1,
-            title: "재택근무 4년차인데 사무실 출근으로 바뀌면 어떻게 적응하나요?",
-            content: "재택근무만 4년째 하다가 다음 달부터 주 3일 출근으로 바뀐다는 공지를 받았습니다. 어떻게 적응해야 할지 조언 부탁드려요.",
-            author: "재택러",
-            profileImage: "https://randomuser.me/api/portraits/men/32.jpg",
-            date: "2023-11-28",
-            views: 1854,
-            likes: 142,
-            comments: 78,
-            tags: ["재택근무", "사무실출근", "직장생활"]
-          },
-          {
-            id: 2,
-            title: "오늘 퇴사했습니다! 자유인이 된 기념으로 치맥 먹으러 갑니다",
-            content: "3년간 다니던 회사를 오늘부로 퇴사했습니다. 그동안 스트레스 너무 많았는데 이제 좀 쉬다가 새로운 도전을 해볼까 합니다.",
-            author: "자유인",
-            profileImage: "https://randomuser.me/api/portraits/women/28.jpg",
-            date: "2023-11-27",
-            views: 2156,
-            likes: 184,
-            comments: 92,
-            tags: ["퇴사", "자유", "치맥"]
-          },
-          {
-            id: 3,
-            title: "직장 내 점심 메뉴 정하기 전쟁... 어떻게 해결하시나요?",
-            content: "매일 점심 메뉴 정하는데 전쟁입니다. 누구는 한식, 누구는 일식... 어떻게 원만하게 해결하시나요?",
-            author: "점심고민",
-            profileImage: "https://randomuser.me/api/portraits/men/45.jpg",
-            date: "2023-11-25",
-            views: 1654,
-            likes: 112,
-            comments: 96,
-            tags: ["직장생활", "점심메뉴", "회사문화"]
-          },
-          {
-            id: 4,
-            title: "월급 3,000만원 vs 행복한 직장... 어떤 걸 선택하시겠어요?",
-            content: "연봉은 3천만원이지만 스트레스 많은 회사 vs 연봉은 2천만원이지만 행복한 회사, 여러분의 선택은?",
-            author: "선택장애",
-            profileImage: "https://randomuser.me/api/portraits/women/22.jpg",
-            date: "2023-11-23",
-            views: 3267,
-            likes: 245,
-            comments: 125,
-            tags: ["연봉", "직장선택", "행복"]
-          },
-          {
-            id: 5,
-            title: "오늘 입사한 신입인데 실수했어요... 어떡하죠?",
-            content: "오늘 첫 출근했는데 사장님 커피를 쏟아버렸어요. 어떻게 해야할까요? 퇴사각?",
-            author: "초보직장인",
-            profileImage: "https://randomuser.me/api/portraits/women/54.jpg",
-            date: "2023-11-22",
-            views: 2842,
-            likes: 156,
-            comments: 84,
-            tags: ["신입", "직장생활", "실수"]
-          },
-          {
-            id: 6,
-            title: "요즘 퇴근 후에 뭐하세요? 취미 추천 부탁드립니다",
-            content: "퇴근 후에 시간을 어떻게 보내시나요? 요즘 퇴근하고 그냥 누워만 있는데 의미있는 취미를 찾고 싶어요.",
-            author: "취미부자",
-            profileImage: "https://randomuser.me/api/portraits/men/67.jpg",
-            date: "2023-11-20",
-            views: 1432,
-            likes: 98,
-            comments: 72,
-            tags: ["취미", "퇴근후", "여가생활"]
-          },
-          {
-            id: 7,
-            title: "재택근무할 때 집중력 높이는 팁 공유해요!",
-            content: "재택근무 3년차입니다. 집중력 높이는 팁 몇 가지 공유드려요. 1. 아침에 일어나서 출근 룩으로 갈아입기 2. 30분 단위로 짧은 휴식 취하기...",
-            author: "집중력짱",
-            profileImage: "https://randomuser.me/api/portraits/women/42.jpg",
-            date: "2023-11-18",
-            views: 1875,
-            likes: 134,
-            comments: 53,
-            tags: ["재택근무", "집중력", "팁"]
-          },
-          {
-            id: 8,
-            title: "직장인 점심값 평균이 얼마까지 올라갔나요?",
-            content: "요즘 점심 먹으러 나가면 만원은 기본이더라구요. 다들 점심 값으로 얼마 정도 쓰시나요?",
-            author: "알뜰족",
-            profileImage: "https://randomuser.me/api/portraits/men/22.jpg",
-            date: "2023-11-16",
-            views: 2345,
-            likes: 87,
-            comments: 145,
-            tags: ["점심값", "물가", "직장인"]
-          }
+          { id: 1, title: "재택근무 4년차인데 사무실 출근으로 바뀌면 어떻게 적응하나요?", content: "...", author: "재택러", profileImage: "https://randomuser.me/api/portraits/men/32.jpg", date: "2023-11-28", views: 1854, likes: 142, comments: 78, tags: ["재택근무", "사무실출근", "직장생활"] },
+          { id: 2, title: "오늘 퇴사했습니다! 자유인이 된 기념으로 치맥 먹으러 갑니다", content: "...", author: "자유인", profileImage: "https://randomuser.me/api/portraits/women/28.jpg", date: "2023-11-27", views: 2156, likes: 184, comments: 92, tags: ["퇴사", "자유", "치맥"] },
+          { id: 3, title: "직장 내 점심 메뉴 정하기 전쟁... 어떻게 해결하시나요?", content: "...", author: "점심고민", profileImage: "https://randomuser.me/api/portraits/men/45.jpg", date: "2023-11-25", views: 1654, likes: 112, comments: 96, tags: ["직장생활", "점심메뉴", "회사문화"] },
+          { id: 4, title: "월급 3,000만원 vs 행복한 직장... 어떤 걸 선택하시겠어요?", content: "...", author: "선택장애", profileImage: "https://randomuser.me/api/portraits/women/22.jpg", date: "2023-11-23", views: 3267, likes: 245, comments: 125, tags: ["연봉", "직장선택", "행복"] },
+          { id: 5, title: "오늘 입사한 신입인데 실수했어요... 어떡하죠?", content: "...", author: "초보직장인", profileImage: "https://randomuser.me/api/portraits/women/54.jpg", date: "2023-11-22", views: 2842, likes: 156, comments: 84, tags: ["신입", "직장생활", "실수"] },
+          { id: 6, title: "요즘 퇴근 후에 뭐하세요? 취미 추천 부탁드립니다", content: "...", author: "취미부자", profileImage: "https://randomuser.me/api/portraits/men/67.jpg", date: "2023-11-20", views: 1432, likes: 98, comments: 72, tags: ["취미", "퇴근후", "여가생활"] },
+          { id: 7, title: "재택근무할 때 집중력 높이는 팁 공유해요!", content: "...", author: "집중력짱", profileImage: "https://randomuser.me/api/portraits/women/42.jpg", date: "2023-11-18", views: 1875, likes: 134, comments: 53, tags: ["재택근무", "집중력", "팁"] },
+          { id: 8, title: "직장인 점심값 평균이 얼마까지 올라갔나요?", content: "...", author: "알뜰족", profileImage: "https://randomuser.me/api/portraits/men/22.jpg", date: "2023-11-16", views: 2345, likes: 87, comments: 145, tags: ["점심값", "물가", "직장인"] },
+          { id: 9, title: "개발자 커뮤니티에서 활발하게 활동하는 방법", content: "...", author: "커뮤니티장", profileImage: "https://randomuser.me/api/portraits/men/1.jpg", date: "2023-11-15", views: 1234, likes: 56, comments: 12, tags: ["커뮤니티", "활동", "팁"] },
+          { id: 10, title: "사이드 프로젝트 아이디어 공유합니다", content: "...", author: "아이디어뱅크", profileImage: "https://randomuser.me/api/portraits/women/2.jpg", date: "2023-11-14", views: 987, likes: 45, comments: 8, tags: ["사이드프로젝트", "아이디어"] },
+          { id: 11, title: "개발자에게 필요한 소프트 스킬은 무엇일까요?", content: "...", author: "소프트맨", profileImage: "https://randomuser.me/api/portraits/men/3.jpg", date: "2023-11-13", views: 765, likes: 32, comments: 5, tags: ["소프트스킬", "개발자", "커리어"] },
+          { id: 12, title: "IT 업계 최신 트렌드 분석", content: "...", author: "트렌드세터", profileImage: "https://randomuser.me/api/portraits/women/4.jpg", date: "2023-11-12", views: 1543, likes: 78, comments: 20, tags: ["IT트렌드", "기술"] },
+          { id: 13, title: "개발자 번아웃 예방 및 극복 방법", content: "...", author: "힐링코더", profileImage: "https://randomuser.me/api/portraits/men/5.jpg", date: "2023-11-11", views: 1123, likes: 67, comments: 15, tags: ["번아웃", "개발자", "멘탈관리"] },
+          { id: 14, title: "효율적인 코드 리뷰 방법", content: "...", author: "코드마스터", profileImage: "https://randomuser.me/api/portraits/women/6.jpg", date: "2023-11-10", views: 876, likes: 40, comments: 10, tags: ["코드리뷰", "개발", "협업"] },
+          { id: 15, title: "개발자 이직 시 연봉 협상 팁", content: "...", author: "연봉협상가", profileImage: "https://randomuser.me/api/portraits/men/7.jpg", date: "2023-11-09", views: 1987, likes: 90, comments: 25, tags: ["이직", "연봉", "협상"] },
+          { id: 16, title: "주니어 개발자를 위한 성장 로드맵", content: "...", author: "성장멘토", profileImage: "https://randomuser.me/api/portraits/women/8.jpg", date: "2023-11-08", views: 1345, likes: 70, comments: 18, tags: ["주니어개발자", "성장", "로드맵"] },
+          { id: 17, title: "개발자 건강 관리의 중요성", content: "...", author: "건강지킴이", profileImage: "https://randomuser.me/api/portraits/men/9.jpg", date: "2023-11-07", views: 654, likes: 28, comments: 7, tags: ["건강", "개발자", "관리"] },
+          { id: 18, title: "개발자 커뮤니티 활용법", content: "...", author: "커뮤니티활용", profileImage: "https://randomuser.me/api/portraits/women/10.jpg", date: "2023-11-06", views: 987, likes: 50, comments: 11, tags: ["커뮤니티", "활용법"] },
+          { id: 19, title: "개발자를 위한 독서 추천", content: "...", author: "책벌레", profileImage: "https://randomuser.me/api/portraits/men/11.jpg", date: "2023-11-05", views: 765, likes: 35, comments: 9, tags: ["독서", "개발자", "추천"] },
+          { id: 20, title: "개발자 포트폴리오에 넣으면 좋은 프로젝트", content: "...", author: "포트폴리오장인", profileImage: "https://randomuser.me/api/portraits/women/12.jpg", date: "2023-11-04", views: 1876, likes: 80, comments: 22, tags: ["포트폴리오", "프로젝트"] },
+          { id: 21, title: "개발자에게 필요한 비전공 지식", content: "...", author: "지식탐험가", profileImage: "https://randomuser.me/api/portraits/men/13.jpg", date: "2023-11-03", views: 543, likes: 20, comments: 5, tags: ["비전공", "지식"] },
+          { id: 22, title: "개발자 커리어 전환 성공 사례", content: "...", author: "커리어전환", profileImage: "https://randomuser.me/api/portraits/women/14.jpg", date: "2023-11-02", views: 1234, likes: 60, comments: 16, tags: ["커리어전환", "성공사례"] },
+          { id: 23, title: "개발자에게 추천하는 운동", content: "...", author: "운동맨", profileImage: "https://randomuser.me/api/portraits/men/15.jpg", date: "2023-11-01", views: 432, likes: 15, comments: 3, tags: ["운동", "개발자"] },
+          { id: 24, title: "개발자에게 필요한 글쓰기 능력", content: "...", author: "글쓰기장인", profileImage: "https://randomuser.me/api/portraits/women/16.jpg", date: "2023-10-31", views: 876, likes: 40, comments: 10, tags: ["글쓰기", "개발자"] },
+          { id: 25, title: "개발자에게 추천하는 유튜브 채널", content: "...", author: "유튜브매니아", profileImage: "https://randomuser.me/api/portraits/men/17.jpg", date: "2023-10-30", views: 1567, likes: 70, comments: 19, tags: ["유튜브", "추천"] },
+          { id: 26, title: "개발자에게 필요한 영어 공부법", content: "...", author: "영어마스터", profileImage: "https://randomuser.me/api/portraits/women/18.jpg", date: "2023-10-29", views: 987, likes: 50, comments: 12, tags: ["영어", "공부법"] },
+          { id: 27, title: "개발자에게 추천하는 블로그", content: "...", author: "블로그매니아", profileImage: "https://randomuser.me/api/portraits/men/19.jpg", date: "2023-10-28", views: 765, likes: 30, comments: 8, tags: ["블로그", "추천"] },
+          { id: 28, title: "개발자에게 필요한 커뮤니케이션 스킬", content: "...", author: "커뮤니케이션전문가", profileImage: "https://randomuser.me/api/portraits/women/20.jpg", date: "2023-10-27", views: 1234, likes: 60, comments: 15, tags: ["커뮤니케이션", "스킬"] },
+          { id: 29, title: "개발자에게 추천하는 컨퍼런스", content: "...", author: "컨퍼런스매니아", profileImage: "https://randomuser.me/api/portraits/men/21.jpg", date: "2023-10-26", views: 876, likes: 40, comments: 10, tags: ["컨퍼런스", "추천"] },
+          { id: 30, title: "개발자에게 필요한 시간 관리법", content: "...", author: "시간관리전문가", profileImage: "https://randomuser.me/api/portraits/women/22.jpg", date: "2023-10-25", views: 543, likes: 20, comments: 5, tags: ["시간관리", "개발자"] }
         ];
         
-        setPosts(dummyPosts);
+        const startIndex = (page - 1) * 8; // 페이지당 8개 게시물
+        const endIndex = startIndex + 8;
+        const newPosts = dummyPosts.slice(startIndex, endIndex);
+
+        setPosts((prevPosts) => [...prevPosts, ...newPosts]);
+        setHasMore(endIndex < dummyPosts.length);
         setLoading(false);
       }, 800);
     };
     
     fetchData();
-  }, []);
+  }, [page]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (loader.current) {
+      observer.observe(loader.current);
+    }
+
+    return () => {
+      if (loader.current) {
+        observer.unobserve(loader.current);
+      }
+    };
+  }, [hasMore, loading]);
   
   // 필터링된 게시글
   const filteredPosts = posts.filter(post => {

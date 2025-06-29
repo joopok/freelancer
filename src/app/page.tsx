@@ -513,7 +513,7 @@ export default function Home() {
                     </button>
                   </div>
                   
-                  {/* 부유하는 3D 오브젝트들은 유지 */}
+                  {/* 부유하는 3D 오브젝트들 - 클릭 가능 */}
                   <motion.div
                     animate={{ 
                       y: [0, -15, 0],
@@ -523,7 +523,10 @@ export default function Home() {
                       duration: 4,
                       ease: "easeInOut" 
                     }}
-                    className="absolute top-[15%] left-[10%] w-16 h-16 rounded-lg bg-gradient-to-r from-pink-500 to-purple-500 rotate-12 shadow-lg z-10"
+                    whileHover={{ scale: 1.1, rotate: 15 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => navigateTo('/freelancer')}
+                    className="absolute top-[15%] left-[10%] w-16 h-16 rounded-lg bg-gradient-to-r from-pink-500 to-purple-500 rotate-12 shadow-lg z-10 cursor-pointer hover:shadow-xl transition-all duration-300"
                   />
                   <motion.div
                     animate={{ 
@@ -535,7 +538,10 @@ export default function Home() {
                       ease: "easeInOut",
                       delay: 1
                     }}
-                    className="absolute bottom-[25%] right-[15%] w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg z-10"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => navigateTo('/project')}
+                    className="absolute bottom-[25%] right-[15%] w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg z-10 cursor-pointer hover:shadow-xl transition-all duration-300"
                   />
                   <motion.div
                     animate={{ 
@@ -546,7 +552,10 @@ export default function Home() {
                       duration: 20,
                       ease: "linear"
                     }}
-                    className="absolute top-[40%] left-[22%] w-20 h-20 rounded-full border-4 border-dashed border-pink-400/30 z-10"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => navigateTo('/categories')}
+                    className="absolute top-[40%] left-[22%] w-20 h-20 rounded-full border-4 border-dashed border-pink-400/30 z-10 cursor-pointer hover:border-pink-300/50 transition-all duration-300"
                       />
                     </div>
               </motion.div>
@@ -563,10 +572,20 @@ export default function Home() {
 
         {/* 검색 섹션 */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-10 relative z-10">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 transition-colors duration-300">
+          <motion.div 
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 transition-colors duration-300"
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.2 }}
+          >
             <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative">
-                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">🔍</span>
+                <motion.span 
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl cursor-pointer"
+                  whileHover={{ scale: 1.1, rotate: 15 }}
+                  onClick={() => navigateTo('/project')}
+                >
+                  🔍
+                </motion.span>
                 <input
                   type="text"
                   value={searchQuery}
@@ -575,14 +594,16 @@ export default function Home() {
                   className="w-full pl-12 pr-4 py-4 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-colors duration-200"
                 />
             </div>
-              <button
+              <motion.button
                 type="submit"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 className="bg-blue-600 hover:bg-blue-700 text-white py-4 px-8 rounded-lg font-bold text-lg transition-colors"
               >
                 검색하기
-              </button>
+              </motion.button>
             </form>
-          </div>
+          </motion.div>
         </section>
 
         {/* 주요 카테고리 섹션 */}
@@ -737,7 +758,14 @@ export default function Home() {
                     rotateY: 5,
                     boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
                   }}
-                  className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-white/20 group"
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    if (stat.id === 1) navigateTo('/freelancer');
+                    else if (stat.id === 2) navigateTo('/project');
+                    else if (stat.id === 3) navigateTo('/project');
+                    else if (stat.id === 4) navigateTo('/jobs');
+                  }}
+                  className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-white/20 group cursor-pointer"
                 >
                   <div className="flex flex-col items-center text-center">
                     <motion.div 
@@ -926,13 +954,19 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
-                className="text-center"
+                whileHover={{ y: -5 }}
+                onClick={() => navigateTo('/freelancer')}
+                className="text-center cursor-pointer group"
               >
-                <div className="bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                <motion.div 
+                  className="bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   <span className="text-blue-600 text-3xl">👥</span>
-                </div>
-                <h3 className="text-xl font-bold mb-4">검증된 프리랜서</h3>
-                  <p className="text-gray-700">
+                </motion.div>
+                <h3 className="text-xl font-bold mb-4 group-hover:text-blue-600 transition-colors duration-300">검증된 프리랜서</h3>
+                  <p className="text-gray-700 group-hover:text-gray-800 transition-colors duration-300">
               까다롭고 엄격한 스크리닝을 통과한<br />전문 프리랜서만 활동합니다.
               </p>
               </motion.div>
@@ -942,13 +976,19 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-center"
+                whileHover={{ y: -5 }}
+                onClick={() => navigateTo('/jobs')}
+                className="text-center cursor-pointer group"
               >
-                <div className="bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                <motion.div 
+                  className="bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   <span className="text-blue-600 text-3xl">💼</span>
-                </div>
-                <h3 className="text-xl font-bold mb-4">안전한 대금계약 시스템</h3>
-                  <p className="text-gray-600">
+                </motion.div>
+                <h3 className="text-xl font-bold mb-4 group-hover:text-blue-600 transition-colors duration-300">안전한 대금계약 시스템</h3>
+                  <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
                   표준 계약서와 에스크로 결제로<br />
                   프로젝트 완료 후 7일 내<br />
                   100% 안전하게 정산됩니다.
@@ -960,13 +1000,19 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="text-center"
+                whileHover={{ y: -5 }}
+                onClick={() => navigateTo('/project')}
+                className="text-center cursor-pointer group"
               >
-                <div className="bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                <motion.div 
+                  className="bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   <span className="text-blue-600 text-3xl">🏠</span>
-                </div>
-                <h3 className="text-xl font-bold mb-4">다양한 근무 방식</h3>
-                  <p className="text-gray-600">
+                </motion.div>
+                <h3 className="text-xl font-bold mb-4 group-hover:text-blue-600 transition-colors duration-300">다양한 근무 방식</h3>
+                  <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
   상주, 재택, 부분 출근 등 다양한 < br /> 근무 방식으로 유연하게 일할 수 있으며, <br />
                   상위 1% 를 위한 특별한 프리미엄 프로젝트를 만나보세요.
                 </p>
@@ -992,7 +1038,14 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
-                    className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-700"
+                    whileHover={{ y: -5, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      if (testimonial.id === 1) navigateTo('/freelancer');
+                      else if (testimonial.id === 2) navigateTo('/project');
+                      else navigateTo('/jobs');
+                    }}
+                    className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-700 cursor-pointer group"
                   >
                     {/* 별점 */}
                     <div className="flex items-center mb-6">

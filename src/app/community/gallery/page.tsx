@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -179,6 +179,9 @@ export default function CommunityGalleryPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [layout, setLayout] = useState<'grid' | 'masonry'>('grid');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const loader = useRef(null);
   
   // 카테고리 목록
   const categories = [
@@ -198,161 +201,65 @@ export default function CommunityGalleryPage() {
       
       setTimeout(() => {
         const dummyGalleryItems: GalleryItem[] = [
-          {
-            id: 1,
-            title: "모바일 앱 UI 디자인 포트폴리오",
-            description: "새로운 핀테크 앱을 위해 디자인한 UI 컴포넌트 모음입니다.",
-            author: "디자인마스터",
-            authorImage: "https://randomuser.me/api/portraits/women/44.jpg",
-            category: "ui_ux",
-            imageUrl: "https://images.unsplash.com/photo-1616400619175-5beda3a17896?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vYmlsZSUyMGFwcHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60",
-            likes: 128,
-            comments: 24,
-            date: "2023-11-28",
-            isFeatured: true
-          },
-          {
-            id: 2,
-            title: "브랜드 아이덴티티 디자인",
-            description: "신규 스타트업을 위한 브랜드 아이덴티티 작업물입니다.",
-            author: "브랜딩전문가",
-            authorImage: "https://randomuser.me/api/portraits/men/32.jpg",
-            category: "design",
-            imageUrl: "https://images.unsplash.com/photo-1634942536790-29fac3b6b047?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTh8fGJyYW5kaW5nfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60",
-            likes: 96,
-            comments: 18,
-            date: "2023-11-25"
-          },
-          {
-            id: 3,
-            title: "웹 개발자 포트폴리오 사이트",
-            description: "React와 Next.js로 제작한 개인 포트폴리오 사이트입니다.",
-            author: "프론트엔드개발자",
-            authorImage: "https://randomuser.me/api/portraits/men/45.jpg",
-            category: "portfolio",
-            imageUrl: "https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8d2ViJTIwZGV2ZWxvcG1lbnR8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60",
-            likes: 85,
-            comments: 32,
-            date: "2023-11-22"
-          },
-          {
-            id: 4,
-            title: "IT 기업 최종 합격 인증!",
-            description: "6개월간의 취업 준비 끝에 드디어 대기업에 합격했습니다!",
-            author: "취업성공러",
-            authorImage: "https://randomuser.me/api/portraits/women/22.jpg",
-            category: "success",
-            imageUrl: "https://images.unsplash.com/photo-1579389083078-4e7018379f7e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NHx8Y2VsZWJyYXRpb258ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60",
-            likes: 215,
-            comments: 64,
-            date: "2023-11-20",
-            isFeatured: true
-          },
-          {
-            id: 5,
-            title: "제품 사진 촬영 작업물",
-            description: "화장품 브랜드의 신제품 사진 촬영 작업물입니다.",
-            author: "제품사진작가",
-            authorImage: "https://randomuser.me/api/portraits/women/67.jpg",
-            category: "photo",
-            imageUrl: "https://images.unsplash.com/photo-1581395204630-2256073ee7ec?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8cHJvZHVjdCUyMHBob3RvZ3JhcGh5fGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60",
-            likes: 74,
-            comments: 15,
-            date: "2023-11-18"
-          },
-          {
-            id: 6,
-            title: "캐릭터 일러스트레이션",
-            description: "게임 캐릭터 디자인을 위한 일러스트레이션 작업물입니다.",
-            author: "일러스트레이터",
-            authorImage: "https://randomuser.me/api/portraits/men/67.jpg",
-            category: "illustration",
-            imageUrl: "https://images.unsplash.com/photo-1608889825103-eb5ed706fc64?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8Y2hhcmFjdGVyJTIwZGVzaWdufGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60",
-            likes: 112,
-            comments: 28,
-            date: "2023-11-15"
-          },
-          {
-            id: 7,
-            title: "모바일 앱 와이어프레임",
-            description: "신규 라이프스타일 앱을 위한 와이어프레임 디자인입니다.",
-            author: "UX디자이너",
-            authorImage: "https://randomuser.me/api/portraits/women/28.jpg",
-            category: "ui_ux",
-            imageUrl: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fHdpcmVmcmFtZXxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60",
-            likes: 67,
-            comments: 14,
-            date: "2023-11-12"
-          },
-          {
-            id: 8,
-            title: "스타트업 채용 최종 합격!",
-            description: "유망 스타트업 UX 디자이너 포지션에 최종 합격했습니다.",
-            author: "취업축하해요",
-            authorImage: "https://randomuser.me/api/portraits/men/22.jpg",
-            category: "success",
-            imageUrl: "https://images.unsplash.com/photo-1533227268428-f9ed0900fb3b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fGhhcHB5JTIwcGVyc29ufGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60",
-            likes: 142,
-            comments: 38,
-            date: "2023-11-10"
-          },
-          {
-            id: 9,
-            title: "웹사이트 리디자인 프로젝트",
-            description: "기존 쇼핑몰 웹사이트의 리디자인 프로젝트 결과물입니다.",
-            author: "웹디자이너",
-            authorImage: "https://randomuser.me/api/portraits/women/54.jpg",
-            category: "design",
-            imageUrl: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fHdlYnNpdGUlMjBkZXNpZ258ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60",
-            likes: 89,
-            comments: 22,
-            date: "2023-11-08"
-          },
-          {
-            id: 10,
-            title: "자연 풍경 사진 작업물",
-            description: "여행 중 촬영한 자연 풍경 사진 포트폴리오입니다.",
-            author: "풍경사진작가",
-            authorImage: "https://randomuser.me/api/portraits/men/88.jpg",
-            category: "photo",
-            imageUrl: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8bmF0dXJlfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60",
-            likes: 156,
-            comments: 42,
-            date: "2023-11-05"
-          },
-          {
-            id: 11,
-            title: "3D 아이콘 디자인",
-            description: "앱용으로 제작한 3D 아이콘 디자인 세트입니다.",
-            author: "3D디자이너",
-            authorImage: "https://randomuser.me/api/portraits/women/36.jpg",
-            category: "design",
-            imageUrl: "https://images.unsplash.com/photo-1618331833283-0a4148e11a1e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NHx8M2QlMjBpY29ufGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60",
-            likes: 78,
-            comments: 19,
-            date: "2023-11-02"
-          },
-          {
-            id: 12,
-            title: "그래픽 디자이너 포트폴리오",
-            description: "그래픽 디자이너로서의 다양한 작업물을 모은 포트폴리오입니다.",
-            author: "그래픽마스터",
-            authorImage: "https://randomuser.me/api/portraits/men/76.jpg",
-            category: "portfolio",
-            imageUrl: "https://images.unsplash.com/photo-1616002411355-49593fd89721?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Z3JhcGhpYyUyMGRlc2lnbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60",
-            likes: 94,
-            comments: 26,
-            date: "2023-10-30"
-          }
+          { id: 1, title: "모바일 앱 UI 디자인 포트폴리오", description: "...", author: "디자인마스터", authorImage: "https://randomuser.me/api/portraits/women/44.jpg", category: "ui_ux", imageUrl: "https://images.unsplash.com/photo-1616400619175-5beda3a17896?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vYmlsZSUyMGFwcHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60", likes: 128, comments: 24, date: "2023-11-28", isFeatured: true },
+          { id: 2, title: "브랜드 아이덴티티 디자인", description: "...", author: "브랜딩전문가", authorImage: "https://randomuser.me/api/portraits/men/32.jpg", category: "design", imageUrl: "https://images.unsplash.com/photo-1634942536790-29fac3b6b047?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTh8fGJyYW5kaW5nfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60", likes: 96, comments: 18, date: "2023-11-25" },
+          { id: 3, title: "웹 개발자 포트폴리오 사이트", description: "...", author: "프론트엔드개발자", authorImage: "https://randomuser.me/api/portraits/men/45.jpg", category: "portfolio", imageUrl: "https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8d2ViJTIwZGV2ZWxvcG1lbnR8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60", likes: 85, comments: 32, date: "2023-11-22" },
+          { id: 4, title: "IT 기업 최종 합격 인증!", description: "...", author: "취업성공러", authorImage: "https://randomuser.me/api/portraits/women/22.jpg", category: "success", imageUrl: "https://images.unsplash.com/photo-1579389083078-4e7018379f7e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NHx8Y2VsZWJyYXRpb258ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60", likes: 215, comments: 64, date: "2023-11-20", isFeatured: true },
+          { id: 5, title: "제품 사진 촬영 작업물", description: "...", author: "제품사진작가", authorImage: "https://randomuser.me/api/portraits/women/67.jpg", category: "photo", imageUrl: "https://images.unsplash.com/photo-1581395204630-2256073ee7ec?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8cHJvZHVjdCUyMHBob3RvZ3JhcGh5fGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60", likes: 74, comments: 15, date: "2023-11-18" },
+          { id: 6, title: "캐릭터 일러스트레이션", description: "...", author: "일러스트레이터", authorImage: "https://randomuser.me/api/portraits/men/67.jpg", category: "illustration", imageUrl: "https://images.unsplash.com/photo-1608889825103-eb5ed706fc64?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8Y2hhcmFjdGVyJTIwZGVzaWdufGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60", likes: 112, comments: 28, date: "2023-11-15" },
+          { id: 7, title: "모바일 앱 와이어프레임", description: "...", author: "UX디자이너", authorImage: "https://randomuser.me/api/portraits/women/28.jpg", category: "ui_ux", imageUrl: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fHdpcmVmcmFtZXxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60", likes: 67, comments: 14, date: "2023-11-12" },
+          { id: 8, title: "스타트업 채용 최종 합격!", description: "...", author: "취업축하해요", authorImage: "https://randomuser.me/api/portraits/men/22.jpg", category: "success", imageUrl: "https://images.unsplash.com/photo-1533227268428-f9ed0900fb3b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fGhhcHB5JTIwcGVyc29ufGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60", likes: 142, comments: 38, date: "2023-11-10", isFeatured: true },
+          { id: 9, title: "웹사이트 리디자인 프로젝트", description: "...", author: "웹디자이너", authorImage: "https://randomuser.me/api/portraits/women/54.jpg", category: "design", imageUrl: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fHdlYnNpdGUlMjBkZXNpZ258ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60", likes: 89, comments: 22, date: "2023-11-08" },
+          { id: 10, title: "자연 풍경 사진 작업물", description: "...", author: "풍경사진작가", authorImage: "https://randomuser.me/api/portraits/men/88.jpg", category: "photo", imageUrl: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8bmF0dXJlfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60", likes: 156, comments: 42, date: "2023-11-05" },
+          { id: 11, title: "3D 아이콘 디자인", description: "...", author: "3D디자이너", authorImage: "https://randomuser.me/api/portraits/women/36.jpg", category: "design", imageUrl: "https://images.unsplash.com/photo-1618331833283-0a4148e11a1e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NHx8M2QlMjBpY29ufGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60", likes: 78, comments: 19, date: "2023-11-02" },
+          { id: 12, title: "그래픽 디자이너 포트폴리오", description: "...", author: "그래픽마스터", authorImage: "https://randomuser.me/api/portraits/men/76.jpg", category: "portfolio", imageUrl: "https://images.unsplash.com/photo-1616002411355-49593fd89721?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Z3JhcGhpYyUyMGRlc2lnbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60", likes: 94, comments: 26, date: "2023-10-30" },
+          { id: 13, title: "모바일 앱 UI 디자인 포트폴리오 2", description: "...", author: "디자인마스터", authorImage: "https://randomuser.me/api/portraits/women/44.jpg", category: "ui_ux", imageUrl: "https://images.unsplash.com/photo-1616400619175-5beda3a17896?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fG1vYmlsZSUyMGFwcHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60", likes: 128, comments: 24, date: "2023-11-28", isFeatured: true },
+          { id: 14, title: "브랜드 아이덴티티 디자인 2", description: "...", author: "브랜딩전문가", authorImage: "https://randomuser.me/api/portraits/men/32.jpg", category: "design", imageUrl: "https://images.unsplash.com/photo-1634942536790-29fac3b6b047?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTh8fGJyYW5kaW5nfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60", likes: 96, comments: 18, date: "2023-11-25" },
+          { id: 15, title: "웹 개발자 포트폴리오 사이트 2", description: "...", author: "프론트엔드개발자", authorImage: "https://randomuser.me/api/portraits/men/45.jpg", category: "portfolio", imageUrl: "https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8d2ViJTIwZGV2ZWxvcG1lbnR8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60", likes: 85, comments: 32, date: "2023-11-22" },
+          { id: 16, title: "IT 기업 최종 합격 인증! 2", description: "...", author: "취업성공러", authorImage: "https://randomuser.me/api/portraits/women/22.jpg", category: "success", imageUrl: "https://images.unsplash.com/photo-1579389083078-4e7018379f7e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NHx8Y2VsZWJyYXRpb258ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60", likes: 215, comments: 64, date: "2023-11-20", isFeatured: true },
+          { id: 17, title: "제품 사진 촬영 작업물 2", description: "...", author: "제품사진작가", authorImage: "https://randomuser.me/api/portraits/women/67.jpg", category: "photo", imageUrl: "https://images.unsplash.com/photo-1581395204630-2256073ee7ec?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8cHJvZHVjdCUyMHBob3RvZ3JhcGh5fGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60", likes: 74, comments: 15, date: "2023-11-18" },
+          { id: 18, title: "캐릭터 일러스트레이션 2", description: "...", author: "일러스트레이터", authorImage: "https://randomuser.me/api/portraits/men/67.jpg", category: "illustration", imageUrl: "https://images.unsplash.com/photo-1608889825103-eb5ed706fc64?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8Y2hhcmFjdGVyJTIwZGVzaWdufGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60", likes: 112, comments: 28, date: "2023-11-15" },
+          { id: 19, title: "모바일 앱 와이어프레임 2", description: "...", author: "UX디자이너", authorImage: "https://randomuser.me/api/portraits/women/28.jpg", category: "ui_ux", imageUrl: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fHdpcmVmcmFtZXxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60", likes: 67, comments: 14, date: "2023-11-12" },
+          { id: 20, title: "스타트업 채용 최종 합격! 2", description: "...", author: "취업축하해요", authorImage: "https://randomuser.me/api/portraits/men/22.jpg", category: "success", imageUrl: "https://images.unsplash.com/photo-1533227268428-f9ed0900fb3b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fGhhcHB5JTIwcGVyc29ufGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60", likes: 142, comments: 38, date: "2023-11-10", isFeatured: true },
+          { id: 21, title: "웹사이트 리디자인 프로젝트 2", description: "...", author: "웹디자이너", authorImage: "https://randomuser.me/api/portraits/women/54.jpg", category: "design", imageUrl: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fHdlYnNpdGUlMjBkZXNpZ258ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60", likes: 89, comments: 22, date: "2023-11-08" },
+          { id: 22, title: "자연 풍경 사진 작업물 2", description: "...", author: "풍경사진작가", authorImage: "https://randomuser.me/api/portraits/men/88.jpg", category: "photo", imageUrl: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8bmF0dXJlfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60", likes: 156, comments: 42, date: "2023-11-05" },
+          { id: 23, title: "3D 아이콘 디자인 2", description: "...", author: "3D디자이너", authorImage: "https://randomuser.me/api/portraits/women/36.jpg", category: "design", imageUrl: "https://images.unsplash.com/photo-1618331833283-0a4148e11a1e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NHx8M2QlMjBpY29ufGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=800&q=60", likes: 78, comments: 19, date: "2023-11-02" },
+          { id: 24, title: "그래픽 디자이너 포트폴리오 2", description: "...", author: "그래픽마스터", authorImage: "https://randomuser.me/api/portraits/men/76.jpg", category: "portfolio", imageUrl: "https://images.unsplash.com/photo-1616002411355-49593fd89721?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Z3JhcGhpYyUyMGRlc2lnbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60", likes: 94, comments: 26, date: "2023-10-30" }
         ];
         
-        setGalleryItems(dummyGalleryItems);
+        const startIndex = (page - 1) * 8; // 페이지당 8개 게시물
+        const endIndex = startIndex + 8;
+        const newItems = dummyGalleryItems.slice(startIndex, endIndex);
+
+        setGalleryItems((prevItems) => [...prevItems, ...newItems]);
+        setHasMore(endIndex < dummyGalleryItems.length);
         setLoading(false);
       }, 800);
     };
     
     fetchData();
-  }, []);
+  }, [page]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (loader.current) {
+      observer.observe(loader.current);
+    }
+
+    return () => {
+      if (loader.current) {
+        observer.unobserve(loader.current);
+      }
+    };
+  }, [hasMore, loading]);
   
   // 필터링된 갤러리 아이템
   const filteredItems = filter === 'all' 

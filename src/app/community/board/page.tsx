@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -26,6 +26,9 @@ export default function CommunityBoardPage() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [scrollY, setScrollY] = useState(0);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const loader = useRef(null);
   
   // 필터 옵션
   const filters = [
@@ -53,112 +56,71 @@ export default function CommunityBoardPage() {
       // 실제 프로젝트에서는 API 호출로 대체
       setTimeout(() => {
         const mockPosts: Post[] = [
-          {
-            id: 1,
-            title: "공지사항: 커뮤니티 이용 규칙 안내",
-            content: "안녕하세요, 모든 회원 여러분. 커뮤니티를 보다 유익하고 건전하게 이용하기 위한 규칙을 안내드립니다.",
-            author: "관리자",
-            profileImage: "https://randomuser.me/api/portraits/men/75.jpg",
-            date: "2023-11-15",
-            views: 1254,
-            likes: 89,
-            comments: 23,
-            category: "공지사항",
-            isNotice: true
-          },
-          {
-            id: 2,
-            title: "개발자 면접 후기 (대기업 최종 합격했어요!)",
-            content: "3개월간의 준비 끝에 대기업 개발자 면접에 최종 합격했습니다. 준비 과정과 면접 팁을 공유합니다.",
-            author: "코딩마스터",
-            profileImage: "https://randomuser.me/api/portraits/men/32.jpg",
-            date: "2023-11-12",
-            views: 3456,
-            likes: 271,
-            comments: 54,
-            category: "취업/이직"
-          },
-          {
-            id: 3,
-            title: "재택근무 2년차 노하우 공유합니다",
-            content: "재택근무 2년차입니다. 업무 효율을 높이고 건강도 챙기는 노하우를 공유합니다.",
-            author: "홈오피스",
-            profileImage: "https://randomuser.me/api/portraits/women/28.jpg",
-            date: "2023-11-10",
-            views: 2187,
-            likes: 194,
-            comments: 42,
-            category: "직장생활"
-          },
-          {
-            id: 4,
-            title: "개발자에서 PM으로 커리어 전환 후기",
-            content: "5년차 개발자에서 PM으로 커리어를 전환한 경험을 공유합니다. 전환 과정과 필요한 역량에 대해 말씀드릴게요.",
-            author: "커리어점프",
-            profileImage: "https://randomuser.me/api/portraits/men/42.jpg",
-            date: "2023-11-08",
-            views: 1893,
-            likes: 147,
-            comments: 38,
-            category: "커리어"
-          },
-          {
-            id: 5,
-            title: "첫 직장 스트레스 극복하는 방법 공유해요",
-            content: "신입으로 입사해 겪는 스트레스를 극복하는 방법들을 공유합니다. 선배님들의 조언도 환영합니다!",
-            author: "새내기직장인",
-            profileImage: "https://randomuser.me/api/portraits/women/24.jpg",
-            date: "2023-11-05",
-            views: 2341,
-            likes: 162,
-            comments: 47,
-            category: "고민상담"
-          },
-          {
-            id: 6,
-            title: "회사에서 인정받는 방법 5가지",
-            content: "회사에서 능력을 인정받고 성장하기 위한 실질적인 방법 5가지를 소개합니다.",
-            author: "경력관리",
-            profileImage: "https://randomuser.me/api/portraits/women/57.jpg",
-            date: "2023-11-03",
-            views: 1987,
-            likes: 173,
-            comments: 29,
-            category: "직장생활"
-          },
-          {
-            id: 7,
-            title: "개발자 번아웃 극복 경험담",
-            content: "3년차 개발자로 심한 번아웃을 겪었지만 이를 극복한 경험을 나누고 싶습니다.",
-            author: "회복중",
-            profileImage: "https://randomuser.me/api/portraits/men/67.jpg",
-            date: "2023-11-01",
-            views: 2456,
-            likes: 234,
-            comments: 62,
-            category: "고민상담"
-          },
-          {
-            id: 8,
-            title: "사이드 프로젝트로 월 300만원 버는 이야기",
-            content: "본업 외에 사이드 프로젝트로 월 300만원의 추가 수입을 올리는 방법을 공유합니다.",
-            author: "부업왕",
-            profileImage: "https://randomuser.me/api/portraits/men/52.jpg",
-            date: "2023-10-28",
-            views: 5487,
-            likes: 423,
-            comments: 87,
-            category: "수익창출"
-          }
+          { id: 1, title: "공지사항: 커뮤니티 이용 규칙 안내", content: "...", author: "관리자", profileImage: "https://randomuser.me/api/portraits/men/75.jpg", date: "2023-11-15", views: 1254, likes: 89, comments: 23, category: "공지사항", isNotice: true },
+          { id: 2, title: "개발자 면접 후기 (대기업 최종 합격했어요!)", content: "...", author: "코딩마스터", profileImage: "https://randomuser.me/api/portraits/men/32.jpg", date: "2023-11-12", views: 3456, likes: 271, comments: 54, category: "취업/이직" },
+          { id: 3, title: "재택근무 2년차 노하우 공유합니다", content: "...", author: "홈오피스", profileImage: "https://randomuser.me/api/portraits/women/28.jpg", date: "2023-11-10", views: 2187, likes: 194, comments: 42, category: "직장생활" },
+          { id: 4, title: "개발자에서 PM으로 커리어 전환 후기", content: "...", author: "커리어점프", profileImage: "https://randomuser.me/api/portraits/men/42.jpg", date: "2023-11-08", views: 1893, likes: 147, comments: 38, category: "커리어" },
+          { id: 5, title: "첫 직장 스트레스 극복하는 방법 공유해요", content: "...", author: "새내기직장인", profileImage: "https://randomuser.me/api/portraits/women/24.jpg", date: "2023-11-05", views: 2341, likes: 162, comments: 47, category: "고민상담" },
+          { id: 6, title: "회사에서 인정받는 방법 5가지", content: "...", author: "경력관리", profileImage: "https://randomuser.me/api/portraits/women/57.jpg", date: "2023-11-03", views: 1987, likes: 173, comments: 29, category: "직장생활" },
+          { id: 7, title: "개발자 번아웃 극복 경험담", content: "...", author: "회복중", profileImage: "https://randomuser.me/api/portraits/men/67.jpg", date: "2023-11-01", views: 2456, likes: 234, comments: 62, category: "고민상담" },
+          { id: 8, title: "사이드 프로젝트로 월 300만원 버는 이야기", content: "...", author: "부업왕", profileImage: "https://randomuser.me/api/portraits/men/52.jpg", date: "2023-10-28", views: 5487, likes: 423, comments: 87, category: "수익창출" },
+          { id: 9, title: "프론트엔드 개발자를 위한 React/Next.js 스터디", content: "...", author: "김개발", profileImage: "https://randomuser.me/api/portraits/men/32.jpg", date: "2023-03-10", views: 123, likes: 45, comments: 6, category: "개발" },
+          { id: 10, title: "백엔드 개발자 모임: Node.js와 Express 마스터하기", content: "...", author: "이서버", profileImage: "https://randomuser.me/api/portraits/women/44.jpg", date: "2023-03-12", views: 456, likes: 78, comments: 9, category: "개발" },
+          { id: 11, title: "UI/UX 디자인 스터디: 사용자 중심 디자인의 이해", content: "...", author: "박디자인", profileImage: "https://randomuser.me/api/portraits/women/68.jpg", date: "2023-03-15", views: 789, likes: 12, comments: 3, category: "디자인" },
+          { id: 12, title: "Python 데이터 사이언스 스터디", content: "...", author: "최데이터", profileImage: "https://randomuser.me/api/portraits/men/75.jpg", date: "2023-03-18", views: 101, likes: 11, comments: 1, category: "데이터" },
+          { id: 13, title: "취업 준비생을 위한 포트폴리오 및 면접 스터디", content: "...", author: "정취업", profileImage: "https://randomuser.me/api/portraits/women/90.jpg", date: "2023-03-20", views: 234, likes: 56, comments: 7, category: "취업/이직" },
+          { id: 14, title: "모바일 앱 개발 스터디: Flutter & Swift", content: "...", author: "조모바일", profileImage: "https://randomuser.me/api/portraits/men/42.jpg", date: "2023-03-22", views: 567, likes: 89, comments: 10, category: "개발" },
+          { id: 15, title: "클라우드 컴퓨팅 기초 스터디", content: "...", author: "강클라우드", profileImage: "https://randomuser.me/api/portraits/men/1.jpg", date: "2023-03-25", views: 890, likes: 123, comments: 14, category: "개발" },
+          { id: 16, title: "인공지능 윤리 토론 모임", content: "...", author: "윤리연구가", profileImage: "https://randomuser.me/api/portraits/women/2.jpg", date: "2023-03-28", views: 123, likes: 12, comments: 3, category: "기타" },
+          { id: 17, title: "블록체인 기술 동향 스터디", content: "...", author: "블록체인매니아", profileImage: "https://randomuser.me/api/portraits/men/3.jpg", date: "2023-03-30", views: 456, likes: 34, comments: 5, category: "개발" },
+          { id: 18, title: "사이버 보안 전문가 양성 과정", content: "...", author: "보안전문가", profileImage: "https://randomuser.me/api/portraits/women/4.jpg", date: "2023-04-01", views: 789, likes: 56, comments: 7, category: "기타" },
+          { id: 19, title: "게임 개발 입문 스터디", content: "...", author: "게임덕후", profileImage: "https://randomuser.me/api/portraits/men/5.jpg", date: "2023-04-03", views: 101, likes: 7, comments: 1, category: "개발" },
+          { id: 20, title: "UX 리서치 방법론 스터디", content: "...", author: "리서치퀸", profileImage: "https://randomuser.me/api/portraits/women/6.jpg", date: "2023-04-05", views: 234, likes: 18, comments: 2, category: "디자인" },
+          { id: 21, title: "애자일 방법론 실천 스터디", content: "...", author: "애자일전도사", profileImage: "https://randomuser.me/api/portraits/men/7.jpg", date: "2023-04-07", views: 567, likes: 29, comments: 4, category: "기획" },
+          { id: 22, title: "데브옵스 자동화 스터디", content: "...", author: "자동화마스터", profileImage: "https://randomuser.me/api/portraits/women/8.jpg", date: "2023-04-09", views: 890, likes: 40, comments: 6, category: "개발" },
+          { id: 23, title: "IT 트렌드 분석 모임", content: "...", author: "트렌드세터", profileImage: "https://randomuser.me/api/portraits/men/9.jpg", date: "2023-04-11", views: 123, likes: 8, comments: 1, category: "기타" },
+          { id: 24, title: "데이터 시각화 스터디", content: "...", author: "시각화전문가", profileImage: "https://randomuser.me/api/portraits/women/10.jpg", date: "2023-04-13", views: 456, likes: 19, comments: 3, category: "데이터" },
+          { id: 25, title: "클린 코드 작성법 스터디", content: "...", author: "클린코더", profileImage: "https://randomuser.me/api/portraits/men/11.jpg", date: "2023-04-15", views: 789, likes: 30, comments: 5, category: "개발" },
+          { id: 26, title: "서비스 기획 실무 스터디", content: "...", author: "기획장인", profileImage: "https://randomuser.me/api/portraits/women/12.jpg", date: "2023-04-17", views: 101, likes: 5, comments: 1, category: "기획" },
+          { id: 27, title: "모바일 게임 기획 스터디", content: "...", author: "게임기획자", profileImage: "https://randomuser.me/api/portraits/men/13.jpg", date: "2023-04-19", views: 234, likes: 10, comments: 2, category: "기획" },
+          { id: 28, title: "웹 접근성 스터디", content: "...", author: "웹접근성전문가", profileImage: "https://randomuser.me/api/portraits/women/14.jpg", date: "2023-04-21", views: 567, likes: 15, comments: 3, category: "개발" },
+          { id: 29, title: "인공지능 모델 배포 스터디", content: "...", author: "AI엔지니어", profileImage: "https://randomuser.me/api/portraits/men/15.jpg", date: "2023-04-23", views: 890, likes: 20, comments: 4, category: "개발" },
+          { id: 30, title: "클라우드 보안 스터디", content: "...", author: "보안담당자", profileImage: "https://randomuser.me/api/portraits/women/16.jpg", date: "2023-04-25", views: 123, likes: 2, comments: 0, category: "기타" }
         ];
         
-        setPosts(mockPosts);
+        const startIndex = (page - 1) * 8; // 페이지당 8개 게시물
+        const endIndex = startIndex + 8;
+        const newPosts = mockPosts.slice(startIndex, endIndex);
+
+        setPosts((prevPosts) => [...prevPosts, ...newPosts]);
+        setHasMore(endIndex < mockPosts.length);
         setLoading(false);
       }, 1000);
     };
     
     fetchData();
-  }, []);
+  }, [page]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (loader.current) {
+      observer.observe(loader.current);
+    }
+
+    return () => {
+      if (loader.current) {
+        observer.unobserve(loader.current);
+      }
+    };
+  }, [hasMore, loading]);
   
   // 필터링된 게시글
   const filteredPosts = posts.filter(post => {
@@ -482,37 +444,45 @@ export default function CommunityBoardPage() {
         
         {/* 페이지네이션 및 작성 버튼 */}
         <div className="flex justify-between items-center">
-          <div className="flex justify-center">
-            <nav className="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <a href="#" className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <span className="sr-only">이전</span>
-                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </a>
-              <a href="#" aria-current="page" className="relative inline-flex items-center px-4 py-2 border border-blue-500 bg-blue-50 text-sm font-medium text-blue-600">
-                1
-              </a>
-              <a href="#" className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                2
-              </a>
-              <a href="#" className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                3
-              </a>
-              <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                ...
-              </span>
-              <a href="#" className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                10
-              </a>
-              <a href="#" className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <span className="sr-only">다음</span>
-                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                </svg>
-              </a>
-            </nav>
-          </div>
+          {totalPages > 1 && (
+            <div className="flex justify-center">
+              <nav className="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  <span className="sr-only">이전</span>
+                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`relative inline-flex items-center px-4 py-2 border ${
+                      currentPage === page
+                        ? 'border-blue-500 bg-blue-50 text-blue-600'
+                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                    } text-sm font-medium`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  <span className="sr-only">다음</span>
+                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </nav>
+            </div>
+          )}
           
           <motion.button
             whileHover={{ scale: 1.05 }}

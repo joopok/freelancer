@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -26,6 +26,9 @@ export default function CommunityQnaPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('latest');
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const loader = useRef(null);
   
   // 카테고리 목록
   const categories = [
@@ -45,127 +48,65 @@ export default function CommunityQnaPage() {
       
       setTimeout(() => {
         const dummyQuestions: Question[] = [
-          {
-            id: 1,
-            title: "신입 개발자 포트폴리오에 꼭 포함되어야 할 내용이 있을까요?",
-            content: "안녕하세요, 비전공자 신입 개발자입니다. 포트폴리오를 준비 중인데, 꼭 포함되어야 할 내용이 있을까요?",
-            author: "코딩초보",
-            profileImage: "https://randomuser.me/api/portraits/men/32.jpg",
-            date: "2023-11-28",
-            views: 1254,
-            likes: 56,
-            answers: 8,
-            category: "취업/이직",
-            isResolved: true,
-            tags: ["포트폴리오", "신입", "개발자"]
-          },
-          {
-            id: 2,
-            title: "면접에서 '본인의 단점'을 물어볼 때 어떻게 대답하는 게 좋을까요?",
-            content: "다음 주에 첫 면접이 있는데요. '본인의 단점'을 물어볼 때 어떻게 대답하면 좋을지 조언 부탁드립니다.",
-            author: "면접준비생",
-            profileImage: "https://randomuser.me/api/portraits/women/54.jpg",
-            date: "2023-11-27",
-            views: 986,
-            likes: 42,
-            answers: 12,
-            category: "취업/이직",
-            isResolved: true,
-            tags: ["면접", "취업준비", "자기소개"]
-          },
-          {
-            id: 3,
-            title: "React와 Next.js 중 취업에 더 유리한 기술은 무엇인가요?",
-            content: "프론트엔드 개발자를 준비하고 있습니다. React와 Next.js 중 어떤 기술을 더 깊게 공부해야 취업에 유리할까요?",
-            author: "프론트개발자",
-            profileImage: "https://randomuser.me/api/portraits/men/45.jpg",
-            date: "2023-11-25",
-            views: 854,
-            likes: 38,
-            answers: 6,
-            category: "개발",
-            isResolved: false,
-            tags: ["React", "Next.js", "프론트엔드", "취업"]
-          },
-          {
-            id: 4,
-            title: "UX/UI 디자이너의 포트폴리오에는 어떤 프로젝트가 포함되어야 할까요?",
-            content: "UX/UI 디자이너로 취업하고 싶은데, 포트폴리오에 어떤 유형의 프로젝트가 포함되어야 할지 궁금합니다.",
-            author: "디자인꿈나무",
-            profileImage: "https://randomuser.me/api/portraits/women/33.jpg",
-            date: "2023-11-22",
-            views: 742,
-            likes: 29,
-            answers: 5,
-            category: "디자인",
-            isResolved: true,
-            tags: ["UX/UI", "디자인", "포트폴리오"]
-          },
-          {
-            id: 5,
-            title: "기획자로 이직하려면 어떤 경험이 필요할까요?",
-            content: "현재 마케팅 담당자로 일하고 있는데 기획자로 이직하고 싶습니다. 어떤 경험이나 스킬이 필요할까요?",
-            author: "예비기획자",
-            profileImage: "https://randomuser.me/api/portraits/men/22.jpg",
-            date: "2023-11-20",
-            views: 635,
-            likes: 24,
-            answers: 4,
-            category: "기획",
-            isResolved: false,
-            tags: ["기획", "이직", "PM"]
-          },
-          {
-            id: 6,
-            title: "첫 연봉 협상, 어떻게 준비해야 할까요?",
-            content: "첫 취업 제안을 받았는데, 연봉 협상을 어떻게 준비해야 할지 모르겠어요. 조언 부탁드립니다.",
-            author: "연봉고민",
-            profileImage: "https://randomuser.me/api/portraits/women/28.jpg",
-            date: "2023-11-18",
-            views: 892,
-            likes: 47,
-            answers: 9,
-            category: "취업/이직",
-            isResolved: true,
-            tags: ["연봉협상", "취업", "신입"]
-          },
-          {
-            id: 7,
-            title: "백엔드 개발자 로드맵 추천해주세요",
-            content: "백엔드 개발자가 되기 위한 로드맵이나 추천 공부 방법이 있을까요?",
-            author: "백엔드지망생",
-            profileImage: "https://randomuser.me/api/portraits/men/67.jpg",
-            date: "2023-11-15",
-            views: 723,
-            likes: 35,
-            answers: 7,
-            category: "개발",
-            isResolved: false,
-            tags: ["백엔드", "개발자", "로드맵"]
-          },
-          {
-            id: 8,
-            title: "HR 직무 취업 준비, 어떤 자격증이 도움이 될까요?",
-            content: "HR 직무로 취업 준비 중인데, 어떤 자격증이나 경험이 도움이 될지 궁금합니다.",
-            author: "HR준비생",
-            profileImage: "https://randomuser.me/api/portraits/women/42.jpg",
-            date: "2023-11-12",
-            views: 542,
-            likes: 18,
-            answers: 3,
-            category: "HR",
-            isResolved: true,
-            tags: ["HR", "자격증", "취업"]
-          }
+          { id: 1, title: "신입 개발자 포트폴리오에 꼭 포함되어야 할 내용이 있을까요?", content: "...", author: "코딩초보", profileImage: "https://randomuser.me/api/portraits/men/32.jpg", date: "2023-11-28", views: 1254, likes: 56, answers: 8, category: "취업/이직", isResolved: true, tags: ["포트폴리오", "신입", "개발자"] },
+          { id: 2, title: "면접에서 '본인의 단점'을 물어볼 때 어떻게 대답하는 게 좋을까요?", content: "...", author: "면접준비생", profileImage: "https://randomuser.me/api/portraits/women/54.jpg", date: "2023-11-27", views: 986, likes: 42, answers: 12, category: "취업/이직", isResolved: true, tags: ["면접", "취업준비", "자기소개"] },
+          { id: 3, title: "React와 Next.js 중 취업에 더 유리한 기술은 무엇인가요?", content: "...", author: "프론트개발자", profileImage: "https://randomuser.me/api/portraits/men/45.jpg", date: "2023-11-25", views: 854, likes: 38, answers: 6, category: "개발", isResolved: false, tags: ["React", "Next.js", "프론트엔드", "취업"] },
+          { id: 4, title: "UX/UI 디자이너의 포트폴리오에는 어떤 프로젝트가 포함되어야 할까요?", content: "...", author: "디자인꿈나무", profileImage: "https://randomuser.me/api/portraits/women/33.jpg", date: "2023-11-22", views: 742, likes: 29, answers: 5, category: "디자인", isResolved: true, tags: ["UX/UI", "디자인", "포트폴리오"] },
+          { id: 5, title: "기획자로 이직하려면 어떤 경험이 필요할까요?", content: "...", author: "예비기획자", profileImage: "https://randomuser.me/api/portraits/men/22.jpg", date: "2023-11-20", views: 635, likes: 24, answers: 4, category: "기획", isResolved: false, tags: ["기획", "이직", "PM"] },
+          { id: 6, title: "첫 연봉 협상, 어떻게 준비해야 할까요?", content: "...", author: "연봉고민", profileImage: "https://randomuser.me/api/portraits/women/28.jpg", date: "2023-11-18", views: 892, likes: 47, answers: 9, category: "취업/이직", isResolved: true, tags: ["연봉협상", "취업", "신입"] },
+          { id: 7, title: "백엔드 개발자 로드맵 추천해주세요", content: "...", author: "백엔드지망생", profileImage: "https://randomuser.me/api/portraits/men/67.jpg", date: "2023-11-15", views: 723, likes: 35, answers: 7, category: "개발", isResolved: false, tags: ["백엔드", "개발자", "로드맵"] },
+          { id: 8, title: "HR 직무 취업 준비, 어떤 자격증이 도움이 될까요?", content: "...", author: "HR준비생", profileImage: "https://randomuser.me/api/portraits/women/42.jpg", date: "2023-11-12", views: 542, likes: 18, answers: 3, category: "HR", isResolved: true, tags: ["HR", "자격증", "취업"] },
+          { id: 9, title: "프론트엔드 개발자 포트폴리오 피드백 부탁드립니다", content: "...", author: "프론트초보", profileImage: "https://randomuser.me/api/portraits/men/1.jpg", date: "2023-11-10", views: 321, likes: 15, answers: 2, category: "개발", isResolved: false, tags: ["포트폴리오", "프론트엔드"] },
+          { id: 10, title: "백엔드 개발자에게 필요한 데이터베이스 지식", content: "...", author: "DB마스터", profileImage: "https://randomuser.me/api/portraits/women/2.jpg", date: "2023-11-08", views: 456, likes: 20, answers: 4, category: "개발", isResolved: true, tags: ["데이터베이스", "백엔드"] },
+          { id: 11, title: "UX/UI 디자이너에게 추천하는 툴", content: "...", author: "툴추천", profileImage: "https://randomuser.me/api/portraits/men/3.jpg", date: "2023-11-06", views: 123, likes: 5, answers: 1, category: "디자인", isResolved: false, tags: ["UX/UI", "툴"] },
+          { id: 12, title: "마케터에게 필요한 데이터 분석 능력", content: "...", author: "데이터마케터", profileImage: "https://randomuser.me/api/portraits/women/4.jpg", date: "2023-11-04", views: 789, likes: 30, answers: 6, category: "마케팅", isResolved: true, tags: ["데이터분석", "마케팅"] },
+          { id: 13, title: "기획자에게 필요한 커뮤니케이션 스킬", content: "...", author: "소통왕", profileImage: "https://randomuser.me/api/portraits/men/5.jpg", date: "2023-11-02", views: 987, likes: 40, answers: 8, category: "기획", isResolved: false, tags: ["커뮤니케이션", "기획"] },
+          { id: 14, title: "HR 담당자에게 필요한 법률 지식", content: "...", author: "법률전문가", profileImage: "https://randomuser.me/api/portraits/women/6.jpg", date: "2023-10-30", views: 654, likes: 25, answers: 3, category: "HR", isResolved: true, tags: ["법률", "HR"] },
+          { id: 15, title: "개발자에게 추천하는 알고리즘 문제 사이트", content: "...", author: "알고리즘매니아", profileImage: "https://randomuser.me/api/portraits/men/7.jpg", date: "2023-10-28", views: 1234, likes: 50, answers: 10, category: "개발", isResolved: false, tags: ["알고리즘", "코딩테스트"] },
+          { id: 16, title: "디자이너에게 필요한 코딩 지식", content: "...", author: "코딩디자이너", profileImage: "https://randomuser.me/api/portraits/women/8.jpg", date: "2023-10-26", views: 876, likes: 35, answers: 7, category: "디자인", isResolved: true, tags: ["코딩", "디자인"] },
+          { id: 17, title: "마케터에게 필요한 심리학 지식", content: "...", author: "심리마케터", profileImage: "https://randomuser.me/api/portraits/men/9.jpg", date: "2023-10-24", views: 543, likes: 20, answers: 2, category: "마케팅", isResolved: false, tags: ["심리학", "마케팅"] },
+          { id: 18, title: "기획자에게 필요한 시장 분석 능력", content: "...", author: "시장분석가", profileImage: "https://randomuser.me/api/portraits/women/10.jpg", date: "2023-10-22", views: 101, likes: 5, answers: 1, category: "기획", isResolved: true, tags: ["시장분석", "기획"] },
+          { id: 19, title: "HR 담당자에게 필요한 채용 트렌드", content: "...", author: "채용전문가", profileImage: "https://randomuser.me/api/portraits/men/11.jpg", date: "2023-10-20", views: 234, likes: 10, answers: 3, category: "HR", isResolved: false, tags: ["채용", "HR"] },
+          { id: 20, title: "개발자에게 추천하는 커뮤니티", content: "...", author: "커뮤니티매니아", profileImage: "https://randomuser.me/api/portraits/women/12.jpg", date: "2023-10-18", views: 567, likes: 15, answers: 4, category: "개발", isResolved: true, tags: ["커뮤니티", "개발자"] },
+          { id: 21, title: "디자이너에게 필요한 포토샵 스킬", content: "...", author: "포토샵장인", profileImage: "https://randomuser.me/api/portraits/men/13.jpg", date: "2023-10-16", views: 890, likes: 20, answers: 5, category: "디자인", isResolved: false, tags: ["포토샵", "디자인"] },
+          { id: 22, title: "마케터에게 필요한 글쓰기 능력", content: "...", author: "글쓰기마케터", profileImage: "https://randomuser.me/api/portraits/women/14.jpg", date: "2023-10-14", views: 123, likes: 2, answers: 0, category: "마케팅", isResolved: true, tags: ["글쓰기", "마케팅"] },
+          { id: 23, title: "기획자에게 필요한 데이터 시각화", content: "...", author: "데이터시각화", profileImage: "https://randomuser.me/api/portraits/men/15.jpg", date: "2023-10-12", views: 456, likes: 8, answers: 1, category: "기획", isResolved: false, tags: ["데이터시각화", "기획"] },
+          { id: 24, title: "HR 담당자에게 필요한 협상 스킬", content: "...", author: "협상전문가", profileImage: "https://randomuser.me/api/portraits/women/16.jpg", date: "2023-10-10", views: 789, likes: 15, answers: 3, category: "HR", isResolved: true, tags: ["협상", "HR"] }
         ];
         
-        setQuestions(dummyQuestions);
+        const startIndex = (page - 1) * 8; // 페이지당 8개 게시물
+        const endIndex = startIndex + 8;
+        const newQuestions = dummyQuestions.slice(startIndex, endIndex);
+
+        setQuestions((prevQuestions) => [...prevQuestions, ...newQuestions]);
+        setHasMore(endIndex < dummyQuestions.length);
         setLoading(false);
       }, 800);
     };
     
     fetchData();
-  }, []);
+  }, [page]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (loader.current) {
+      observer.observe(loader.current);
+    }
+
+    return () => {
+      if (loader.current) {
+        observer.unobserve(loader.current);
+      }
+    };
+  }, [hasMore, loading]);
   
   // 질문 필터링
   const filteredQuestions = questions.filter(question => {

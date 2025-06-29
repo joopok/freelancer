@@ -30,6 +30,9 @@ export default function CommunityStudyPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const loader = useRef(null);
 
   // 스크롤 위치 추적
   useEffect(() => {
@@ -44,106 +47,33 @@ export default function CommunityStudyPage() {
   // 데이터 가져오기
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [page]);
 
   // 모의 데이터 가져오기 함수
   const fetchData = () => {
     // 실제 API 호출을 대신하는 모의 데이터
     const mockStudies: Study[] = [
-      {
-        id: 1,
-        title: "프론트엔드 개발자를 위한 React/Next.js 스터디",
-        description: "React와 Next.js를 함께 공부하는 스터디입니다. 주 1회 온라인으로 진행되며, 실제 프로젝트를 통해 실전 경험을 쌓을 수 있습니다.",
-        author: "김개발",
-        profileImage: "https://randomuser.me/api/portraits/men/32.jpg",
-        date: "2023-03-10",
-        participants: 8,
-        maxParticipants: 10,
-        location: "온라인/줌",
-        tags: ["React", "Next.js", "프론트엔드"],
-        category: "개발",
-        isRecruiting: true,
-        imageUrl: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
-      },
-      {
-        id: 2,
-        title: "백엔드 개발자 모임: Node.js와 Express 마스터하기",
-        description: "백엔드 개발에 관심 있는 개발자들의 모임입니다. Node.js와 Express를 중심으로 백엔드 아키텍처와 API 설계를 학습합니다.",
-        author: "이서버",
-        profileImage: "https://randomuser.me/api/portraits/women/44.jpg",
-        date: "2023-03-12",
-        participants: 12,
-        maxParticipants: 15,
-        location: "강남 스터디룸",
-        tags: ["Node.js", "Express", "백엔드"],
-        category: "개발",
-        isRecruiting: true
-      },
-      {
-        id: 3,
-        title: "UI/UX 디자인 스터디: 사용자 중심 디자인의 이해",
-        description: "사용자 중심 디자인을 탐구하는 UI/UX 디자인 스터디입니다. 매주 실제 사례를 분석하고 디자인 과제를 수행합니다.",
-        author: "박디자인",
-        profileImage: "https://randomuser.me/api/portraits/women/68.jpg",
-        date: "2023-03-15",
-        participants: 6,
-        maxParticipants: 8,
-        location: "선릉역 카페",
-        tags: ["UI", "UX", "디자인"],
-        category: "디자인",
-        isRecruiting: true,
-        imageUrl: "https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2000&q=80"
-      },
-      {
-        id: 4,
-        title: "Python 데이터 사이언스 스터디",
-        description: "Python을 활용한 데이터 분석과 머신러닝을 학습하는 스터디입니다. 기초부터 실전 프로젝트까지 단계별로 진행됩니다.",
-        author: "최데이터",
-        profileImage: "https://randomuser.me/api/portraits/men/75.jpg",
-        date: "2023-03-18",
-        participants: 15,
-        maxParticipants: 20,
-        location: "온라인/디스코드",
-        tags: ["Python", "데이터분석", "머신러닝"],
-        category: "데이터",
-        isRecruiting: true
-      },
-      {
-        id: 5,
-        title: "취업 준비생을 위한 포트폴리오 및 면접 스터디",
-        description: "IT 취업을 준비하는 분들을 위한 포트폴리오 리뷰와 모의 면접을 진행하는 스터디입니다.",
-        author: "정취업",
-        profileImage: "https://randomuser.me/api/portraits/women/90.jpg",
-        date: "2023-03-20",
-        participants: 10,
-        maxParticipants: 12,
-        location: "홍대입구역 스터디카페",
-        tags: ["취업", "포트폴리오", "면접"],
-        category: "취업/이직",
-        isRecruiting: false
-      },
-      {
-        id: 6,
-        title: "모바일 앱 개발 스터디: Flutter & Swift",
-        description: "크로스 플랫폼 및 네이티브 앱 개발을 학습하는 스터디입니다. Flutter와 Swift를 중심으로 실제 앱을 개발합니다.",
-        author: "조모바일",
-        profileImage: "https://randomuser.me/api/portraits/men/42.jpg",
-        date: "2023-03-22",
-        participants: 7,
-        maxParticipants: 10,
-        location: "강남 토즈",
-        tags: ["Flutter", "Swift", "앱개발"],
-        category: "개발",
-        isRecruiting: true,
-        imageUrl: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80"
-      }
+      { id: 1, title: "프론트엔드 개발자를 위한 React/Next.js 스터디", description: "...", author: "김개발", profileImage: "https://randomuser.me/api/portraits/men/32.jpg", date: "2023-03-10", participants: 8, maxParticipants: 10, location: "온라인/줌", tags: ["React", "Next.js", "프론트엔드"], category: "개발", isRecruiting: true, imageUrl: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" },
+      { id: 2, title: "백엔드 개발자 모임: Node.js와 Express 마스터하기", description: "...", author: "이서버", profileImage: "https://randomuser.me/api/portraits/women/44.jpg", date: "2023-03-12", participants: 12, maxParticipants: 15, location: "강남 스터디룸", tags: ["Node.js", "Express", "백엔드"], category: "개발", isRecruiting: true },
+      { id: 3, title: "UI/UX 디자인 스터디: 사용자 중심 디자인의 이해", description: "...", author: "박디자인", profileImage: "https://randomuser.me/api/portraits/women/68.jpg", date: "2023-03-15", participants: 6, maxParticipants: 8, location: "선릉역 카페", tags: ["UI", "UX", "디자인"], category: "디자인", isRecruiting: true, imageUrl: "https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2000&q=80" },
+      { id: 4, title: "Python 데이터 사이언스 스터디", description: "...", author: "최데이터", profileImage: "https://randomuser.me/api/portraits/men/75.jpg", date: "2023-03-18", participants: 15, maxParticipants: 20, location: "온라인/디스코드", tags: ["Python", "데이터분석", "머신러닝"], category: "데이터", isRecruiting: true },
+      { id: 5, title: "취업 준비생을 위한 포트폴리오 및 면접 스터디", description: "...", author: "정취업", profileImage: "https://randomuser.me/api/portraits/women/90.jpg", date: "2023-03-20", participants: 10, maxParticipants: 12, location: "홍대입구역 스터디카페", tags: ["취업", "포트폴리오", "면접"], category: "취업/이직", isRecruiting: false },
+      { id: 6, title: "모바일 앱 개발 스터디: Flutter & Swift", description: "...", author: "조모바일", profileImage: "https://randomuser.me/api/portraits/men/42.jpg", date: "2023-03-22", participants: 7, maxParticipants: 10, location: "강남 토즈", tags: ["Flutter", "Swift", "앱개발"], category: "개발", isRecruiting: true, imageUrl: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80" },
+      { id: 7, title: "클라우드 컴퓨팅 스터디", description: "...", author: "클라우드맨", profileImage: "https://randomuser.me/api/portraits/men/1.jpg", date: "2023-03-25", participants: 5, maxParticipants: 8, location: "온라인", tags: ["클라우드", "AWS"], category: "개발", isRecruiting: true },
+      { id: 8, title: "인공지능 스터디", description: "...", author: "AI마스터", profileImage: "https://randomuser.me/api/portraits/women/2.jpg", date: "2023-03-28", participants: 10, maxParticipants: 12, location: "판교", tags: ["AI", "머신러닝"], category: "데이터", isRecruiting: true },
+      { id: 9, title: "블록체인 개발 스터디", description: "...", author: "블록체인전문가", profileImage: "https://randomuser.me/api/portraits/men/3.jpg", date: "2023-03-30", participants: 7, maxParticipants: 10, location: "강남", tags: ["블록체인", "솔리디티"], category: "개발", isRecruiting: true },
+      { id: 10, title: "데이터 시각화 스터디", description: "...", author: "시각화전문가", profileImage: "https://randomuser.me/api/portraits/women/4.jpg", date: "2023-04-02", participants: 8, maxParticipants: 10, location: "온라인", tags: ["데이터시각화", "태블로"], category: "데이터", isRecruiting: true },
+      { id: 11, title: "서비스 기획 스터디", description: "...", author: "기획자", profileImage: "https://randomuser.me/api/portraits/men/5.jpg", date: "2023-04-05", participants: 6, maxParticipants: 8, location: "강남", tags: ["서비스기획", "PM"], category: "기획", isRecruiting: true },
+      { id: 12, title: "UX 리서치 스터디", description: "...", author: "UX리서처", profileImage: "https://randomuser.me/api/portraits/women/6.jpg", date: "2023-04-08", participants: 4, maxParticipants: 6, location: "홍대", tags: ["UX리서치", "사용자경험"], category: "디자인", isRecruiting: true }
     ];
     
-    // 로딩 상태 표시 후 데이터 설정
-    setTimeout(() => {
-      setStudies(mockStudies);
-      setLoading(false);
-    }, 1000);
+    const startIndex = (page - 1) * 8; // 페이지당 8개 게시물
+    const endIndex = startIndex + 8;
+    const newStudies = mockStudies.slice(startIndex, endIndex);
+
+    setStudies((prevStudies) => [...prevStudies, ...newStudies]);
+    setHasMore(endIndex < mockStudies.length);
+    setLoading(false);
   };
 
   // 필터링 토글 함수

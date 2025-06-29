@@ -90,13 +90,7 @@ export default function Header() {
     };
   }, [activeMenu]);
 
-  const handleLoginClick = () => {
-    setLoading(true, '로그인 페이지 이동');
-    router.push('/login');
-    setTimeout(() => {
-      setLoading(false, '로그인 페이지 이동 완료');
-    }, 1000);
-  };
+  
 
   const handleLogout = async () => {
     try {
@@ -151,35 +145,7 @@ export default function Header() {
     setActiveMenu(null);
   };
 
-  // 페이지 이동 함수
-  const navigateTo = (href: string) => {
-    console.log('Navigating to:', href); // 디버깅용 로그
-    try {
-      setLoading(true);
-      
-      // 현재 경로와 동일한 경우 리로드
-      if (pathname === href) {
-        console.log('Same page, reloading...');
-        window.location.reload();
-        return;
-      }
-      
-      // Next.js router를 먼저 시도
-      console.log('Attempting router.push...');
-      router.push(href);
-      console.log('Navigation completed to:', href);
-      
-    } catch (error) {
-      console.error('Router navigation failed, trying window.location:', error);
-      // fallback으로 window.location 사용
-      window.location.href = href;
-    } finally {
-      // 페이지 이동 후 로딩 상태 해제
-      setTimeout(() => {
-        setLoading(false);
-      }, 500);
-    }
-  };
+  
 
   // 메뉴 아이템 정의 (블로그에 서브메뉴 추가)
   const menuItems: MenuItem[] = [
@@ -225,9 +191,15 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           {/* 로고 */}
           <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-blue-600">JobKorea</span>
-              <span className="ml-2 text-lg text-gray-600">Billboard</span>
+            <Link href="/" className="flex items-center group">
+              <motion.span 
+                className="text-2xl font-bold text-blue-600"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6, ease: "easeInOut" }}
+              >
+                JobKorea
+              </motion.span>
+              <span className="ml-2 text-lg text-gray-600 dark:text-gray-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-300">Billboard</span>
             </Link>
           </div>
 
@@ -244,12 +216,6 @@ export default function Header() {
                   <Link
                     href={item.href}
                     className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-lg font-medium transition-colors duration-200"
-                    onClick={(e) => {
-                      // 기본 링크 동작을 막고 커스텀 네비게이션 사용
-                      e.preventDefault();
-                      console.log('Menu clicked:', item.label, item.href); // 디버깅용 로그
-                      navigateTo(item.href);
-                    }}
                   >
                     {item.label}
                   </Link>
@@ -269,12 +235,6 @@ export default function Header() {
                             key={subItem.href}
                             href={subItem.href}
                             className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 first:rounded-t-md last:rounded-b-md transition-colors duration-200"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              console.log('Submenu clicked:', subItem.label, subItem.href); // 디버깅용 로그
-                              setActiveMenu(null);
-                              navigateTo(subItem.href);
-                            }}
                           >
                             {subItem.icon}
                             {subItem.label}
@@ -325,10 +285,6 @@ export default function Header() {
                   <Link
                     href="/login"
                     className="relative text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 hover:from-purple-600 hover:to-pink-600 dark:hover:from-purple-400 dark:hover:to-pink-400 transition-all duration-300"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleLoginClick();
-                    }}
                   >
                     로그인
                   </Link>
@@ -343,7 +299,7 @@ export default function Header() {
                     className="relative px-6 py-2 text-base font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-lg overflow-hidden group shadow-lg hover:shadow-xl transition-all duration-300"
                     onClick={(e) => {
                       e.preventDefault();
-                      navigateTo('/register');
+                      router.push('/register');
                     }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -391,12 +347,7 @@ export default function Header() {
                 <Link
                   href={item.href}
                   className="block px-3 py-2 text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    console.log('Mobile menu clicked:', item.label, item.href); // 디버깅용 로그
-                    setIsMenuOpen(false);
-                    navigateTo(item.href);
-                  }}
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
                 </Link>
@@ -408,12 +359,7 @@ export default function Header() {
                         key={subItem.href}
                         href={subItem.href}
                         className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          console.log('Mobile submenu clicked:', subItem.label, subItem.href); // 디버깅용 로그
-                          setIsMenuOpen(false);
-                          navigateTo(subItem.href);
-                        }}
+                        onClick={() => setIsMenuOpen(false)}
                       >
                         {subItem.label}
                       </Link>

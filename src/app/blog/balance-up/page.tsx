@@ -165,7 +165,7 @@ export default function BalanceUpPage() {
           </p>
         </div>
               
-        <BlogMenuSearch />
+        <BlogMenuSearch currentPage="balance-up" />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 메인 콘텐츠 영역 */}

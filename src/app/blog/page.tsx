@@ -637,7 +637,7 @@ export default function BlogPage() {
         </div>
       </header>
 
-      <BlogMenuSearch /> 
+      <BlogMenuSearch currentPage="all" /> 
 
       {/* 블로그 섹션들 */}
       <div className="max-w-7xl mx-auto px-4 py-8">

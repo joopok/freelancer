@@ -31,6 +31,9 @@ export default function CommunitySharePage() {
   const [scrollY, setScrollY] = useState(0);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const loader = useRef(null);
 
   // 스크롤 위치 추적
   useEffect(() => {
@@ -45,106 +48,39 @@ export default function CommunitySharePage() {
   // 데이터 가져오기
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [page]);
 
   // 모의 데이터 가져오기 함수
   const fetchData = () => {
     // 실제 API 호출을 대신하는 모의 데이터
     const mockItems: SharedItem[] = [
-      {
-        id: 1,
-        title: "2023년 개발자 이력서 템플릿 공유",
-        description: "취업 성공한 개발자 이력서 템플릿입니다. 깔끔한 디자인과 핵심 역량을 잘 보여줄 수 있는 구조로 되어 있습니다.",
-        author: "김개발",
-        profileImage: "https://randomuser.me/api/portraits/men/32.jpg",
-        date: "2023-03-10",
-        likes: 128,
-        views: 1024,
-        shares: 56,
-        contentType: "template",
-        tags: ["이력서", "취업", "템플릿"],
-        thumbnailUrl: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80",
-        resourceUrl: "https://example.com/resume-template"
-      },
-      {
-        id: 2,
-        title: "프론트엔드 개발자를 위한 유용한 VS Code 확장 프로그램 모음",
-        description: "생산성을 높여주는 VS Code 확장 프로그램 리스트입니다. 코드 자동완성, 린팅, 디버깅 등 다양한 기능을 제공하는 확장 프로그램을 소개합니다.",
-        author: "이프론트",
-        profileImage: "https://randomuser.me/api/portraits/women/44.jpg",
-        date: "2023-03-12",
-        likes: 85,
-        views: 750,
-        shares: 32,
-        contentType: "resource",
-        tags: ["VS Code", "개발도구", "프론트엔드"],
-        thumbnailUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
-      },
-      {
-        id: 3,
-        title: "개발자 포트폴리오 사이트 제작 가이드",
-        description: "취업에 도움이 되는 포트폴리오 사이트 제작 방법을 정리했습니다. Next.js와 Tailwind CSS를 활용한 모던 웹사이트 제작 방법을 단계별로 설명합니다.",
-        author: "박디자인",
-        profileImage: "https://randomuser.me/api/portraits/women/68.jpg",
-        date: "2023-03-15",
-        likes: 64,
-        views: 512,
-        shares: 28,
-        contentType: "article",
-        tags: ["포트폴리오", "Next.js", "Tailwind CSS"],
-        thumbnailUrl: "https://images.unsplash.com/photo-1522542550221-31fd19575a2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80",
-        resourceUrl: "https://example.com/portfolio-guide"
-      },
-      {
-        id: 4,
-        title: "무료 API 모음 - 사이드 프로젝트를 위한 데이터 소스",
-        description: "사이드 프로젝트에 활용할 수 있는 무료 API 목록입니다. 날씨, 주식, 영화, 음악 등 다양한 분야의 API를 소개합니다.",
-        author: "최백엔드",
-        profileImage: "https://randomuser.me/api/portraits/men/75.jpg",
-        date: "2023-03-18",
-        likes: 96,
-        views: 678,
-        shares: 42,
-        contentType: "resource",
-        tags: ["API", "사이드프로젝트", "데이터"],
-        thumbnailUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
-      },
-      {
-        id: 5,
-        title: "개발자 로드맵 2023 - 프론트엔드, 백엔드, DevOps",
-        description: "2023년 개발자가 되기 위한 로드맵입니다. 각 분야별 필수 기술과 학습 순서를 정리했습니다.",
-        author: "정멘토",
-        profileImage: "https://randomuser.me/api/portraits/women/90.jpg",
-        date: "2023-03-20",
-        likes: 112,
-        views: 890,
-        shares: 64,
-        contentType: "article",
-        tags: ["로드맵", "커리어", "학습"],
-        thumbnailUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80",
-        resourceUrl: "https://example.com/developer-roadmap"
-      },
-      {
-        id: 6,
-        title: "프로그래밍 알고리즘 문제 해결 전략",
-        description: "코딩 테스트와 알고리즘 문제를 효율적으로 해결하는 방법을 공유합니다. 자주 등장하는 알고리즘 패턴과 해결 접근법을 소개합니다.",
-        author: "조알고",
-        profileImage: "https://randomuser.me/api/portraits/men/42.jpg",
-        date: "2023-03-22",
-        likes: 78,
-        views: 546,
-        shares: 38,
-        contentType: "article",
-        tags: ["알고리즘", "코딩테스트", "문제해결"],
-        thumbnailUrl: "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
-      }
+      { id: 1, title: "2023년 개발자 이력서 템플릿 공유", description: "...", author: "김개발", profileImage: "https://randomuser.me/api/portraits/men/32.jpg", date: "2023-03-10", likes: 128, views: 1024, shares: 56, contentType: "template", tags: ["이력서", "취업", "템플릿"], thumbnailUrl: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80", resourceUrl: "https://example.com/resume-template" },
+      { id: 2, title: "프론트엔드 개발자를 위한 유용한 VS Code 확장 프로그램 모음", description: "...", author: "이프론트", profileImage: "https://randomuser.me/api/portraits/women/44.jpg", date: "2023-03-12", likes: 85, views: 750, shares: 32, contentType: "resource", tags: ["VS Code", "개발도구", "프론트엔드"], thumbnailUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" },
+      { id: 3, title: "개발자 포트폴리오 사이트 제작 가이드", description: "...", author: "박디자인", profileImage: "https://randomuser.me/api/portraits/women/68.jpg", date: "2023-03-15", likes: 64, views: 512, shares: 28, contentType: "article", tags: ["포트폴리오", "Next.js", "Tailwind CSS"], thumbnailUrl: "https://images.unsplash.com/photo-1522542550221-31fd19575a2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80", resourceUrl: "https://example.com/portfolio-guide" },
+      { id: 4, title: "무료 API 모음 - 사이드 프로젝트를 위한 데이터 소스", description: "...", author: "최백엔드", profileImage: "https://randomuser.me/api/portraits/men/75.jpg", date: "2023-03-18", likes: 96, views: 678, shares: 42, contentType: "resource", tags: ["API", "사이드프로젝트", "데이터"], thumbnailUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" },
+      { id: 5, title: "개발자 로드맵 2023 - 프론트엔드, 백엔드, DevOps", description: "...", author: "정멘토", profileImage: "https://randomuser.me/api/portraits/women/90.jpg", date: "2023-03-20", likes: 112, views: 890, shares: 64, contentType: "article", tags: ["로드맵", "커리어", "학습"], thumbnailUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80", resourceUrl: "https://example.com/developer-roadmap" },
+      { id: 6, title: "프로그래밍 알고리즘 문제 해결 전략", description: "...", author: "조알고", profileImage: "https://randomuser.me/api/portraits/men/42.jpg", date: "2023-03-22", likes: 78, views: 546, shares: 38, contentType: "article", tags: ["알고리즘", "코딩테스트", "문제해결"], thumbnailUrl: "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" },
+      { id: 7, title: "클린 코드 작성법", description: "...", author: "클린코더", profileImage: "https://randomuser.me/api/portraits/men/1.jpg", date: "2023-03-25", likes: 150, views: 1200, shares: 70, contentType: "article", tags: ["클린코드", "개발"], thumbnailUrl: "https://images.unsplash.com/photo-1504384308090-c894fd248f46?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" },
+      { id: 8, title: "Git & GitHub 완벽 가이드", description: "...", author: "깃마스터", profileImage: "https://randomuser.me/api/portraits/women/2.jpg", date: "2023-03-28", likes: 90, views: 800, shares: 40, contentType: "resource", tags: ["Git", "GitHub", "버전관리"], thumbnailUrl: "https://images.unsplash.com/photo-1593642532842-98d0fd5f8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" },
+      { id: 9, title: "개발자를 위한 생산성 도구 모음", description: "...", author: "생산성덕후", profileImage: "https://randomuser.me/api/portraits/men/3.jpg", date: "2023-03-30", likes: 110, views: 950, shares: 50, contentType: "tool", tags: ["생산성", "개발도구"], thumbnailUrl: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" },
+      { id: 10, title: "면접 대비 알고리즘 문제 풀이", description: "...", author: "코딩고수", profileImage: "https://randomuser.me/api/portraits/women/4.jpg", date: "2023-04-02", likes: 130, views: 1100, shares: 60, contentType: "article", tags: ["알고리즘", "면접"], thumbnailUrl: "https://images.unsplash.com/photo-1520004434532-cd668035079d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" },
+      { id: 11, title: "개발자를 위한 효과적인 커뮤니케이션 전략", description: "...", author: "소통전문가", profileImage: "https://randomuser.me/api/portraits/men/5.jpg", date: "2023-04-05", likes: 70, views: 600, shares: 30, contentType: "article", tags: ["커뮤니케이션", "소프트스킬"], thumbnailUrl: "https://images.unsplash.com/photo-1521737711867-ee1bd4808bd9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" },
+      { id: 12, title: "웹 개발자를 위한 디자인 시스템 가이드", description: "...", author: "디자인시스템", profileImage: "https://randomuser.me/api/portraits/women/6.jpg", date: "2023-04-08", likes: 95, views: 850, shares: 45, contentType: "resource", tags: ["디자인시스템", "웹개발"], thumbnailUrl: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" },
+      { id: 13, title: "2023년 개발자 이력서 템플릿 공유 2", description: "...", author: "김개발", profileImage: "https://randomuser.me/api/portraits/men/32.jpg", date: "2023-03-10", likes: 128, views: 1024, shares: 56, contentType: "template", tags: ["이력서", "취업", "템플릿"], thumbnailUrl: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80", resourceUrl: "https://example.com/resume-template" },
+      { id: 14, title: "프론트엔드 개발자를 위한 유용한 VS Code 확장 프로그램 모음 2", description: "...", author: "이프론트", profileImage: "https://randomuser.me/api/portraits/women/44.jpg", date: "2023-03-12", likes: 85, views: 750, shares: 32, contentType: "resource", tags: ["VS Code", "개발도구", "프론트엔드"], thumbnailUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" },
+      { id: 15, title: "개발자 포트폴리오 사이트 제작 가이드 2", description: "...", author: "박디자인", profileImage: "https://randomuser.me/api/portraits/women/68.jpg", date: "2023-03-15", likes: 64, views: 512, shares: 28, contentType: "article", tags: ["포트폴리오", "Next.js", "Tailwind CSS"], thumbnailUrl: "https://images.unsplash.com/photo-1522542550221-31fd19575a2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80", resourceUrl: "https://example.com/portfolio-guide" },
+      { id: 16, title: "무료 API 모음 - 사이드 프로젝트를 위한 데이터 소스 2", description: "...", author: "최백엔드", profileImage: "https://randomuser.me/api/portraits/men/75.jpg", date: "2023-03-18", likes: 96, views: 678, shares: 42, contentType: "resource", tags: ["API", "사이드프로젝트", "데이터"], thumbnailUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" },
+      { id: 17, title: "개발자 로드맵 2023 - 프론트엔드, 백엔드, DevOps 2", description: "...", author: "정멘토", profileImage: "https://randomuser.me/api/portraits/women/90.jpg", date: "2023-03-20", likes: 112, views: 890, shares: 64, contentType: "article", tags: ["로드맵", "커리어", "학습"], thumbnailUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80", resourceUrl: "https://example.com/developer-roadmap" },
+      { id: 18, title: "프로그래밍 알고리즘 문제 해결 전략 2", description: "...", author: "조알고", profileImage: "https://randomuser.me/api/portraits/men/42.jpg", date: "2023-03-22", likes: 78, views: 546, shares: 38, contentType: "article", tags: ["알고리즘", "코딩테스트", "문제해결"], thumbnailUrl: "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" }
     ];
     
-    // 로딩 상태 표시 후 데이터 설정
-    setTimeout(() => {
-      setSharedItems(mockItems);
-      setLoading(false);
-    }, 1000);
+    const startIndex = (page - 1) * 8; // 페이지당 8개 게시물
+    const endIndex = startIndex + 8;
+    const newItems = mockItems.slice(startIndex, endIndex);
+
+    setSharedItems((prevItems) => [...prevItems, ...newItems]);
+    setHasMore(endIndex < mockItems.length);
+    setLoading(false);
   };
 
   // 필터링 토글 함수
@@ -524,17 +460,13 @@ export default function CommunitySharePage() {
         
         {/* 더 보기 버튼 */}
         {!loading && filteredItems.length > 0 && (
-          <div className="flex justify-center mt-10">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 shadow-sm text-base font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300"
-            >
+          <div className="mt-12 text-center">
+            <button className="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 shadow-sm text-base font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300">
               더 많은 공유 자료 보기
-              <svg className="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m0 0V4m0 15L10 8" />
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
-            </motion.button>
+            </button>
           </div>
         )}
       </div>

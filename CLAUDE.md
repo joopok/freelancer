@@ -269,7 +269,58 @@ const navigateTo = (href: string) => {
 - Loading state management during page transitions
 - Conditional rendering based on authentication status
 
+### Multi-Search Functionality
+- Implemented advanced multi-search input component (`MultiSearchInput.tsx`)
+- Tag-based search system with Enter to add, X to remove functionality
+- Integrated across freelancer, on-site project, and remote project pages
+- AND condition search logic for enhanced filtering accuracy
+
+### Sorting & Filtering Systems
+- Added comprehensive sorting options: rating, experience, view count, duration, budget
+- Implemented clickable sort buttons with visual state indicators
+- Fixed data parsing issues (e.g., "3개월" duration parsing)
+- Unified sorting behavior across all project and freelancer pages
+
+### Performance & Code Quality
+- Unified loading indicator colors across pages (`border-blue-600 dark:border-blue-400`)
+- Git-based file restoration for corrupted files during development
+- Memory and performance optimizations with webpack chunk splitting
+- Bundle analysis tools for optimization insights
+
 ### Project Structure Optimization
 - Cleaned up unused components and CSS files
 - Consolidated file structure and removed redundant code
 - Added dynamic routing for athome, freelancer, and project detail pages
+
+## Data Parsing Patterns
+
+### Duration Field Handling
+```typescript
+// Parse Korean duration strings (e.g., "3개월")
+const durationA = parseInt(a.duration.replace(/[^0-9]/g, ''));
+const durationB = parseInt(b.duration.replace(/[^0-9]/g, ''));
+return durationB - durationA; // Descending order
+```
+
+### Experience Level Filtering
+```typescript
+// Experience filtering with years extraction
+const yearsExp = parseInt(freelancer.experience);
+const matchesExperience = selectedExperience === '' ||
+  (selectedExperience === '3' && yearsExp <= 3) ||
+  (selectedExperience === '6' && yearsExp <= 6) ||
+  // ... additional conditions
+```
+
+## File Restoration & Development Safety
+
+### Git-Based Recovery
+```bash
+# Restore corrupted files during development
+git checkout HEAD -- [filename]
+```
+
+### Common File Corruption Scenarios
+- TypeScript files with 800+ errors after edit operations
+- Files affected: `athome/page.tsx`, `freelancer/page.tsx`
+- Recovery pattern: Git restore → Re-apply changes incrementally

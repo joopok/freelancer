@@ -165,7 +165,7 @@ export default function SiliconValleyAIPage() {
           </p>
         </div>
               
-        <BlogMenuSearch />
+        <BlogMenuSearch currentPage="silicon-valley-ai" />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 메인 콘텐츠 영역 */}
