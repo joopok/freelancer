@@ -94,11 +94,11 @@ export default function BlogCategoriesPage() {
   ];
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 인터랙티브 블로그 헤더 */}
       <div className="relative overflow-hidden">
         {/* 배경 그래디언트 및 패턴 */}
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-500 z-0" />
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-500 dark:from-gray-800 dark:to-gray-700 z-0" />
         
         {/* 배경 패턴 */}
         <div 
@@ -227,20 +227,20 @@ export default function BlogCategoriesPage() {
                 href={`/blog?category=${category.id}`}
                 className="block group h-full"
               >
-                <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+                <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md dark:shadow-gray-900/50 hover:shadow-lg dark:hover:shadow-gray-900/70 transition-shadow duration-300 h-full flex flex-col">
                   <div className="p-8 flex flex-col flex-grow">
-                    <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-indigo-200 transition-colors">
-                      <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center mb-6 group-hover:bg-indigo-200 dark:group-hover:bg-indigo-800/70 transition-colors">
+                      <svg className="w-8 h-8 text-indigo-600 dark:text-indigo-400 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={category.icon} />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2 text-gray-800 flex items-center">
+                    <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white flex items-center">
                       {category.name}
-                      <span className="ml-2 text-sm text-gray-500 font-normal">({category.count})</span>
+                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400 font-normal">({category.count})</span>
                     </h3>
-                    <p className="text-gray-600 mb-4 flex-grow">{category.description}</p>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 flex-grow">{category.description}</p>
                     <div className="mt-auto">
-                      <span className="text-indigo-600 flex items-center group-hover:text-indigo-800">
+                      <span className="text-indigo-600 dark:text-indigo-400 flex items-center group-hover:text-indigo-800 dark:text-indigo-300">
                         더 보기
                         <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

@@ -24,10 +24,10 @@ export default function SiliconValleyPage() {
   }, [setLoading]);
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 p-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">실리콘밸리</h1>
-        <p className="text-gray-600">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">실리콘밸리</h1>
+        <p className="text-gray-600 dark:text-gray-300">
           실리콘밸리의 최신 소식과 트렌드, 스타트업 동향을 소개합니다.
         </p>
       </div>

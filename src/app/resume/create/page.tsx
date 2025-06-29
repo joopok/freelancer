@@ -14,8 +14,8 @@ export default function CreateResume() {
     careers: [] as CareerHistory[],
   });
 
-  const handleFileSelect = (file: File) => {
-    console.log('Selected file:', file);
+  const handleFileSelect = (files: File[]) => {
+    console.log('Selected files:', files);
     // 파일 처리 로직 구현
   };
 

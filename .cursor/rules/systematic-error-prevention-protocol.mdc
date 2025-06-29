@@ -1,0 +1,393 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 🚨 **SYSTEMATIC ERROR PREVENTION PROTOCOL**
+
+**MISSION CRITICAL MANDATE**: This protocol is derived from systematic analysis of catastrophic failures during Next.js development. Every rule is **NON-NEGOTIABLE** and represents lessons learned from actual project-breaking mistakes.
+
+---
+
+## 📊 **FAILURE PATTERN ANALYSIS**
+
+### **🔴 CRITICAL FAILURE MODES IDENTIFIED**
+
+1. **Server/Client Component Boundary Violations** (PROJECT BREAKING)
+   - **Root Cause**: Misunderstanding React 18+ Server Component execution model
+   - **Manifestation**: `useContext` called in server environment → `Cannot read properties of null`
+   - **Impact**: Complete application failure, development server crash
+
+2. **Library Integration Cascade Failures** (SYSTEM WIDE)
+   - **Root Cause**: Partial implementation without understanding complete requirements
+   - **Manifestation**: Missing providers, incomplete configuration, middleware failures
+   - **Impact**: Multiple hours of debugging, system-wide instability
+
+3. **Cognitive Bias-Driven Problem Solving** (PROCESS FAILURE)
+   - **Root Cause**: Tunnel vision on error messages instead of root cause analysis
+   - **Manifestation**: Reactive fixes that create new problems
+   - **Impact**: Technical debt accumulation, repeated failures
+
+4. **Self-Rule Violation Syndrome** (META FAILURE)
+   - **Root Cause**: Creating rules but not following them systematically
+   - **Manifestation**: Ignoring own established protocols
+   - **Impact**: Loss of development discipline, unpredictable outcomes
+
+---
+
+## 🛡️ **CRITICAL ERROR PREVENTION RULES**
+
+### **RULE C1: SERVER/CLIENT COMPONENT STRICT VERIFICATION**
+**TRIGGER**: Before using ANY React hook, context, or client-side API
+
+**MANDATORY VERIFICATION SEQUENCE**:
+```typescript
+// STEP 1: Component Classification Check
+// Ask: "Is this component running on server or client?"
+// Verify: Check for 'use client' directive AND execution context
+
+// STEP 2: API Compatibility Matrix
+const COMPATIBILITY_MATRIX = {
+  'useState': 'CLIENT_ONLY',
+  'useEffect': 'CLIENT_ONLY', 
+  'useContext': 'CLIENT_ONLY',
+  'AnimatePresence': 'CLIENT_ONLY', // ← KEY LEARNING
+  'framer-motion': 'CLIENT_ONLY',
+  'useTranslations': 'UNIVERSAL',
+  'getMessages': 'SERVER_ONLY'
+};
+
+// STEP 3: Environment Verification
+if (COMPATIBILITY_MATRIX[api] === 'CLIENT_ONLY' && !hasUseClientDirective) {
+  throw new Error('CLIENT_ONLY API used in Server Component');
+}
+```
+
+**VERIFICATION CHECKLIST**:
+- [ ] Component has explicit 'use client' directive if using client APIs
+- [ ] No client-only hooks in Server Components
+- [ ] No server-only APIs in Client Components
+- [ ] Layout components verified for server/client boundary compliance
+
+---
+
+### **RULE C2: LIBRARY INTEGRATION HOLISTIC VERIFICATION**
+**TRIGGER**: Before integrating ANY new library
+
+**MANDATORY INTEGRATION PROTOCOL**:
+
+**PHASE 1: COMPREHENSIVE DOCUMENTATION ANALYSIS**
+```bash
+# STEP 1: Documentation Deep Dive (NON-NEGOTIABLE)
+# Read ENTIRE official documentation, not just quick start
+# Focus areas:
+# - Server-side rendering compatibility
+# - Next.js App Router specific requirements
+# - Provider setup requirements
+# - Middleware configuration needs
+
+# STEP 2: Compatibility Matrix Creation
+LIBRARY_REQUIREMENTS = {
+  'next-intl': {
+    'providers': ['NextIntlClientProvider'],
+    'middleware': true,
+    'config_files': ['next.config.js', 'src/i18n.ts'],
+    'directory_structure': '[locale]',
+    'server_client': 'HYBRID'
+  }
+}
+```
+
+**PHASE 2: SYSTEMATIC IMPLEMENTATION**
+```typescript
+// STEP 1: Configuration Files First
+// 1. next.config.js modifications
+// 2. middleware.ts setup
+// 3. Environment variables
+// 4. TypeScript configuration
+
+// STEP 2: Provider Hierarchy Establishment
+// 1. Root layout provider setup
+// 2. Context provider ordering
+// 3. Server/client boundary respect
+
+// STEP 3: Incremental Feature Integration
+// 1. Basic functionality first
+// 2. Advanced features incrementally
+// 3. Test each step before proceeding
+```
+
+**VERIFICATION GATES**:
+- [ ] All configuration files updated
+- [ ] Provider hierarchy correctly established
+- [ ] Middleware properly configured
+- [ ] Server/client boundaries respected
+- [ ] Basic functionality tested before advanced features
+- [ ] Development server restart successful
+- [ ] Build process successful
+
+---
+
+### **RULE C3: SYSTEMATIC PROBLEM DIAGNOSIS**
+**TRIGGER**: When encountering ANY error or unexpected behavior
+
+**MANDATORY DIAGNOSIS PROTOCOL**:
+
+**PHASE 1: ROOT CAUSE ANALYSIS (BEFORE ANY FIXES)**
+```typescript
+interface ProblemAnalysis {
+  symptom: string;
+  errorMessage: string;
+  stackTrace: string[];
+  affectedComponents: string[];
+  recentChanges: Change[];
+  hypotheses: Hypothesis[];
+}
+
+// STEP 1: Comprehensive Information Gathering
+const analysis: ProblemAnalysis = {
+  symptom: "Describe observable behavior",
+  errorMessage: "Exact error message",
+  stackTrace: ["Full stack trace analysis"],
+  affectedComponents: ["List all affected components"],
+  recentChanges: ["All changes in last 24 hours"],
+  hypotheses: ["At least 3 different potential causes"]
+};
+
+// STEP 2: Hypothesis Testing (NOT ASSUMPTION MAKING)
+for (const hypothesis of analysis.hypotheses) {
+  const testResult = await testHypothesis(hypothesis);
+  if (testResult.confirmed) {
+    return createSolution(hypothesis);
+  }
+}
+```
+
+**COGNITIVE BIAS PREVENTION**:
+- [ ] Generate at least 3 different hypotheses before testing any
+- [ ] Test hypotheses in order of likelihood, not convenience
+- [ ] Verify each fix doesn't create new problems
+- [ ] Document the actual root cause for future reference
+
+---
+
+### **RULE C4: CHANGE IMPACT ANALYSIS**
+**TRIGGER**: Before making ANY code modification
+
+**MANDATORY IMPACT ASSESSMENT**:
+
+**DEPENDENCY GRAPH ANALYSIS**:
+```typescript
+interface ChangeImpact {
+  directDependents: string[];
+  indirectDependents: string[];
+  sharedResources: string[];
+  potentialBreakingChanges: string[];
+  rollbackPlan: string[];
+}
+
+// STEP 1: Map All Dependencies
+const impact = analyzeChangeImpact(targetFile, proposedChanges);
+
+// STEP 2: Verify Each Dependent
+for (const dependent of impact.directDependents) {
+  await verifyCompatibility(dependent, proposedChanges);
+}
+
+// STEP 3: Create Rollback Plan BEFORE Implementation
+const rollbackPlan = createRollbackPlan(currentState, proposedChanges);
+```
+
+**VERIFICATION REQUIREMENTS**:
+- [ ] All direct dependents identified and tested
+- [ ] Indirect impact assessed
+- [ ] Rollback plan created before implementation
+- [ ] Changes implemented incrementally with testing at each step
+
+---
+
+## 🔄 **SYSTEMATIC DEVELOPMENT PROCESS**
+
+### **RULE P1: INCREMENTAL VERIFICATION PROTOCOL**
+
+**MANDATORY DEVELOPMENT SEQUENCE**:
+```typescript
+// NEVER make multiple changes simultaneously
+// ALWAYS follow this sequence:
+
+const developmentSequence = [
+  {
+    phase: "SINGLE_CHANGE",
+    action: "Make ONE logical change",
+    verification: "Test immediately",
+    checkpoint: "Commit if successful"
+  },
+  {
+    phase: "IMPACT_VERIFICATION", 
+    action: "Test all affected components",
+    verification: "Verify no regressions",
+    checkpoint: "Document any issues"
+  },
+  {
+    phase: "INTEGRATION_TEST",
+    action: "Test entire application flow",
+    verification: "End-to-end functionality",
+    checkpoint: "Performance impact assessment"
+  }
+];
+```
+
+### **RULE P2: KNOWLEDGE VERIFICATION MANDATE**
+
+**BEFORE IMPLEMENTING ANY SOLUTION**:
+```typescript
+interface KnowledgeVerification {
+  assumption: string;
+  evidence: string[];
+  verification_method: string;
+  confidence_level: number; // 1-10
+  fallback_plan: string;
+}
+
+// STEP 1: Identify All Assumptions
+const assumptions = identifyAssumptions(proposedSolution);
+
+// STEP 2: Verify Each Assumption
+for (const assumption of assumptions) {
+  if (assumption.confidence_level < 8) {
+    await verifyAssumption(assumption);
+  }
+}
+
+// STEP 3: Require Evidence-Based Decisions
+// NO implementation without verification
+```
+
+---
+
+## 🎯 **QUALITY ASSURANCE GATES**
+
+### **GATE 1: PRE-IMPLEMENTATION CHECKLIST**
+- [ ] Complete documentation read for all involved libraries
+- [ ] Server/client compatibility verified
+- [ ] Impact analysis completed
+- [ ] Rollback plan created
+- [ ] All assumptions identified and verified
+
+### **GATE 2: IMPLEMENTATION CHECKPOINT**
+- [ ] Single logical change implemented
+- [ ] Immediate testing completed
+- [ ] No new errors introduced
+- [ ] Performance impact assessed
+- [ ] Documentation updated
+
+### **GATE 3: INTEGRATION VERIFICATION**
+- [ ] All dependent components tested
+- [ ] End-to-end functionality verified
+- [ ] Build process successful
+- [ ] Development server stable
+- [ ] No regression in existing features
+
+### **GATE 4: POST-IMPLEMENTATION REVIEW**
+- [ ] Solution addresses root cause (not just symptoms)
+- [ ] No technical debt introduced
+- [ ] Learning documented for future reference
+- [ ] Process improvements identified
+
+---
+
+## 🧠 **COGNITIVE BIAS PREVENTION**
+
+### **BIAS B1: CONFIRMATION BIAS PREVENTION**
+```typescript
+// MANDATORY: Generate counter-hypotheses
+interface BiasPreventionProtocol {
+  primaryHypothesis: string;
+  counterHypotheses: string[]; // At least 2 alternatives
+  evidenceFor: Evidence[];
+  evidenceAgainst: Evidence[];
+  finalDecision: string;
+  reasoning: string;
+}
+
+// Force consideration of alternatives
+const analysis = generateCounterHypotheses(problem);
+```
+
+### **BIAS B2: TUNNEL VISION PREVENTION**
+- **MANDATORY**: Consider at least 3 different solution approaches
+- **MANDATORY**: Seek evidence that contradicts initial assumptions
+- **MANDATORY**: Take breaks during complex problem-solving
+- **MANDATORY**: Explain solution to imaginary colleague before implementing
+
+---
+
+## 📚 **CONTINUOUS LEARNING INTEGRATION**
+
+### **RULE L1: FAILURE ANALYSIS DOCUMENTATION**
+```typescript
+interface FailureReport {
+  incident_id: string;
+  root_cause: string;
+  contributing_factors: string[];
+  prevention_rules_created: string[];
+  process_improvements: string[];
+  knowledge_gaps_identified: string[];
+}
+
+// MANDATORY after every significant error
+const report = createFailureReport(incident);
+await updatePreventionRules(report);
+```
+
+### **RULE L2: RULE EVOLUTION PROTOCOL**
+- **WEEKLY**: Review and update rules based on new learnings
+- **MONTHLY**: Assess rule effectiveness and compliance
+- **QUARTERLY**: Major rule revision based on accumulated insights
+
+---
+
+## ⚠️ **EMERGENCY RECOVERY PROCEDURES**
+
+### **EMERGENCY E1: CRITICAL FAILURE RESPONSE**
+```bash
+# IMMEDIATE ACTIONS (within 5 minutes)
+1. Stop all development servers
+2. Revert to last known good state
+3. Document exact error symptoms
+4. Analyze recent changes (last 24 hours)
+5. Create isolated reproduction case
+
+# SYSTEMATIC RECOVERY (within 30 minutes)
+1. Apply systematic diagnosis protocol
+2. Test each hypothesis in isolation
+3. Implement minimal viable fix
+4. Verify fix doesn't introduce new issues
+5. Document root cause and prevention
+```
+
+---
+
+## 🎖️ **PROTOCOL COMPLIANCE VERIFICATION**
+
+### **SELF-ASSESSMENT CHECKLIST**
+```typescript
+interface ComplianceCheck {
+  rule_followed: boolean;
+  evidence: string[];
+  deviations: Deviation[];
+  improvement_actions: string[];
+}
+
+// MANDATORY before declaring task complete
+const compliance = assessCompliance(allRules);
+if (!compliance.fully_compliant) {
+  throw new Error('Protocol violation detected');
+}
+```
+
+**FINAL MANDATE**: This protocol is not optional. Every violation represents a potential project failure. Compliance is mandatory for all development activities.
+
+---
+
+*"The definition of insanity is doing the same thing over and over again and expecting different results. This protocol breaks that cycle through systematic discipline and evidence-based development."* 

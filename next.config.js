@@ -24,28 +24,25 @@ const nextConfig = {
   },
   // 메모리 사용량을 줄이기 위한 webpack 설정
   webpack: (config, { isServer }) => {
-    // 서버 사이드 최적화
-    if (isServer) {
-      // 서버에서 불필요한 패키지 외부화
-      config.externals.push('framer-motion');
-    }
-    
     // 클라이언트 사이드 최적화
     if (!isServer) {
       // 클라이언트 청크 그룹화
       config.optimization.splitChunks = {
         chunks: 'all',
         cacheGroups: {
-          commons: {
+          vendor: {
             test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
+            name: 'vendor',
             chunks: 'all',
             priority: 10,
+            enforce: true,
           },
-          default: {
+          common: {
+            name: 'common',
             minChunks: 2,
-            priority: -20,
-            reuseExistingChunk: true,
+            priority: 5,
+            chunks: 'all',
+            enforce: true,
           },
         },
       };

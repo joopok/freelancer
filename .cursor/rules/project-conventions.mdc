@@ -1,0 +1,84 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Architecture & Coding Conventions
+
+This guide outlines the core architecture, coding conventions, and best practices for the `aiproject02` repository. As an AI assistant, you are expected to adhere strictly to these rules to maintain code quality, consistency, and performance.
+
+### 1. Core Technology Stack
+
+The project is built on a modern web stack. Refer to [package.json](mdc:package.json) for a full list of dependencies.
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS (Utility-First) with `clsx` for conditional classes.
+- **State Management**: Zustand for minimal, centralized state.
+- **API Communication**: Axios, with a dedicated service layer.
+- **Linting**: ESLint with `eslint-config-next`.
+
+### 2. Directory Structure (`src`-based)
+
+- `src/app/`: **Routing & Pages**. Each folder maps to a URL segment. Contains `page.tsx`, `layout.tsx`, `loading.tsx`, etc.
+- `src/components/`: **Reusable React Components**.
+- `src/services/`: **API Service Layer**. All `axios` calls and data-fetching logic reside here.
+- `src/store/`: **Zustand Global State**. Define stores for cross-component state.
+- `src/hooks/`: **Custom React Hooks**. For reusable component logic.
+- `src/types/`: **Global TypeScript Types**. Define shared interfaces and types here.
+- `src/utils/`: **Utility Functions**. Pure, non-domain-specific helper functions.
+- `public/`: Static assets like images and fonts.
+
+### 3. Design System & Styling Rules
+
+-   **Utility-First Principle**: **Exclusively** use [Tailwind CSS](mdc:tailwind.config.js) utility classes directly in the `className` prop for all styling. This is a strict project-wide rule.
+    ```jsx
+    // Correct: Styling is co-located with the element.
+    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+      Click Me
+    </button>
+    ```
+-   **Design Tokens**: All design system values (colors, fonts, spacing, etc.) **must** be defined and centralized within `tailwind.config.js`. Do not use magic numbers or hard-coded style values.
+-   **Conditional Styling**: **Always** use the `clsx` library to dynamically and conditionally apply Tailwind classes. This improves readability and maintainability.
+    ```jsx
+    // Correct: Clean and readable conditional classes.
+    <div className={clsx('p-4 rounded-md', {
+      'bg-green-100 text-green-800': isSuccess,
+      'bg-red-100 text-red-800': isError,
+    })} />
+    ```
+-   **Animations**:
+    -   For simple transitions and keyframe animations, use the utilities provided by the `tailwindcss-animate` plugin.
+    -   For complex, state-driven, or interactive animations, use the **Framer Motion** (`"framer-motion"`) library.
+
+---
+
+## ✅ **MUST-DO Rules: Core Directives**
+
+1.  **SERVER COMPONENTS FIRST**: Always assume components are React Server Components (RSC) by default. This is the fundamental principle of the App Router.
+2.  **USE PATH ALIASES**: **Always** use the `@/*` path alias for imports, as configured in [tsconfig.json](mdc:tsconfig.json).
+    ```typescript
+    // Correct
+    import { Button } from '@/components/ui/Button';
+    ```
+3.  **CENTRALIZE API CALLS**: All external API interactions **must** be handled within the `src/services` directory. Components should not call `axios` directly.
+4.  **DEFINE SHARED TYPES**: Any data structure or type used in more than one place **must** be defined in the `src/types` directory.
+5.  **USE `clsx` FOR DYNAMIC STYLES**: When applying conditional Tailwind CSS classes, **must** use the `clsx` utility for readability and maintainability.
+    ```jsx
+    <div className={clsx('base-class', { 'active-class': isActive, 'error-class': hasError })} />
+    ```
+
+---
+
+## ❌ **MUST-NOT-DO Rules: Strict Prohibitions**
+
+1.  **DO NOT ABUSE 'use client'**: This is the most critical rule. **DO NOT** add the `'use client'` directive unless the component *requires* browser-specific APIs, such as `useState`, `useEffect`, or event listeners (`onClick`, `onChange`). Overusing it negates the performance benefits of RSC.
+
+2.  **DO NOT WRITE CUSTOM CSS FILES**: **Never** create `.css` or `.module.css` files for styling components. The project exclusively uses Tailwind CSS utility classes. All styling must be done via `className`.
+
+3.  **DO NOT FETCH DATA IN COMPONENTS**: **Never** call an API service directly from a UI component's render body. Data fetching should be done in Server Components, Route Handlers, or via custom hooks that use the service layer.
+
+4.  **DO NOT USE RELATIVE PATHS FOR IMPORTS**: **Never** use relative paths that traverse up the directory tree (e.g., `../../../components`). This creates fragile code. **Always** use the `@/*` alias.
+    ```typescript
+    // INCORRECT - DO NOT DO THIS
+    import { Button } from '../../../components/ui/Button';
+    ```

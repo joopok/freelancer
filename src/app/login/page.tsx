@@ -147,13 +147,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden flex flex-col">
+    <div className="min-h-screen w-full relative overflow-hidden flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 기존 로그인 컨텐츠 */}
       <div className="flex-1 flex flex-col justify-center">
         {/* Background effect */}
         <div className="h-screen w-full relative overflow-hidden flex flex-col justify-center">
           {/* Background effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-blue-800 to-purple-900">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-blue-800 to-purple-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
             <div className="absolute w-full h-full opacity-10">
               <div className="absolute top-0 left-0 w-full h-full">
                 <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full">
@@ -176,21 +176,21 @@ export default function LoginPage() {
           </div>
 
           {/* Login form */}
-          <div className="relative flex justify-center items-center px-4 sm:px-6 lg:px-8 z-10 py-6" style={{ overflow: 'hidden' }}>
+          <div className="relative flex justify-center items-center px-4 sm:px-6 lg:px-8 z-10 py-2" style={{ overflow: 'hidden' }}>
             <div
               ref={containerRef}
               className={`w-full max-w-md transition-all duration-1000 transform ${showContent ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
               style={{
                 transform: `${showContent ? 'translateY(0)' : 'translateY(2rem)'} scale(${scale})`,
                 transformOrigin: 'center',
-                maxHeight: 'calc(100vh - 4rem)',
+                maxHeight: 'calc(100vh - 2rem)',
                 overflowY: 'auto'
               }}
             >
-              <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 md:p-8 transition-all border border-white border-opacity-20">
-                <div className="text-center mb-6 md:mb-8">
-                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">로그인</h2>
-                  <p className="text-blue-200 text-xs md:text-sm">잡코리아 빌보드에 오신 것을 환영합니다</p>
+              <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-lg rounded-2xl shadow-2xl p-4 md:p-6 transition-all border border-white/20 dark:border-gray-600/30">
+                <div className="text-center mb-4 md:mb-6">
+                  <h2 className="text-2xl md:text-3xl font-bold text-white dark:text-gray-100 mb-2">로그인</h2>
+                  <p className="text-blue-200 dark:text-gray-400 text-xs md:text-sm">잡코리아 빌보드에 오신 것을 환영합니다</p>
                 </div>
 
                 <div className="min-h-[60px] md:min-h-[70px] relative">
@@ -291,8 +291,8 @@ export default function LoginPage() {
                 </form>
 
                 {/* Social login */}
-                <div className="mt-6 pt-4 md:mt-8 md:pt-6 border-t border-white border-opacity-10">
-                  <p className="text-center text-xs md:text-sm text-blue-200 mb-3 md:mb-4">소셜 계정으로 로그인</p>
+                <div className="mt-4 pt-3 md:mt-6 md:pt-4 border-t border-white border-opacity-10">
+                  <p className="text-center text-xs md:text-sm text-blue-200 mb-2 md:mb-3">소셜 계정으로 로그인</p>
                   <div className="flex justify-center gap-3 md:gap-4">
                     <button className="group p-1.5 md:p-2 bg-white bg-opacity-10 backdrop-blur-sm rounded-full border border-white border-opacity-20 hover:bg-opacity-20 transition-all duration-300 transform hover:scale-110" disabled={isLoading}>
                       <div className="relative overflow-hidden rounded-full">
@@ -330,7 +330,7 @@ export default function LoginPage() {
                 </div>
 
                 {/* Sign up and find account links */}
-                <div className="mt-6 md:mt-8 flex justify-center gap-3 md:gap-5 text-xs md:text-sm text-blue-200">
+                <div className="mt-3 md:mt-5 flex justify-center gap-3 md:gap-5 text-xs md:text-sm text-blue-200">
                   <Link href="/register" className="relative group">
                     <span className="group-hover:text-white transition-colors duration-300">회원가입</span>
                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 transition-all duration-300 group-hover:w-full"></span>

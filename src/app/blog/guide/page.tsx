@@ -54,12 +54,12 @@ export default function FreelancerGuidePage() {
   }, [generatePosts]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 카테고리 헤더 */}
-      <div className="bg-white border-b">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-3xl font-bold text-gray-900">프리랜서 가이드</h1>
-          <p className="mt-2 text-lg text-gray-600">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white dark:text-white">프리랜서 가이드</h1>
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-300 dark:text-gray-300">
             프리랜서로 성공하기 위한 실용적인 가이드와 조언을 제공합니다.
           </p>
         </div>
@@ -82,7 +82,7 @@ export default function FreelancerGuidePage() {
               >
                 <Link
                   href={`/blog/posts/${post.id}`}
-                  className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-100 block"
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:shadow-gray-900/50 hover:shadow-md dark:hover:shadow-gray-900/70 transition-shadow overflow-hidden border border-gray-100 dark:border-gray-700 block transition-colors duration-300"
                 >
                   <div className="relative h-48">
                     <Image
@@ -94,20 +94,20 @@ export default function FreelancerGuidePage() {
                   </div>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-blue-600">
+                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
                         {post.category}
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
                         {post.date}
                       </span>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
                       {post.title}
                     </h3>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
                       {post.excerpt}
                     </p>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
                       <span>{post.author}</span>
                       <div className="flex items-center space-x-4">
                         <span className="flex items-center group">

@@ -191,9 +191,9 @@ export default function CommunityBoardPage() {
   };
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 헤더 영역 */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-700">
+      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-gray-800 dark:to-gray-700 transition-colors duration-300">
         {/* 배경 패턴 */}
         <div 
           className="absolute inset-0 opacity-10 z-0"
@@ -248,7 +248,7 @@ export default function CommunityBoardPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
-                className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100"
+                className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white dark:text-gray-100 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100 dark:from-gray-100 dark:to-gray-300"
               >
                 자유게시판
               </motion.h1>
@@ -257,7 +257,7 @@ export default function CommunityBoardPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
-                className="text-blue-100 text-lg sm:text-xl mb-6 leading-relaxed"
+                className="text-blue-100 dark:text-gray-300 text-lg sm:text-xl mb-6 leading-relaxed"
               >
                 다양한 주제에 대해 자유롭게 의견을 나눌 수 있는 공간입니다.
                 직장생활, 취업/이직, 커리어 등 자유롭게 이야기해보세요.
@@ -358,7 +358,7 @@ export default function CommunityBoardPage() {
         {/* 곡선 구분선 */}
         <div className="absolute bottom-0 left-0 right-0 overflow-hidden leading-none">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-10">
-            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#F9FAFB"></path>
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="currentColor" className="text-gray-50 dark:text-gray-900"></path>
           </svg>
         </div>
       </div>
@@ -366,7 +366,7 @@ export default function CommunityBoardPage() {
       {/* 메인 콘텐츠 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 검색 및 필터 */}
-        <div className="bg-white shadow-sm rounded-lg p-4 mb-8">
+        <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 mb-8 transition-colors duration-300">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex space-x-2">
               {filters.map((filter) => (
@@ -375,8 +375,8 @@ export default function CommunityBoardPage() {
                   onClick={() => setActiveFilter(filter.id)}
                   className={`px-3 py-1 text-sm rounded-md transition-colors ${
                     activeFilter === filter.id
-                      ? 'bg-blue-100 text-blue-700 font-medium'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
                   {filter.name}
@@ -390,11 +390,11 @@ export default function CommunityBoardPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="검색어를 입력하세요"
-                className="w-full md:w-64 px-3 py-1 text-sm border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full md:w-64 px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-300"
               />
               <button 
                 type="submit"
-                className="bg-blue-600 text-white px-3 py-1 rounded-r-md hover:bg-blue-700 transition-colors"
+                className="bg-blue-600 dark:bg-blue-700 text-white px-3 py-1 rounded-r-md hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -405,19 +405,19 @@ export default function CommunityBoardPage() {
         </div>
         
         {/* 게시글 목록 */}
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden mb-8">
+        <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden mb-8 transition-colors duration-300">
           {loading ? (
             <div className="p-8 flex justify-center">
               <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
             </div>
           ) : filteredPosts.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
               검색 결과가 없습니다.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-700 transition-colors duration-300">
                   <tr>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제목</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작성자</th>
@@ -426,7 +426,7 @@ export default function CommunityBoardPage() {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">추천</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 transition-colors duration-300">
                   {filteredPosts.map((post) => (
                     <motion.tr 
                       key={post.id}
@@ -434,7 +434,7 @@ export default function CommunityBoardPage() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
-                      className="hover:bg-gray-50 cursor-pointer"
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200"
                       onClick={() => window.location.href = `/community/board/${post.id}`}
                     >
                       <td className="px-6 py-4">
@@ -444,7 +444,7 @@ export default function CommunityBoardPage() {
                               공지
                             </span>
                           )}
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
                             {post.title}
                             {post.comments > 0 && (
                               <span className="ml-2 text-blue-600">[{post.comments}]</span>
@@ -465,7 +465,7 @@ export default function CommunityBoardPage() {
                             />
                           </div>
                           <div className="ml-3">
-                            <div className="text-sm font-medium text-gray-900">{post.author}</div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">{post.author}</div>
                           </div>
                         </div>
                       </td>

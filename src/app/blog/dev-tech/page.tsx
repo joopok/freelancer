@@ -178,11 +178,11 @@ export default function DevTechPage() {
   const popularPost = useMemo(() => blogPosts.find(post => post.id === 6), []);
   
   return (
-    <div className= "min-h-screen bg-white" >
-    <div className= "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" >
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="mb-12">
-        <h1 className="text-3xl font-bold mb-2">Blog. 개발 테크</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white dark:text-white">Blog. 개발 테크</h1>
+        <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
           소프트웨어 개발의 기본 개념, 프로그래밍 언어, 시스템 설계, 애플리케이션 개발, 그리고 데이터베이스 관리 등의 노하우를 통해 IT 기술의 최신 트렌드와 프로젝트 개발에 도움이 되는 정보를 제공합니다.
         </p>
       </div>
@@ -198,12 +198,12 @@ export default function DevTechPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
-              className="border border-gray-200 rounded-lg overflow-hidden"
+              className="border border-gray-200 dark:border-gray-700 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 transition-colors duration-300"
             >
               <div className="flex flex-col md:flex-row">
                 <div className="md:w-1/3 relative">
                   <Link href={`/blog/${post.slug}`} className="block aspect-video md:aspect-auto md:h-full relative">
-                    <div className="w-full h-full bg-gray-200 animate-pulse absolute"></div>
+                    <div className="w-full h-full bg-gray-200 dark:bg-gray-600 animate-pulse absolute"></div>
                     <Image
                       src={post.thumbnail}
                       alt={post.title}
@@ -220,22 +220,22 @@ export default function DevTechPage() {
                   </Link>
                 </div>
                 <div className="md:w-2/3 p-5">
-                  <div className="text-sm text-blue-600 mb-2">{post.category}</div>
+                  <div className="text-sm text-blue-600 dark:text-blue-400 dark:text-blue-400 mb-2">{post.category}</div>
                   <Link href={`/blog/${post.slug}`} className="block">
-                    <h2 className="text-xl font-bold mb-2 hover:text-blue-600 transition-colors">{post.title}</h2>
+                    <h2 className="text-xl font-bold mb-2 hover:text-blue-600 dark:text-blue-400 transition-colors">{post.title}</h2>
                   </Link>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{post.excerpt}</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">{post.excerpt}</p>
                   
                   {/* 태그 목록 */}
                   <div className="flex flex-wrap gap-2 mb-3">
                     {post.tags.map((tag, idx) => (
-                      <Link href={`/blog/tag/${tag}`} key={idx} className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600 hover:bg-gray-200 transition-colors">
+                      <Link href={`/blog/tag/${tag}`} key={idx} className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:bg-gray-600 transition-colors">
                         #{tag}
                       </Link>
                     ))}
                   </div>
                   
-                  <div className="flex justify-between items-center text-sm text-gray-500">
+                  <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
                     <span>{post.date}</span>
                     <span>조회수 {post.views.toLocaleString()}</span>
                   </div>
@@ -261,7 +261,7 @@ export default function DevTechPage() {
           
           {/* 모든 게시물을 다 표시했을 때 메시지 */}
           {visiblePosts >= blogPosts.length && (
-            <div className="text-center text-gray-500 mt-8">
+            <div className="text-center text-gray-500 dark:text-gray-400 mt-8">
               모든 게시물을 확인하셨습니다.
             </div>
           )}
@@ -271,11 +271,11 @@ export default function DevTechPage() {
         <div className="space-y-6">
           {/* 인기 포스트 */}
           {popularPost && (
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
               <div className="relative">
                 <div className="absolute top-2 left-2 z-10 bg-red-500 text-white px-2 py-1 text-xs font-bold rounded">1</div>
                 <Link href={`/blog/${popularPost.slug}`} className="block aspect-video relative">
-                  <div className="w-full h-full bg-gray-200 animate-pulse absolute"></div>
+                  <div className="w-full h-full bg-gray-200 dark:bg-gray-600 animate-pulse absolute"></div>
                   <Image
                     src={popularPost.thumbnail}
                     alt={popularPost.title}
@@ -293,12 +293,12 @@ export default function DevTechPage() {
               </div>
               <div className="p-4">
                 <Link href={`/blog/${popularPost.slug}`} className="block">
-                  <h3 className="font-bold hover:text-blue-600 transition-colors mb-2">{popularPost.title}</h3>
+                  <h3 className="font-bold hover:text-blue-600 dark:text-blue-400 transition-colors mb-2">{popularPost.title}</h3>
                 </Link>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">{popularPost.excerpt}</p>
-                <div className="flex justify-between items-center text-xs text-gray-500">
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">{popularPost.excerpt}</p>
+                <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
                   <span>{popularPost.date}</span>
-                  <Link href={`/blog/${popularPost.slug}`} className="text-blue-600 hover:underline">
+                  <Link href={`/blog/${popularPost.slug}`} className="text-blue-600 dark:text-blue-400 hover:underline">
                     자세히 보기
                   </Link>
                 </div>
@@ -307,8 +307,8 @@ export default function DevTechPage() {
           )}
           
           {/* HOT 키워드 */}
-          <div className="border border-gray-200 rounded-lg overflow-hidden">
-            <div className="p-4 bg-gray-50 border-b border-gray-200">
+          <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
               <h3 className="font-bold flex items-center">
                 <span className="text-red-500 mr-1">❤️</span> HOT 키워드
               </h3>
@@ -320,7 +320,7 @@ export default function DevTechPage() {
                     href={`/blog/tag/${keyword}`}
                     key={index}
                     className={`text-sm px-3 py-1.5 rounded-full ${
-                      index % 4 === 0 ? 'bg-blue-100 text-blue-700' :
+                      index % 4 === 0 ? 'bg-blue-100 text-blue-700 dark:text-blue-300' :
                       index % 4 === 1 ? 'bg-pink-100 text-pink-700' :
                       index % 4 === 2 ? 'bg-green-100 text-green-700' :
                       'bg-yellow-100 text-yellow-700'
@@ -334,58 +334,58 @@ export default function DevTechPage() {
           </div>
           
           {/* 이전/다음 내비게이션 */}
-          <div className="flex justify-between items-center px-4 py-3 bg-gray-50 rounded-lg">
+          <div className="flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <button className="text-gray-400 disabled:opacity-50" disabled>
               &lt;
             </button>
             <span className="text-sm">
               <span className="text-red-500">😍</span> 인기 게시물 1/5
             </span>
-            <button className="text-gray-600 hover:text-gray-900 transition-colors">
+            <button className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white transition-colors">
               &gt;
             </button>
           </div>
           
           {/* 통계 위젯 추가 */}
-          <div className="border border-gray-200 rounded-lg overflow-hidden">
-            <div className="p-4 bg-gray-50 border-b border-gray-200">
+          <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
               <h3 className="font-bold">카테고리별 게시물</h3>
             </div>
             <div className="p-4">
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span>개발 테크</span>
-                  <span className="font-medium text-blue-600">56</span>
+                  <span className="font-medium text-blue-600 dark:text-blue-400">56</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>프론트엔드</span>
-                  <span className="font-medium text-blue-600">23</span>
+                  <span className="font-medium text-blue-600 dark:text-blue-400">23</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>백엔드</span>
-                  <span className="font-medium text-blue-600">18</span>
+                  <span className="font-medium text-blue-600 dark:text-blue-400">18</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>데브옵스</span>
-                  <span className="font-medium text-blue-600">12</span>
+                  <span className="font-medium text-blue-600 dark:text-blue-400">12</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>모바일</span>
-                  <span className="font-medium text-blue-600">8</span>
+                  <span className="font-medium text-blue-600 dark:text-blue-400">8</span>
                 </div>
               </div>
             </div>
           </div>
           
           {/* 추천 포스트 내비게이션 */}
-          <div className="flex justify-between items-center px-4 py-3 bg-gray-50 rounded-lg">
+          <div className="flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <button className="text-gray-400 disabled:opacity-50" disabled>
               &lt;
             </button>
             <span className="text-sm">
               <span className="text-yellow-500">👍</span> 추천 주제 게시물 1/5
             </span>
-            <button className="text-gray-600 hover:text-gray-900 transition-colors">
+            <button className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white transition-colors">
               &gt;
             </button>
           </div>

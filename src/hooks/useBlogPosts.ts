@@ -23,6 +23,7 @@ export function useBlogPosts({ category, length = 12, role }: UseBlogPostsProps 
       author: ['김프리', '이랜서', '박개발', '정디자인'][i % 4],
       views: Math.floor(Math.random() * 10000) + 1000,
       likes: Math.floor(Math.random() * 1000) + 100,
+      tags: ['개발', '프리랜서', 'IT', '경험담'].slice(0, Math.floor(Math.random() * 3) + 1),
       ...(role && { role }),
     }));
   }, [category, length, role]);

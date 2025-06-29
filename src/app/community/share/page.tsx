@@ -213,7 +213,7 @@ export default function CommunitySharePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 공유 페이지 헤더 섹션 */}
       <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700" ref={heroRef}>
         {/* 배경 패턴 */}
@@ -361,8 +361,8 @@ export default function CommunitySharePage() {
       <div id="shared-content" className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">모든 공유 자료</h2>
-            <p className="text-gray-600 mt-1">총 {filteredItems.length}개의 공유 자료를 찾았습니다.</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">모든 공유 자료</h2>
+            <p className="text-gray-600 dark:text-gray-300 mt-1 transition-colors duration-300">총 {filteredItems.length}개의 공유 자료를 찾았습니다.</p>
           </div>
           
           <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
@@ -371,7 +371,7 @@ export default function CommunitySharePage() {
                 <input
                   type="text"
                   placeholder="공유 자료 검색하기"
-                  className="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors duration-300"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -387,10 +387,10 @@ export default function CommunitySharePage() {
                 <button
                   key={type.id}
                   onClick={() => toggleFilter(type.id)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium ${
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-300 ${
                     activeFilters.includes(type.id)
                       ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
                   {type.name}
@@ -415,7 +415,7 @@ export default function CommunitySharePage() {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.5 }}
                 whileHover={{ y: -5 }}
-                className="bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100 hover:border-indigo-200 hover:shadow-xl transition-all"
+                className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-600 hover:shadow-xl transition-all duration-300"
               >
                 {item.thumbnailUrl && (
                   <div className="h-48 relative overflow-hidden group">
@@ -441,23 +441,23 @@ export default function CommunitySharePage() {
                       />
                     </div>
                     <div>
-                      <div className="font-medium text-gray-900">{item.author}</div>
-                      <div className="text-gray-500 text-sm">{item.date}</div>
+                      <div className="font-medium text-gray-900 dark:text-white transition-colors duration-300">{item.author}</div>
+                      <div className="text-gray-500 dark:text-gray-400 text-sm transition-colors duration-300">{item.date}</div>
                     </div>
                   </div>
                   
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{item.title}</h3>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">{item.description}</p>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 transition-colors duration-300">{item.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3 transition-colors duration-300">{item.description}</p>
                   
                   <div className="flex flex-wrap gap-1 mb-4">
                     {item.tags.map(tag => (
-                      <span key={tag} className="px-2 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-medium">
+                      <span key={tag} className="px-2 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 text-xs font-medium transition-colors duration-300">
                         {tag}
                       </span>
                     ))}
                   </div>
                   
-                  <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
+                  <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400 mb-4 transition-colors duration-300">
                     <span className="flex items-center">
                       <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -497,7 +497,7 @@ export default function CommunitySharePage() {
                       onClick={() => handleShare(item)}
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
-                      className="flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                      className="flex items-center justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none transition-colors duration-300"
                     >
                       {copiedId === item.id ? (
                         <>
@@ -528,7 +528,7 @@ export default function CommunitySharePage() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 shadow-sm text-base font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300"
             >
               더 많은 공유 자료 보기
               <svg className="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

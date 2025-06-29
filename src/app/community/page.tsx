@@ -135,7 +135,7 @@ export default function CommunityPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 인터랙티브한 헤더 섹션 */}
       <div 
         ref={headerRef}
@@ -143,7 +143,7 @@ export default function CommunityPage() {
       >
         {/* 그라데이션 배경 */}
         <div 
-          className="absolute inset-0 bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-700 z-0"
+          className="absolute inset-0 bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-700 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 z-0 transition-colors duration-300"
           style={{
             opacity: Math.max(0.85, 1 - scrollY * 0.001)
           }}
@@ -214,9 +214,9 @@ export default function CommunityPage() {
             >
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
                 <span className="block">커뮤니티와 함께</span>
-                <span className="block mt-2 text-blue-200">성장하는 경험</span>
+                <span className="block mt-2 text-blue-200 dark:text-blue-300">성장하는 경험</span>
               </h1>
-              <p className="mt-6 text-xl sm:text-2xl text-blue-50 max-w-2xl">
+              <p className="mt-6 text-xl sm:text-2xl text-blue-50 dark:text-gray-300 max-w-2xl">
                 다양한 개발자, 디자이너, 기획자들과 함께 소통하고 지식을 공유하며 
                 당신의 커리어를 한 단계 더 발전시키세요.
               </p>
@@ -260,8 +260,8 @@ export default function CommunityPage() {
                 <div className="absolute bottom-0 left-20 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-blob animation-delay-4000"></div>
                 
                 {/* 메인 카드 컨테이너 */}
-                <div className="relative bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 shadow-xl">
-                  <h3 className="text-2xl font-bold text-white mb-6">인기 커뮤니티</h3>
+                <div className="relative bg-white/10 dark:bg-gray-800/20 backdrop-blur-lg rounded-2xl p-8 border border-white/20 dark:border-gray-600/30 shadow-xl">
+                  <h3 className="text-2xl font-bold text-white dark:text-gray-100 mb-6">인기 커뮤니티</h3>
                   
                   <div className="space-y-4">
                     {communityMenus.slice(0, 3).map((menu) => (
@@ -275,17 +275,17 @@ export default function CommunityPage() {
                         onMouseEnter={() => setActiveMenu(menu.id)}
                         onMouseLeave={() => setActiveMenu(null)}
                       >
-                        <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-white/15">
-                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-white/15 dark:bg-gray-600/30">
+                          <svg className="w-6 h-6 text-white dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={menu.icon} />
                           </svg>
                         </div>
                         <div className="ml-4">
-                          <h4 className="text-lg font-medium text-white">{menu.name}</h4>
-                          <p className="text-blue-200 text-sm">{menu.count}개의 게시글</p>
+                          <h4 className="text-lg font-medium text-white dark:text-gray-100">{menu.name}</h4>
+                          <p className="text-blue-200 dark:text-gray-300 text-sm">{menu.count}개의 게시글</p>
                         </div>
                         <div className="ml-auto">
-                          <svg className="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <svg className="w-5 h-5 text-white/70 dark:text-gray-300/70" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         </div>
@@ -297,7 +297,7 @@ export default function CommunityPage() {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="inline-flex items-center px-4 py-2 rounded-lg bg-white/15 text-white text-sm font-medium hover:bg-white/25 transition-all"
+                      className="inline-flex items-center px-4 py-2 rounded-lg bg-white/15 dark:bg-gray-600/20 text-white dark:text-gray-100 text-sm font-medium hover:bg-white/25 dark:hover:bg-gray-600/30 transition-all"
                     >
                       모든 커뮤니티 보기
                       <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -327,15 +327,96 @@ export default function CommunityPage() {
         {/* 물결 모양 디바이더 */}
         <div className="absolute bottom-0 left-0 right-0 overflow-hidden leading-none z-10">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-16">
-            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#F9FAFB"></path>
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="currentColor" className="text-gray-50 dark:text-gray-900"></path>
           </svg>
         </div>
       </div>
       
       {/* 여기서부터 기존 콘텐츠 영역 */}
-      <div id="community-explore" className="py-16">
-        {/* 기존 콘텐츠 영역 */}
-        {/* ... existing code ... */}
+      <div id="community-explore" className="py-16 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* 커뮤니티 카테고리 그리드 */}
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">커뮤니티 둘러보기</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              다양한 주제의 커뮤니티에서 소통하고, 지식을 공유하며, 함께 성장해보세요.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+            {communityMenus.map((menu, index) => (
+              <motion.div
+                key={menu.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group hover:scale-105 border border-gray-200 dark:border-gray-700"
+              >
+                <Link href={menu.path} className="block p-6">
+                  <div className="flex items-center mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={menu.icon} />
+                      </svg>
+                    </div>
+                    <div className="ml-4 flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {menu.name}
+                      </h3>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">{menu.count}개 게시글</span>
+                    </div>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                    {menu.description}
+                  </p>
+                  <div className="mt-4 flex items-center text-blue-600 dark:text-blue-400 text-sm font-medium group-hover:translate-x-1 transition-transform duration-200">
+                    바로가기
+                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+          
+          {/* 인기 게시글 섹션 */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">인기 게시글</h3>
+              <Link href="/community/board" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium transition-colors">
+                더보기 →
+              </Link>
+            </div>
+            <div className="space-y-4">
+              {popularPosts.map((post, index) => (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  className="flex items-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer border border-gray-100 dark:border-gray-600"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold mr-4">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                      {post.title}
+                    </h4>
+                    <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      <span>{post.author}</span>
+                      <span className="mx-2">•</span>
+                      <span>👍 {post.likes}</span>
+                      <span className="mx-2">•</span>
+                      <span>💬 {post.comments}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   );

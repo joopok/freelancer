@@ -16,18 +16,29 @@ export default function BlogCard({ post }: BlogCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      whileHover={{ 
+        scale: 1.02,
+        rotateX: 5,
+        rotateY: 5,
+        z: 50
+      }}
+      style={{
+        transformStyle: "preserve-3d",
+        perspective: 1000
+      }}
     >
       <Link
         href={`/blog/posts/${post.id}`}
-        className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-100 block"
+        className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 overflow-hidden border border-white/20 block group"
       >
-        <div className="relative h-48">
+        <div className="relative h-48 overflow-hidden">
           <Image
             src={post.thumbnail}
             alt={post.title}
             fill
-            className="object-cover"
+            className="object-cover group-hover:scale-110 transition-transform duration-500"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           {post.role && (
             <div className="absolute top-4 right-4 bg-blue-600 text-white text-xs px-3 py-1 rounded-full">
               {post.role}
@@ -43,7 +54,7 @@ export default function BlogCard({ post }: BlogCardProps) {
               {post.date}
             </span>
           </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-blue-600 transition-all duration-300">
             {post.title}
           </h3>
           <p className="text-gray-600 text-sm mb-4 line-clamp-2">
@@ -91,7 +102,7 @@ export default function BlogCard({ post }: BlogCardProps) {
                   />
                 </svg>
                 <span className="group-hover:text-red-500 transition-colors">
-                  {formatNumber(post.likes)}
+                  {formatNumber(post.likes || 0)}
                 </span>
               </span>
             </div>

@@ -1,0 +1,58 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# **AI Protocol: Strict Library Integration Procedure**
+
+**Directive:** You have recently made critical, sequential errors during the integration of the `next-intl` library. This demonstrates a failure in your implementation process. To prevent recurrence, you **MUST** adopt the following meticulous, step-by-step protocol for integrating any new library, especially those that interact with the Next.js build process, routing, or rendering environments.
+
+**Case Study of Failure - `next-intl` Integration:**
+1.  **Provider Failure:** `useTranslations` was used without wrapping the root layout in `NextIntlClientProvider`.
+2.  **Plugin Failure:** The `withNextIntl` plugin was omitted from `next.config.js`.
+3.  **Middleware Failure:** The `matcher` in `middleware.ts` was misconfigured, failing to cover all page routes.
+
+The root cause was a lack of holistic, procedural diligence. This protocol is the mandatory corrective action.
+
+---
+
+## ✅ **Mandatory Library Integration Checklist**
+
+Before marking any integration task as complete, you **MUST** verify and validate every single step of this checklist.
+
+### **Phase 1: Pre-Implementation Analysis**
+
+1.  **RTFM (Read The Full Manual):**
+    -   **Action:** Open the library's official documentation. Locate and thoroughly read the "Getting Started," "Installation," or "App Router Integration" guide from beginning to end.
+    -   **Verification:** Do not proceed until you have a complete mental model of all required setup steps.
+
+### **Phase 2: Holistic Implementation**
+
+2.  **Build Configuration (`next.config.js`):**
+    -   **Question:** Does this library require a Next.js plugin (e.g., `withNextIntl`, `withBundleAnalyzer`)?
+    -   **Action:** If yes, immediately wrap the `nextConfig` export with the required plugin(s) as per the documentation.
+    -   **File to check:** [next.config.js](mdc:next.config.js)
+
+3.  **Routing & Middleware (`middleware.ts`):**
+    -   **Question:** Does this library affect routing or require middleware?
+    -   **Action:** If yes, create or update `middleware.ts`. Pay **critical attention** to the `config.matcher`. It **MUST** correctly cover all relevant paths while excluding API routes and static assets (`/((?!api|_next|_vercel|.*\\..*).*)`). A restrictive matcher is a critical error.
+    -   **File to check:** [src/middleware.ts](mdc:src/middleware.ts)
+
+4.  **Global Context Providers (Root `layout.tsx`):**
+    -   **Question:** Does this library use React Context and require a global provider (e.g., `NextIntlClientProvider`, `QueryClientProvider`, `ReduxProvider`)?
+    -   **Action:** If yes, wrap the `children` prop in the **root layout** (`src/app/[locale]/layout.tsx` or similar) with the necessary provider(s). This is non-negotiable for client-side hooks to function.
+    -   **File to check:** `src/app/[locale]/layout.tsx` (or the project's root layout)
+
+5.  **Environment Configuration (`.env`, `tsconfig.json`):**
+    -   **Question:** Does the library require new environment variables or changes to `tsconfig.json` (like `paths`)?
+    -   **Action:** Create/update these files immediately.
+
+### **Phase 3: Final Verification**
+
+6.  **Full System Restart & Test:**
+    -   **Action:** After completing all configuration, **stop and restart the development server**.
+    -   **Verification:** Test the new functionality not just on the main page, but across multiple, distinct routes (e.g., `/login`, `/blog`, a dynamic route). Confirm there are no console errors on either the server or the client.
+
+---
+
+**Final Mandate:** You will not declare a task complete until this entire protocol has been followed. Partial or incomplete integrations are unacceptable failures. Adhere to this procedure without deviation.

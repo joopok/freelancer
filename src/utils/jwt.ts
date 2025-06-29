@@ -24,7 +24,10 @@ export type JwtPayload = {
  * @returns 생성된 JWT 토큰
  */
 export function generateToken(payload: Omit<JwtPayload, 'iat' | 'exp'>): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+  if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined');
+  }
+  return jwt.sign(payload, JWT_SECRET as string, { expiresIn: JWT_EXPIRY || '30d' } as any);
 }
 
 /**

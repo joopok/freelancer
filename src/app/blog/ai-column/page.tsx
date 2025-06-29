@@ -101,10 +101,10 @@ export default function AIColumnPage() {
   }, [setLoading]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 min-h-screen bg-gray-50 dark:bg-gray-800 dark:bg-gray-900 transition-colors duration-300">
       <div className="mb-10">
-        <h1 className="text-3xl font-bold mb-2">AI 컬럼</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">AI 컬럼</h1>
+        <p className="text-gray-600 dark:text-gray-300 dark:text-gray-300">
           인공지능 분야의 최신 동향, 연구 결과, 그리고 현업에서의 적용 사례를 소개하는 컬럼입니다.
           전문가의 통찰과 함께 AI 기술의 미래를 전망해 봅니다.
         </p>
@@ -114,7 +114,7 @@ export default function AIColumnPage() {
       <div className="mb-12">
         {aiColumnNewsData.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            <div className="lg:col-span-2 bg-blue-50 rounded-xl overflow-hidden">
+            <div className="lg:col-span-2 bg-blue-50 dark:bg-gray-800 rounded-xl overflow-hidden transition-colors duration-300">
               <div className="flex flex-col md:flex-row">
                 <div className="md:w-1/2 relative h-64 md:h-auto">
                   <Image
@@ -126,23 +126,23 @@ export default function AIColumnPage() {
                   />
                 </div>
                 <div className="md:w-1/2 p-6 md:p-8">
-                  <div className="flex items-center text-sm text-blue-600 mb-2">
+                  <div className="flex items-center text-sm text-blue-600 dark:text-blue-400 dark:text-blue-400 mb-2">
                     <span className="mr-2">주목할 만한 소식</span>
                     <span>•</span>
                     <span className="ml-2">{aiColumnNewsData[0].date}</span>
                   </div>
                   <Link href={`/blog/tech-news/ai-column/${aiColumnNewsData[0].slug}`}>
-                    <h2 className="text-2xl font-bold mb-3 hover:text-blue-600 transition-colors">
+                    <h2 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-400 transition-colors">
                       {aiColumnNewsData[0].title}
                     </h2>
                   </Link>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
                     {aiColumnNewsData[0].excerpt}
                   </p>
                   
                   <div className="flex flex-wrap gap-2 mb-4">
                     {aiColumnNewsData[0].tags.map((tag, index) => (
-                      <Link href={`/blog/tag/${tag.toLowerCase()}`} key={index} className="text-xs bg-blue-100 px-2 py-1 rounded-full text-blue-700 hover:bg-blue-200 transition-colors">
+                      <Link href={`/blog/tag/${tag.toLowerCase()}`} key={index} className="text-xs bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded-full text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:bg-blue-800/50 transition-colors">
                         #{tag}
                       </Link>
                     ))}
@@ -153,11 +153,11 @@ export default function AIColumnPage() {
                       <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold mr-2">
                         {aiColumnNewsData[0].author ? aiColumnNewsData[0].author.charAt(0) : 'A'}
                       </div>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
                         {aiColumnNewsData[0].author || '익명'}
                       </span>
                     </div>
-                    <span className="text-sm text-gray-500">조회수 {aiColumnNewsData[0].views}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">조회수 {aiColumnNewsData[0].views}</span>
                   </div>
                 </div>
               </div>
@@ -174,7 +174,7 @@ export default function AIColumnPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+              className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
             >
               <Link href={`/blog/tech-news/ai-column/${news.slug}`}>
                 <div className="relative h-48">
@@ -187,23 +187,23 @@ export default function AIColumnPage() {
                   />
                 </div>
                 <div className="p-4">
-                  <h2 className="text-lg font-bold mb-2 hover:text-blue-600 transition-colors">
+                  <h2 className="text-lg font-bold mb-2 hover:text-blue-600 dark:text-blue-400 transition-colors">
                     {news.title}
                   </h2>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
                     {news.excerpt}
                   </p>
                   
                   {/* 태그 목록 */}
                   <div className="flex flex-wrap gap-2 mb-3">
                     {news.tags.map((tag, index) => (
-                      <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600">
+                      <span key={index} className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-gray-600 dark:text-gray-300">
                         #{tag}
                       </span>
                     ))}
                   </div>
                   
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                     <div className="flex items-center">
                       <span>{news.date}</span>
                       {news.author && (
@@ -225,42 +225,42 @@ export default function AIColumnPage() {
       {/* AI 트렌드 */}
       <div className="mb-10">
         <h2 className="text-xl font-bold mb-4">주목할 AI 트렌드</h2>
-        <div className="bg-gray-50 p-6 rounded-lg">
+        <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
           <ul className="space-y-4">
             <li className="flex items-start">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mr-3">
                 1
               </div>
               <div>
                 <h3 className="font-medium">멀티모달 AI의 부상</h3>
-                <p className="text-sm text-gray-600">텍스트, 이미지, 오디오, 비디오를 통합 처리하는 AI 모델이 표준화되고 있습니다.</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">텍스트, 이미지, 오디오, 비디오를 통합 처리하는 AI 모델이 표준화되고 있습니다.</p>
               </div>
             </li>
             <li className="flex items-start">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mr-3">
                 2
               </div>
               <div>
                 <h3 className="font-medium">인공지능 규제 강화</h3>
-                <p className="text-sm text-gray-600">각국 정부와 국제기구가 AI 규제 프레임워크를 발전시키고 있습니다.</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">각국 정부와 국제기구가 AI 규제 프레임워크를 발전시키고 있습니다.</p>
               </div>
             </li>
             <li className="flex items-start">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mr-3">
                 3
               </div>
               <div>
                 <h3 className="font-medium">AI 모델의 경량화</h3>
-                <p className="text-sm text-gray-600">엣지 디바이스에서도 고성능 AI를 구현할 수 있는 경량 모델이 발전하고 있습니다.</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">엣지 디바이스에서도 고성능 AI를 구현할 수 있는 경량 모델이 발전하고 있습니다.</p>
               </div>
             </li>
             <li className="flex items-start">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mr-3">
                 4
               </div>
               <div>
                 <h3 className="font-medium">AI 개인화 서비스</h3>
-                <p className="text-sm text-gray-600">개인 맞춤형 AI 어시스턴트와 서비스가 일상 생활에 통합되고 있습니다.</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">개인 맞춤형 AI 어시스턴트와 서비스가 일상 생활에 통합되고 있습니다.</p>
               </div>
             </li>
           </ul>
@@ -278,7 +278,7 @@ export default function AIColumnPage() {
             placeholder="이메일 주소" 
             className="flex-1 px-4 py-2 border border-transparent rounded-lg text-gray-800 focus:outline-none"
           />
-          <button className="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors font-medium">
+          <button className="bg-white text-blue-600 dark:text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors font-medium">
             구독하기
           </button>
         </div>

@@ -43,19 +43,19 @@ export default function Bottom() {
   };
 
   return (
-    <footer className="bg-gray-100 pt-12 pb-6 w-full bottom-0 mt-auto">
+    <footer className="bg-gray-100 dark:bg-gray-900 pt-12 pb-6 w-full bottom-0 mt-auto transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4">
         {/* 통합된 푸터 정보 영역 */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-10">
           {/* 회사 정보 */}
           <div>
-            <h3 className="font-semibold mb-4">회사정보</h3>
+            <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">회사정보</h3>
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
                   <Link 
                     href={link.href}
-                    className="text-gray-600 hover:text-gray-900"
+                    className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
                     onClick={(e) => {
                       e.preventDefault();
                       navigateTo(link.href);
@@ -70,13 +70,13 @@ export default function Bottom() {
 
           {/* 고객지원 */}
           <div>
-            <h3 className="font-semibold mb-4">고객지원</h3>
+            <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">고객지원</h3>
             <ul className="space-y-2">
               {footerLinks.support.map((link) => (
                 <li key={link.href}>
                   <Link 
                     href={link.href}
-                    className="text-gray-600 hover:text-gray-900"
+                    className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
                     onClick={(e) => {
                       e.preventDefault();
                       navigateTo(link.href);
@@ -89,17 +89,16 @@ export default function Bottom() {
             </ul>
           </div>
 
-
           {/* 고객센터 */}
           <div>
-            <h3 className="font-semibold mb-4">고객센터</h3>
-            <p className="text-2xl font-bold text-blue-600 mb-2">
+            <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">고객센터</h3>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
               {footerLinks.contact.phone}
             </p>
-            <p className="text-gray-600 mb-2">
+            <p className="text-gray-600 dark:text-gray-300 mb-2">
               {footerLinks.contact.email}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {footerLinks.contact.operatingHours}
             </p>
           </div>
@@ -114,24 +113,24 @@ export default function Bottom() {
                 height={30}
                 className="mr-4"
               />
-              <span className="text-gray-500">(주)잡코리아 빌보드에</span>
+              <span className="text-gray-500 dark:text-gray-400">(주)잡코리아 빌보드에</span>
             </div>
-            <p className="text-sm text-gray-500 mb-2">{footerLinks.contact.address}</p>
-            <p className="text-sm text-gray-500 mb-2">{footerLinks.contact.business}</p>
-            <p className="text-xs text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{footerLinks.contact.address}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{footerLinks.contact.business}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               © {new Date().getFullYear()} JobKorea. All rights reserved.
             </p>
           </div>
         </div>
 
         {/* 구분선 */}
-        <div className="border-t border-gray-200 pt-3 mb-3" />
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mb-3" />
 
         {/* SNS 링크 */}
         <div className="flex justify-center gap-4 mt-4">
           <Link 
             href="https://facebook.com" 
-            className="text-gray-400 hover:text-blue-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
             onClick={(e) => {
               e.preventDefault();
               window.open('https://facebook.com', '_blank');
@@ -151,7 +150,7 @@ export default function Bottom() {
           </Link>
           <Link 
             href="https://twitter.com" 
-            className="text-gray-400 hover:text-blue-400 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
             onClick={(e) => {
               e.preventDefault();
               window.open('https://twitter.com', '_blank');
@@ -171,7 +170,7 @@ export default function Bottom() {
           </Link>
           <Link 
             href="https://instagram.com" 
-            className="text-gray-400 hover:text-pink-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-pink-600 dark:hover:text-pink-400 transition-colors duration-200"
             onClick={(e) => {
               e.preventDefault();
               window.open('https://instagram.com', '_blank');

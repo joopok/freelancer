@@ -365,7 +365,7 @@ export default function CommunityGalleryPage() {
   };
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <HeaderSection />
       
       {/* 필터 및 레이아웃 옵션 */}
@@ -377,10 +377,10 @@ export default function CommunityGalleryPage() {
               <button
                 key={category.id}
                 onClick={() => setFilter(category.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 ${
                   filter === category.id
                     ? 'bg-indigo-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
                 }`}
               >
                 {category.name}
@@ -389,13 +389,13 @@ export default function CommunityGalleryPage() {
           </div>
           
           {/* 레이아웃 옵션 */}
-          <div className="flex gap-2 bg-white rounded-lg p-1 shadow-sm">
+          <div className="flex gap-2 bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-300">
             <button
               onClick={() => handleLayoutChange('grid')}
-              className={`p-2 rounded ${
+              className={`p-2 rounded transition-colors duration-300 ${
                 layout === 'grid'
-                  ? 'bg-indigo-100 text-indigo-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
               aria-label="그리드 뷰"
             >
@@ -405,10 +405,10 @@ export default function CommunityGalleryPage() {
             </button>
             <button
               onClick={() => handleLayoutChange('masonry')}
-              className={`p-2 rounded ${
+              className={`p-2 rounded transition-colors duration-300 ${
                 layout === 'masonry'
-                  ? 'bg-indigo-100 text-indigo-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
               aria-label="매스너리 뷰"
             >
@@ -425,7 +425,7 @@ export default function CommunityGalleryPage() {
             <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-indigo-600"></div>
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="flex flex-col justify-center items-center h-64 bg-white rounded-lg shadow-sm p-6 text-gray-500">
+          <div className="flex flex-col justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 text-gray-500 dark:text-gray-400 transition-colors duration-300">
             <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -450,7 +450,7 @@ export default function CommunityGalleryPage() {
                 }`}
               >
                 <Link href={`/community/gallery/${item.id}`} className="block h-full">
-                  <div className="bg-white rounded-lg shadow-sm overflow-hidden h-full transition-all hover:shadow-md">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden h-full transition-all hover:shadow-md border border-gray-200 dark:border-gray-700">
                     <div className={`relative ${item.isFeatured ? 'pt-[60%]' : 'pt-[75%]'}`}>
                       <Image
                         src={item.imageUrl}
@@ -483,7 +483,7 @@ export default function CommunityGalleryPage() {
                               className="object-cover"
                             />
                           </div>
-                          <span className="text-sm font-medium text-gray-900">{item.author}</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300">{item.author}</span>
                         </div>
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                           {categories.find(cat => cat.id === item.category)?.name || item.category}
@@ -518,7 +518,7 @@ export default function CommunityGalleryPage() {
         {/* 더보기 버튼 */}
         {!loading && filteredItems.length > 0 && (
           <div className="mt-12 text-center">
-            <button className="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+            <button className="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 shadow-sm text-base font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300">
               더 많은 작품 보기
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -529,11 +529,11 @@ export default function CommunityGalleryPage() {
       </div>
       
       {/* 갤러리 이용 안내 */}
-      <div className="bg-white py-16 mt-16">
+      <div className="bg-white dark:bg-gray-800 py-16 mt-16 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">갤러리 이용 안내</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">갤러리 이용 안내</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-12 transition-colors duration-300">
               나만의 작품과 포트폴리오를 공유하고 다양한 분야의 크리에이터들과 소통해보세요.
               취업 성공 스토리도 자유롭게 공유할 수 있습니다.
             </p>
@@ -546,8 +546,8 @@ export default function CommunityGalleryPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">작품 업로드</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 transition-colors duration-300">작품 업로드</h3>
+              <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">
                 고화질 이미지를 업로드하고 작품에 대한 설명을 추가하여 포트폴리오를 구성해보세요.
               </p>
             </div>
@@ -558,8 +558,8 @@ export default function CommunityGalleryPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">피드백 받기</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 transition-colors duration-300">피드백 받기</h3>
+              <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">
                 다른 사용자들로부터 작품에 대한 피드백과 조언을 받아 더 나은 결과물을 만들어보세요.
               </p>
             </div>
@@ -570,8 +570,8 @@ export default function CommunityGalleryPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">취업 기회</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 transition-colors duration-300">취업 기회</h3>
+              <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">
                 우수한 포트폴리오를 통해 기업의 스카우트 제안을 받거나 취업 기회를 얻을 수 있습니다.
               </p>
             </div>

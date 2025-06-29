@@ -107,7 +107,7 @@ export default function ProjectReviewPage() {
   });
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 헤더 섹션 */}
       <motion.div 
         className="relative bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-16 overflow-hidden"
@@ -157,7 +157,7 @@ export default function ProjectReviewPage() {
               <div className="relative rounded-md shadow-sm max-w-lg w-full">
                 <input
                   type="text"
-                  className="block w-full rounded-md border-0 py-3 pl-4 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"
+                  className="block w-full rounded-md border-0 py-3 pl-4 pr-10 text-gray-900 dark:text-white bg-white dark:bg-gray-700 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-colors duration-300"
                   placeholder="프로젝트 후기 검색..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -208,11 +208,11 @@ export default function ProjectReviewPage() {
               <button
                 key={option.id}
                 onClick={() => setActiveFilter(option.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 shadow-sm border border-gray-200 dark:border-gray-600 ${
                   activeFilter === option.id
                     ? 'bg-indigo-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
-                } transition-colors duration-200 shadow-sm`}
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
               >
                 {option.name}
               </button>
@@ -220,9 +220,9 @@ export default function ProjectReviewPage() {
           </div>
           
           <div className="flex items-center">
-            <span className="text-sm text-gray-500 mr-2 whitespace-nowrap">정렬:</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400 mr-2 whitespace-nowrap transition-colors duration-300">정렬:</span>
             <select
-              className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 dark:text-white bg-white dark:bg-gray-700 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 transition-colors duration-300"
               defaultValue="latest"
             >
               {sortOptions.map((option) => (
@@ -246,8 +246,8 @@ export default function ProjectReviewPage() {
             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <h3 className="mt-2 text-lg font-medium text-gray-900">검색 결과가 없습니다</h3>
-            <p className="mt-1 text-gray-500">다른 검색어나 필터를 사용해보세요.</p>
+            <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white transition-colors duration-300">검색 결과가 없습니다</h3>
+            <p className="mt-1 text-gray-500 dark:text-gray-400 transition-colors duration-300">다른 검색어나 필터를 사용해보세요.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -258,7 +258,7 @@ export default function ProjectReviewPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700"
               >
                 <div className="relative h-48 bg-gray-200">
                   <Image
@@ -267,14 +267,14 @@ export default function ProjectReviewPage() {
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute top-2 right-2 bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded">
+                  <div className="absolute top-2 right-2 bg-indigo-600 dark:bg-indigo-700 text-white text-xs font-bold px-2 py-1 rounded transition-colors duration-300">
                     {review.projectType}
                   </div>
                 </div>
                 
                 <div className="p-5">
                   <div className="flex justify-between items-start mb-2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-300 transition-colors duration-300">
                       {review.category}
                     </span>
                     <div className="flex items-center">
@@ -298,11 +298,11 @@ export default function ProjectReviewPage() {
                     </div>
                   </div>
                   
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 transition-colors duration-300">
                     {review.title}
                   </h3>
                   
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3 transition-colors duration-300">
                     {review.content}
                   </p>
                   
@@ -310,7 +310,7 @@ export default function ProjectReviewPage() {
                     {review.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="inline-block bg-gray-100 rounded-full px-2 py-1 text-xs font-semibold text-gray-600"
+                        className="inline-block bg-gray-100 dark:bg-gray-700 rounded-full px-2 py-1 text-xs font-semibold text-gray-600 dark:text-gray-300 transition-colors duration-300"
                       >
                         #{tag}
                       </span>
@@ -327,10 +327,10 @@ export default function ProjectReviewPage() {
                           className="object-cover"
                         />
                       </div>
-                      <span className="text-sm font-medium text-gray-900">{review.author}</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300">{review.author}</span>
                     </div>
                     
-                    <div className="flex items-center text-sm text-gray-500">
+                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
                       <span className="mr-3 flex items-center">
                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -381,7 +381,7 @@ export default function ProjectReviewPage() {
       </div>
       
       {/* CTA 섹션 */}
-      <div className="bg-indigo-700 text-white py-16">
+      <div className="bg-indigo-700 dark:bg-indigo-800 text-white py-16 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-4">나만의 프로젝트 경험을 공유해보세요</h2>
           <p className="text-indigo-100 text-lg max-w-3xl mx-auto mb-8">
@@ -402,7 +402,7 @@ export default function ProjectReviewPage() {
       </div>
       
       {/* 커뮤니티 페이지로 돌아가기 링크 */}
-      <div className="bg-gray-100 py-8">
+      <div className="bg-gray-100 dark:bg-gray-800 py-8 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link href="/community" className="inline-flex items-center text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

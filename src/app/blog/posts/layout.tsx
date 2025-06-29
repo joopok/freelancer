@@ -6,9 +6,9 @@ export default function BlogPostsLayout({
   blog: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {children}
       {blog}
-    </>
+    </div>
   );
 } 

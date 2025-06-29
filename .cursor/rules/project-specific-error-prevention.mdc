@@ -1,0 +1,322 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🎯 **PROJECT-SPECIFIC ERROR PREVENTION GUIDE**
+
+**CONTEXT**: This guide addresses specific error patterns observed during the development of the aiproject02 Next.js application. Each rule directly corresponds to actual failures encountered and their prevention strategies.
+
+---
+
+## 🔍 **ERROR PATTERN ANALYSIS**
+
+### **PATTERN 1: Library Integration Cascade Failures**
+**OBSERVED IN**: next-intl integration
+**ROOT CAUSE**: Partial implementation without understanding complete requirements
+**IMPACT**: Multiple hours of debugging, system-wide failures
+
+### **PATTERN 2: TypeScript Type Assumption Errors**
+**OBSERVED IN**: BlogPost interfaces, JWT utilities, component props
+**ROOT CAUSE**: Assuming type safety without explicit verification
+**IMPACT**: Build failures, runtime errors
+
+### **PATTERN 3: Configuration File Inconsistencies**
+**OBSERVED IN**: Missing root layout, incorrect import paths
+**ROOT CAUSE**: Incomplete understanding of Next.js App Router requirements
+**IMPACT**: Build process failures
+
+---
+
+## 🚨 **CRITICAL PREVENTION PROTOCOLS**
+
+### **PROTOCOL CP1: NEXT-INTL INTEGRATION CHECKLIST**
+**TRIGGER**: Any internationalization library integration
+
+**MANDATORY VERIFICATION SEQUENCE**:
+```bash
+# 1. CONFIGURATION VERIFICATION
+✅ next.config.js includes withNextIntl plugin
+✅ middleware.ts has correct matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
+✅ i18n.ts configuration file exists with proper locale handling
+
+# 2. PROVIDER SETUP VERIFICATION  
+✅ NextIntlClientProvider wraps children in root layout
+✅ getMessages() used in server components (not useMessages)
+✅ useTranslations() only used in client components
+
+# 3. DIRECTORY STRUCTURE VERIFICATION
+✅ All routes moved to [locale] directory
+✅ No legacy files (App.tsx, ClientAppContainer.tsx) remain
+✅ Root redirect page exists at src/app/page.tsx
+
+# 4. RUNTIME VERIFICATION
+✅ Development server starts without errors
+✅ All routes accessible with locale prefixes
+✅ Language switching works without console errors
+✅ Translation keys resolve correctly
+```
+
+### **PROTOCOL CP2: TYPESCRIPT SAFETY CHECKLIST**
+**TRIGGER**: Any interface or type definition changes
+
+**MANDATORY TYPE SAFETY SEQUENCE**:
+```typescript
+// 1. INTERFACE DEFINITION VERIFICATION
+✅ All required properties explicitly marked
+✅ Optional properties use ? syntax
+✅ Array types specified (string[] not string)
+
+interface BlogPost {
+  id: string;           // ✅ Required, explicit type
+  title: string;        // ✅ Required, explicit type
+  tags: string[];       // ✅ Required array, not optional
+  likes?: number;       // ✅ Optional with ? syntax
+}
+
+// 2. TYPE GUARD IMPLEMENTATION
+✅ Type guards for external data
+✅ Runtime validation with Zod schemas
+✅ Proper error handling for type mismatches
+
+function isBlogPost(data: unknown): data is BlogPost {
+  return typeof data === 'object' && 
+         data !== null && 
+         'id' in data && 
+         typeof (data as any).id === 'string';
+}
+
+// 3. BUILD-TIME VERIFICATION
+✅ npm run build passes without TypeScript errors
+✅ No 'any' types in production code
+✅ All function parameters and returns typed
+```
+
+### **PROTOCOL CP3: NEXT.JS APP ROUTER STRUCTURE CHECKLIST**
+**TRIGGER**: Any routing or layout changes
+
+**MANDATORY STRUCTURE VERIFICATION**:
+```
+src/app/
+├── layout.tsx              ✅ Root layout with HTML structure
+├── page.tsx               ✅ Root redirect or main page
+├── [locale]/              ✅ Locale-based routing
+│   ├── layout.tsx         ✅ Locale-specific layout
+│   ├── page.tsx          ✅ Locale home page
+│   ├── blog/             ✅ All routes under locale
+│   └── ...other routes   ✅ Complete migration
+└── api/                  ✅ API routes outside locale
+```
+
+**VERIFICATION COMMANDS**:
+```bash
+✅ All page.tsx files have proper async function exports
+✅ All layout.tsx files have proper children prop handling
+✅ No .tsx extensions in import statements
+✅ All imports use @/ path aliases
+```
+
+---
+
+## 🔧 **SPECIFIC FIX PATTERNS**
+
+### **FIX PATTERN F1: JWT Utility Type Safety**
+**PROBLEM**: JWT decode functions assuming token validity
+**SOLUTION**: Implement proper type guards and error handling
+
+```typescript
+// ❌ INCORRECT - Assumes token is valid
+function getTokenPayload(token: string): JWTPayload {
+  return jwt.decode(token) as JWTPayload;
+}
+
+// ✅ CORRECT - Handles invalid tokens
+function getTokenPayload(token: string): JWTPayload | null {
+  try {
+    const decoded = jwt.decode(token);
+    if (decoded && typeof decoded === 'object') {
+      return decoded as JWTPayload;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+```
+
+### **FIX PATTERN F2: Component Interface Consistency**
+**PROBLEM**: Props interfaces don't match component usage
+**SOLUTION**: Verify interface matches actual component needs
+
+```typescript
+// ❌ INCORRECT - Interface doesn't match usage
+interface FileUploadProps {
+  onUpload: (file: File) => void;
+}
+
+// ✅ CORRECT - Interface matches component implementation
+interface FileUploadProps {
+  onFileSelect: (file: File) => void;  // Matches actual prop name
+  accept?: string;                     // Includes all used props
+  maxSize?: number;
+}
+```
+
+### **FIX PATTERN F3: Build Configuration Consistency**
+**PROBLEM**: Configuration files don't match project structure
+**SOLUTION**: Verify all config files are synchronized
+
+```javascript
+// ❌ INCORRECT - Missing plugin configuration
+const nextConfig = {
+  experimental: {
+    appDir: true,
+  },
+};
+
+// ✅ CORRECT - Complete configuration
+const withNextIntl = require('next-intl/plugin')('./src/i18n.ts');
+const nextConfig = {
+  experimental: {
+    appDir: true,
+  },
+};
+module.exports = withNextIntl(nextConfig);
+```
+
+---
+
+## 📋 **PRE-COMMIT VALIDATION CHECKLIST**
+
+### **VALIDATION V1: MANDATORY PRE-COMMIT CHECKS**
+**EXECUTE BEFORE**: Every git commit
+
+```bash
+# 1. BUILD VERIFICATION
+npm run build                    # ✅ Must pass without errors
+npm run lint                     # ✅ Must pass without warnings
+
+# 2. TYPE SAFETY VERIFICATION
+npx tsc --noEmit                 # ✅ TypeScript compilation check
+grep -r "any" src/ --include="*.ts" --include="*.tsx" # ❌ Should find minimal 'any' usage
+
+# 3. IMPORT PATH VERIFICATION
+grep -r "\.\./\.\." src/         # ❌ Should find no relative path traversals
+grep -r "\.tsx" src/             # ❌ Should find no .tsx in imports
+
+# 4. CONFIGURATION CONSISTENCY
+# ✅ Verify tsconfig.json paths match file structure
+# ✅ Verify next.config.js includes all required plugins
+# ✅ Verify middleware.ts matcher covers all routes
+```
+
+### **VALIDATION V2: INTEGRATION-SPECIFIC CHECKS**
+**EXECUTE AFTER**: Library installation or major changes
+
+```bash
+# 1. NEXT-INTL SPECIFIC CHECKS
+✅ Verify messages/ directory has all locale files
+✅ Test locale switching without console errors
+✅ Verify all translation keys resolve correctly
+✅ Check middleware handles locale routing properly
+
+# 2. AUTHENTICATION SPECIFIC CHECKS
+✅ Verify JWT utilities handle invalid tokens
+✅ Test authentication flow end-to-end
+✅ Verify session management works correctly
+✅ Check logout clears all authentication state
+
+# 3. ROUTING SPECIFIC CHECKS
+✅ Test all routes load without 404 errors
+✅ Verify dynamic routes handle parameters correctly
+✅ Check nested layouts render properly
+✅ Test route navigation preserves locale
+```
+
+---
+
+## 🎯 **ERROR RECOVERY PROCEDURES**
+
+### **RECOVERY R1: BUILD FAILURE RECOVERY**
+**WHEN**: npm run build fails with TypeScript errors
+
+**SYSTEMATIC RESOLUTION**:
+1. **🔍 ERROR CATEGORIZATION**:
+   ```bash
+   # Identify error type
+   npm run build 2>&1 | grep "TS[0-9]"  # TypeScript errors
+   npm run build 2>&1 | grep "Module"   # Module resolution errors
+   npm run build 2>&1 | grep "Cannot"   # Import/export errors
+   ```
+
+2. **📋 TYPE ERROR RESOLUTION**:
+   ```typescript
+   // Common patterns and fixes
+   
+   // ❌ Property 'x' does not exist on type 'y'
+   // ✅ Add property to interface or use optional chaining
+   
+   // ❌ Type 'undefined' is not assignable to type 'string'
+   // ✅ Add null check or use default value
+   
+   // ❌ Cannot find module './Component'
+   // ✅ Check file exists and use correct path alias
+   ```
+
+3. **✅ VERIFICATION AFTER FIX**:
+   ```bash
+   npm run build                 # Must pass
+   npm run dev                   # Test development server
+   # Test affected functionality manually
+   ```
+
+### **RECOVERY R2: INTEGRATION FAILURE RECOVERY**
+**WHEN**: Library integration causes system-wide failures
+
+**EMERGENCY PROTOCOL**:
+1. **🚨 IMMEDIATE ASSESSMENT**:
+   ```bash
+   git status                    # See all modified files
+   git diff                      # Review all changes
+   npm ls                        # Check installed packages
+   ```
+
+2. **🔄 INCREMENTAL ROLLBACK**:
+   ```bash
+   # Rollback configuration files first
+   git checkout HEAD -- next.config.js
+   git checkout HEAD -- middleware.ts
+   git checkout HEAD -- src/i18n.ts
+   
+   # Test after each rollback
+   npm run dev
+   ```
+
+3. **🏗️ SYSTEMATIC RE-INTEGRATION**:
+   - Follow Library Integration Protocol completely
+   - Implement ONE configuration change at a time
+   - Test after each change
+   - **NEVER** bulk-apply multiple changes
+
+---
+
+## 📊 **SUCCESS METRICS**
+
+### **METRIC M1: INTEGRATION SUCCESS RATE**
+- **TARGET**: 100% successful integrations on first attempt
+- **MEASUREMENT**: Track library integrations that require zero rollbacks
+- **IMPROVEMENT**: If < 100%, review and strengthen integration protocols
+
+### **METRIC M2: BUILD STABILITY**
+- **TARGET**: < 5% build failures per week
+- **MEASUREMENT**: Track npm run build success rate
+- **IMPROVEMENT**: If > 5%, implement stricter pre-commit validation
+
+### **METRIC M3: Type Safety Coverage**
+- **TARGET**: Zero 'any' types in production code
+- **MEASUREMENT**: Automated scanning for 'any' usage
+- **IMPROVEMENT**: Implement type-first development practices
+
+---
+
+**🎯 FINAL MANDATE**: This guide represents hard-learned lessons from actual project failures. Every protocol must be followed religiously to prevent recurrence of the systematic errors that caused significant development delays and debugging sessions. The cost of prevention is always less than the cost of recovery. 

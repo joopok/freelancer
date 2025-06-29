@@ -1,0 +1,369 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Comprehensive Development Guide for aiproject02
+
+## 🎯 Executive Summary
+
+You are working on a **Next.js 14 App Router** enterprise application with TypeScript, Tailwind CSS, Zustand, and next-intl. This project follows **Server Components First** architecture with strict conventions for scalability and maintainability.
+
+**Key Project Files:**
+- Configuration: [next.config.js](mdc:next.config.js), [tsconfig.json](mdc:tsconfig.json), [tailwind.config.js](mdc:tailwind.config.js)
+- Internationalization: [src/i18n.ts](mdc:src/i18n.ts), [src/middleware.ts](mdc:src/middleware.ts)
+- Architecture: [src/app/[locale]/layout.tsx](mdc:src/app/[locale]/layout.tsx), [package.json](mdc:package.json)
+- Patterns: [src/store/auth.ts](mdc:src/store/auth.ts), [src/services/auth.ts](mdc:src/services/auth.ts), [src/utils/api.ts](mdc:src/utils/api.ts)
+
+---
+
+## 🏗 Fundamental Architecture Principles
+
+### **1. Server Components First Philosophy**
+**REASONING**: Next.js 14 App Router prioritizes Server Components for performance, SEO, and reduced bundle size.
+
+✅ **DEFAULT APPROACH**: Always start with Server Components
+```typescript
+// Default: Server Component (no 'use client')
+export default function ProductPage() {
+  return <div>Server-rendered content</div>;
+}
+```
+
+✅ **CLIENT ONLY WHEN NECESSARY**: Add 'use client' only for browser APIs
+```typescript
+'use client';
+import { useState } from 'react';
+
+export default function InteractiveForm() {
+  const [value, setValue] = useState('');
+  return <input value={value} onChange={(e) => setValue(e.target.value)} />;
+}
+```
+
+❌ **NEVER**: Add 'use client' to components that don't need browser APIs
+```typescript
+// WRONG: Unnecessary client component
+'use client';
+export default function StaticHeader() {
+  return <h1>Static Title</h1>; // No interactivity needed
+}
+```
+
+### **2. Src-Based Directory Structure**
+**REASONING**: Clean separation of source code from configuration files, following enterprise patterns.
+
+**MANDATORY STRUCTURE**:
+```
+src/
+├── app/[locale]/          # Next.js App Router with i18n
+├── components/            # Reusable UI components
+├── services/             # API business logic layer
+├── store/                # Zustand global state
+├── types/                # Shared TypeScript definitions
+├── utils/                # Pure utility functions
+├── hooks/                # Custom React hooks
+└── data/                 # Static data and mocks
+```
+
+---
+
+## 🔧 Mandatory Implementation Patterns
+
+### **1. Path Aliases - ABSOLUTE REQUIREMENT**
+**REASONING**: Configured in [tsconfig.json](mdc:tsconfig.json) for maintainable imports.
+
+✅ **ALWAYS USE**: @/* path aliases
+```typescript
+import { Button } from '@/components/ui/Button';
+import { authService } from '@/services/auth';
+import { useAuthStore } from '@/store/auth';
+```
+
+❌ **NEVER USE**: Relative paths that traverse directories
+```typescript
+// PROHIBITED: Fragile relative imports
+import { Button } from '../../../components/ui/Button';
+import { authService } from '../../services/auth';
+```
+
+### **2. Service Layer Separation - CRITICAL PATTERN**
+**REASONING**: Centralized API logic in [src/services/](mdc:src/services) for maintainability and testing.
+
+✅ **CORRECT**: Use service layer for all API calls
+```typescript
+// In component
+const handleLogin = async () => {
+  try {
+    const response = await authService.login(username, password);
+    setUser(response.user);
+  } catch (error) {
+    setError(error.message);
+  }
+};
+```
+
+❌ **PROHIBITED**: Direct axios calls in components
+```typescript
+// NEVER DO THIS: Direct API calls in components
+const handleLogin = async () => {
+  const response = await axios.post('/api/auth/login', data);
+};
+```
+
+### **3. Tailwind CSS Only - NO EXCEPTIONS**
+**REASONING**: Utility-first approach configured in [tailwind.config.js](mdc:tailwind.config.js) for consistency.
+
+✅ **REQUIRED**: All styling via Tailwind utilities
+```typescript
+export default function Card() {
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+      Content
+    </div>
+  );
+}
+```
+
+✅ **CONDITIONAL STYLING**: Use clsx for dynamic classes
+```typescript
+import clsx from 'clsx';
+
+const className = clsx('base-class', {
+  'bg-green-100': isSuccess,
+  'bg-red-100': isError
+});
+```
+
+❌ **ABSOLUTELY FORBIDDEN**: CSS files or styled-components
+```typescript
+// NEVER CREATE: Custom CSS files
+// ❌ styles.module.css
+// ❌ component.css
+// ❌ styled-components
+```
+
+### **4. Zustand State Management Pattern**
+**REASONING**: Following patterns in [src/store/auth.ts](mdc:src/store/auth.ts) for consistent state management.
+
+✅ **CORRECT PATTERN**: Zustand with persistence
+```typescript
+export const useFeatureStore = create<FeatureState>()(
+  persist(
+    (set, get) => ({
+      data: null,
+      setData: (data) => set({ data }),
+      clearData: () => set({ data: null })
+    }),
+    { name: 'feature-storage' }
+  )
+);
+```
+
+❌ **AVOID**: useState for global state or complex local state
+```typescript
+// WRONG: Global state in components
+const [globalUser, setGlobalUser] = useState(null);
+```
+
+---
+
+## 🚫 Critical Prohibitions - NEVER VIOLATE
+
+### **1. NEVER: Create CSS Files**
+```typescript
+// ❌ ABSOLUTELY FORBIDDEN
+// - styles.css
+// - component.module.css  
+// - styled-components
+// - emotion
+// - any CSS-in-JS except Tailwind
+```
+
+### **2. NEVER: Use Relative Imports**
+```typescript
+// ❌ PROHIBITED: Directory traversal
+import { utils } from '../../../utils/helpers';
+import { Component } from '../../components/Component';
+```
+
+### **3. NEVER: Direct API Calls in Components**
+```typescript
+// ❌ FORBIDDEN: Bypassing service layer
+const data = await fetch('/api/endpoint');
+const response = await axios.get('/api/data');
+```
+
+### **4. NEVER: Ignore TypeScript Errors**
+```typescript
+// ❌ NEVER USE: Type suppression
+// @ts-ignore
+// @ts-nocheck
+// any type without justification
+```
+
+### **5. NEVER: Mix Server/Client Component Patterns**
+```typescript
+// ❌ WRONG: Client hooks in server components
+export default function ServerPage() {
+  const [state, setState] = useState(''); // Error!
+  return <div>Content</div>;
+}
+```
+
+---
+
+## 📋 Development Workflow Checklist
+
+### **Before Any Code Changes:**
+1. ✅ Identify if component needs 'use client' directive
+2. ✅ Plan service layer integration for API calls
+3. ✅ Verify TypeScript types are defined in [src/types/](mdc:src/types)
+4. ✅ Check if Zustand store updates are needed
+
+### **During Implementation:**
+1. ✅ Use @/* path aliases for ALL imports
+2. ✅ Apply Tailwind utilities for ALL styling
+3. ✅ Implement error handling in service layer
+4. ✅ Add proper TypeScript types
+
+### **After Implementation:**
+1. ✅ Verify no TypeScript errors
+2. ✅ Test both server and client rendering
+3. ✅ Confirm responsive design works
+4. ✅ Check internationalization if applicable
+
+---
+
+## 🔒 Security & Authentication Requirements
+
+### **JWT Token Management**
+**PATTERN**: Follow [src/store/auth.ts](mdc:src/store/auth.ts) implementation
+
+✅ **SECURE TOKEN HANDLING**:
+```typescript
+// Automatic token attachment in API calls
+const token = localStorage.getItem('auth_token');
+if (token) {
+  config.headers.Authorization = `Bearer ${token}`;
+}
+```
+
+✅ **SESSION VALIDATION**:
+```typescript
+// Check token expiry before API calls
+if (!verifyToken(token)) {
+  logout();
+  return false;
+}
+```
+
+❌ **NEVER**: Store sensitive data in plain text or expose tokens
+```typescript
+// FORBIDDEN: Exposing tokens
+console.log('Token:', token);
+window.authToken = token;
+```
+
+---
+
+## ⚡ Performance Optimization Requirements
+
+### **Code Splitting & Lazy Loading**
+```typescript
+// ✅ Dynamic imports for large components
+const HeavyComponent = dynamic(() => import('@/components/HeavyComponent'), {
+  loading: () => <div>Loading...</div>
+});
+```
+
+### **Image Optimization**
+```typescript
+// ✅ Always use Next.js Image component
+import Image from 'next/image';
+
+<Image
+  src="/images/photo.jpg"
+  alt="Description"
+  width={800}
+  height={600}
+  priority={isAboveFold}
+/>
+```
+
+### **Bundle Analysis**
+```bash
+# Use built-in analyzer
+npm run analyze
+```
+
+---
+
+## 🌐 Internationalization Requirements
+
+### **next-intl Integration**
+**CONFIGURATION**: [src/i18n.ts](mdc:src/i18n.ts) and [src/middleware.ts](mdc:src/middleware.ts)
+
+✅ **SERVER COMPONENTS**: Use getTranslations
+```typescript
+import { getTranslations } from 'next-intl/server';
+
+export default async function ServerPage() {
+  const t = await getTranslations('HomePage');
+  return <h1>{t('title')}</h1>;
+}
+```
+
+✅ **CLIENT COMPONENTS**: Use useTranslations hook
+```typescript
+'use client';
+import { useTranslations } from 'next-intl';
+
+export default function ClientComponent() {
+  const t = useTranslations('Navigation');
+  return <button>{t('submit')}</button>;
+}
+```
+
+---
+
+## 🐛 Common Issues & Solutions
+
+### **Issue**: "Cannot find module" errors
+**Solution**: Verify @/* aliases in [tsconfig.json](mdc:tsconfig.json)
+
+### **Issue**: Hydration mismatches
+**Solution**: Ensure server/client components are properly separated
+
+### **Issue**: next-intl locale undefined
+**Solution**: Check [src/i18n.ts](mdc:src/i18n.ts) fallback mechanism
+
+### **Issue**: API calls failing
+**Solution**: Verify service layer implementation and [src/utils/api.ts](mdc:src/utils/api.ts) configuration
+
+---
+
+## 🎯 Quality Assurance Verification
+
+Before considering any task complete:
+
+1. ✅ **No TypeScript errors**: `npm run build` succeeds
+2. ✅ **All imports use @/* aliases**: No relative path traversals
+3. ✅ **Service layer used**: No direct API calls in components  
+4. ✅ **Tailwind only**: No custom CSS files created
+5. ✅ **Proper component type**: Server vs Client components correctly identified
+6. ✅ **Internationalization works**: All text uses translation functions
+7. ✅ **Responsive design**: Mobile and desktop layouts function
+8. ✅ **Authentication flows**: Login/logout works if applicable
+
+---
+
+## 📚 Reference Implementation Examples
+
+**Component Pattern**: [src/components/layout/Header.tsx](mdc:src/components/layout/Header.tsx)
+**State Management**: [src/store/auth.ts](mdc:src/store/auth.ts)  
+**Service Layer**: [src/services/auth.ts](mdc:src/services/auth.ts)
+**API Utilities**: [src/utils/api.ts](mdc:src/utils/api.ts)
+**Root Layout**: [src/app/[locale]/layout.tsx](mdc:src/app/[locale]/layout.tsx)
+
+**Remember**: This is an enterprise-grade application. Every decision should prioritize maintainability, performance, and developer experience. When in doubt, follow the existing patterns in the referenced files.

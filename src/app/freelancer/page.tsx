@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import MultiSearchInput from '@/components/common/MultiSearchInput';
 
 // 프리랜서 타입 정의
 interface Freelancer {
@@ -23,7 +24,7 @@ export default function FreelancerPage() {
   // 상태 관리
   const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
   const [localLoading, setLocalLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerms, setSearchTerms] = useState<string[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [selectedExperience, setSelectedExperience] = useState<string>('');
   const [selectedType, setSelectedType] = useState<string>('');
@@ -31,7 +32,7 @@ export default function FreelancerPage() {
   const [activeTab, setActiveTab] = useState("전체");
 
   const itemsPerPage = 10;
-  const tabs = ["전체", "개발자", "기획자", "퍼블리셔", "디자이너", "기타"];
+  const tabs = ["전체","PM/PL","PMO", "개발자", "기획자", "퍼블리셔", "디자이너", "기타"];
   
   // 모든 기술 스택 목록
   const allSkills = [
@@ -94,11 +95,14 @@ const getNameByIndex = (index: number): string => {
   // 필터링된 프리랜서 계산
   const filteredFreelancers = useMemo(() => {
     return freelancers.filter(freelancer => {
-      // 검색어 필터링
-      const matchesSearch = searchTerm === '' ||
-        freelancer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        freelancer.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        freelancer.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+      // 다중 검색어 필터링 - 모든 검색어가 포함되어야 함 (AND 조건)
+      const matchesSearch = searchTerms.length === 0 ||
+        searchTerms.every(term => {
+          const lowerTerm = term.toLowerCase();
+          return freelancer.name.toLowerCase().includes(lowerTerm) ||
+                 freelancer.description.toLowerCase().includes(lowerTerm) ||
+                 freelancer.skills.some(skill => skill.toLowerCase().includes(lowerTerm));
+        });
 
       // 기술 스택 필터링
       const matchesSkills = selectedSkills.length === 0 ||
@@ -120,7 +124,7 @@ const getNameByIndex = (index: number): string => {
 
       return matchesSearch && matchesSkills && matchesExperience && matchesType && matchesTab;
     });
-  }, [freelancers, searchTerm, selectedSkills, selectedExperience, selectedType, activeTab]);
+  }, [freelancers, searchTerms, selectedSkills, selectedExperience, selectedType, activeTab]);
 
   // 페이지네이션된 프리랜서 계산
   const paginatedFreelancers = useMemo(() => {
@@ -139,8 +143,8 @@ const getNameByIndex = (index: number): string => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+  const handleSearchTermsChange = (terms: string[]) => {
+    setSearchTerms(terms);
     setCurrentPage(1); // 검색어 변경 시 첫 페이지로
   };
 
@@ -168,7 +172,7 @@ const getNameByIndex = (index: number): string => {
     setSelectedSkills([]);
     setSelectedExperience('');
     setSelectedType('');
-    setSearchTerm('');
+    setSearchTerms([]);
     setCurrentPage(1);
     setActiveTab("전체");
   };
@@ -254,19 +258,15 @@ const getNameByIndex = (index: number): string => {
                 검증된 IT 전문가들과 함께 프로젝트를 성공적으로 완수하세요
               </p>
 
-              {/* 검색창 */}
-              <div className="bg-white/10 backdrop-blur-md p-2 flex items-center max-w-3xl rounded-2xl shadow-lg border border-white/20 hover:border-white/30 transition-all group">
-                <input
-                  type="text"
-                  placeholder="기술 스택, 이름으로 검색..."
-                  className="flex-1 px-6 py-4 outline-none text-gray-800 text-lg bg-white rounded-xl shadow-inner"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
+              {/* 다중 검색창 */}
+              <div className="max-w-3xl">
+                <MultiSearchInput
+                  searchTerms={searchTerms}
+                  onSearchTermsChange={handleSearchTermsChange}
+                  placeholder="기술 스택, 이름으로 검색 (여러 검색어 지원)..."
+                  className="bg-white/10 backdrop-blur-md p-2 rounded-2xl shadow-lg border border-white/20 hover:border-white/30 transition-all"
                 />
-                <button className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md ml-2 group-hover:shadow-lg transform group-hover:scale-[1.02] duration-200">
-                  검색
-                </button>
-                </div>
+              </div>
               
               {/* 배지 */}
               <div className="flex flex-wrap gap-3 mt-8">
@@ -427,30 +427,64 @@ const getNameByIndex = (index: number): string => {
           .animate-float {
             animation: float 6s ease-in-out infinite;
           }
+          
+          .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
         `}</style>
       </div>
 
       {/* 탭 네비게이션 */}
       <div className="border-b bg-white sticky top-0 md:top-0 bottom-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto">
-          <nav className="flex relative">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => handleTabChange(tab)}
-                className={`flex-1 py-3 md:py-4 px-2 md:px-6 text-sm md:text-base text-center relative group ${
-                  activeTab === tab
-                    ? "text-blue-600 font-medium"
-                    : "text-gray-500 hover:text-blue-500"
-                } transition-colors duration-300`}
-              >
-                {tab}
-                {activeTab === tab && (
-                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"></div>
-                )}
-              </button>
-            ))}
-          </nav>
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          {/* 모바일에서는 스크롤 가능한 탭 */}
+          <div className="block sm:hidden">
+            <nav className="flex overflow-x-auto scrollbar-hide relative">
+              {tabs.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => handleTabChange(tab)}
+                  className={`flex-shrink-0 py-3 px-4 text-sm text-center relative whitespace-nowrap ${
+                    activeTab === tab
+                      ? "text-blue-600 font-medium"
+                      : "text-gray-500 hover:text-blue-500"
+                  } transition-colors duration-300`}
+                >
+                  {tab}
+                  {activeTab === tab && (
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"></div>
+                  )}
+                </button>
+              ))}
+            </nav>
+          </div>
+          
+          {/* 태블릿 이상에서는 그리드 레이아웃 */}
+          <div className="hidden sm:block">
+            <nav className="grid grid-cols-4 sm:grid-cols-8 relative">
+              {tabs.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => handleTabChange(tab)}
+                  className={`py-3 md:py-4 px-2 lg:px-4 text-xs sm:text-sm lg:text-base text-center relative group ${
+                    activeTab === tab
+                      ? "text-blue-600 font-medium"
+                      : "text-gray-500 hover:text-blue-500"
+                  } transition-colors duration-300`}
+                >
+                  <span className="block truncate">{tab}</span>
+                  {activeTab === tab && (
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"></div>
+                  )}
+                </button>
+              ))}
+            </nav>
+          </div>
         </div>
       </div>
 
@@ -696,7 +730,7 @@ const getNameByIndex = (index: number): string => {
 
                   <div className="flex items-center space-x-2">
                     {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
-                      let pageNumber;
+                      let pageNumber: number;
               if (totalPages <= 5) {
                         pageNumber = index + 1;
               } else if (currentPage <= 3) {

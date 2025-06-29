@@ -350,7 +350,7 @@ export default function RemoteProjectPage() {
           <div className="flex flex-col md:flex-row md:items-center">
             <div className="md:w-2/3 mb-10 md:mb-0 md:pr-10">
               <h1 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight leading-tight">
-                재택 / 원격 <span className="text-pink-300 inline-block relative">
+                재택 <span className="text-pink-300 inline-block relative">
                   프로젝트
                   <div className="absolute -bottom-2 left-0 w-full h-1 bg-pink-300 opacity-50 rounded"></div>
                   <div className="relative inline-block">
@@ -741,7 +741,7 @@ export default function RemoteProjectPage() {
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center">
-                  <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 / 원격 프로젝트 </span>
+                  <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 프로젝트 </span>
                   <span className="ml-2 text-sm font-normal bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full"> NEW </span>
                 </h2>
                 <p className="text-gray-600"> 총 <span className="font-semibold text-indigo-600">{filteredProjects.length}</span>개의 프로젝트가 있습니다</p>
@@ -884,7 +884,7 @@ export default function RemoteProjectPage() {
 
                   <div className="flex items-center space-x-2">
                     {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
-                      let pageNumber;
+                      let pageNumber: number;
                       if (totalPages <= 5) {
                         pageNumber = index + 1;
                       } else if (currentPage <= 3) {
@@ -937,21 +937,21 @@ export default function RemoteProjectPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             <div>
               <h2 className="text-3xl font-bold mb-8 text-gray-900 flex items-center">
-                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 / 원격 프로젝트란 ? </span>
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 프로젝트란? </span>
                 <div className="ml-4 h-1 w-24 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"></div>
               </h2>
               <div className="space-y-6 text-gray-600">
                 <p className="text-lg leading-relaxed">
-                  <span className="font-medium text-indigo-600"> 재택 / 원격 프로젝트 </span>는 장소에 구애받지 않고 자유롭게 작업할 수 있는 프로젝트 형태입니다. 이랜서는 검증된 IT 프리랜서 전문가들이 원격으로 진행할 수 있는 다양한 프로젝트를 제공합니다.
+                  <span className="font-medium text-indigo-600"> 재택 프로젝트 </span>는 장소에 구애받지 않고 온라인으로 진행하는 프로젝트입니다. AI 개발, 웹/앱 개발, 블록체인, IoT 등 다양한 IT 분야의 전문 프로젝트를 재택근무로 수행할 수 있습니다.
                 </p>
                 <ul className="list-none space-y-4">
                   <li className="flex items-start">
                     <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
                       <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <span> 자유로운 시간과 장소에서 업무 진행 가능 </span>
+                    <span> 자유로운 근무 환경과 시간 관리 </span>
                   </li>
                   <li className="flex items-start">
                     <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
@@ -959,7 +959,7 @@ export default function RemoteProjectPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
                       </svg>
                     </div>
-                    <span> 개인의 효율적인 작업 환경에서 높은 생산성 발휘 </span>
+                    <span> 월 평균 3,000만원 ~ 8,000만원 고수익 </span>
                   </li>
                   <li className="flex items-start">
                     <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
@@ -967,7 +967,7 @@ export default function RemoteProjectPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
                       </svg>
                     </div>
-                    <span> 통근 시간 절약 및 워라밸 향상 </span>
+                    <span> Slack, Zoom, Git 등 협업 도구 활용 </span>
                   </li>
                   <li className="flex items-start">
                     <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
@@ -975,7 +975,7 @@ export default function RemoteProjectPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
                       </svg>
                     </div>
-                    <span> 클라우드 기반 협업 도구를 통한 원활한 소통 </span>
+                    <span> 주간 진행상황 보고 및 정기 미팅 </span>
                   </li>
                   <li className="flex items-start">
                     <div className="flex-shrink-0 h-6 w-6 bg-indigo-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
@@ -983,11 +983,11 @@ export default function RemoteProjectPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
                       </svg>
                     </div>
-                    <span> 정기적인 화상 미팅과 결과물 보고로 프로젝트 관리 </span>
+                    <span> 대기업부터 스타트업까지 다양한 클라이언트 </span>
                   </li>
                 </ul>
                 <p className="text-lg leading-relaxed">
-                  재택 / 원격 프로젝트는 자기주도적인 업무 역량이 뛰어난 전문가에게 적합하며, 프로젝트 관리와 소통 능력이 중요합니다.시간과 공간의 제약 없이 효율적으로 프로젝트를 진행하고 싶은 프리랜서에게 추천합니다.
+                  현재 <span className="font-semibold text-indigo-600">12개의 재택 프로젝트</span>가 진행 중이며, Python, React, Node.js, TensorFlow 등 다양한 기술 스택을 요구합니다. 자기주도적 업무 능력과 원격 협업 경험이 있는 프리랜서에게 최적화된 프로젝트들입니다.
                 </p>
               </div>
             </div>
@@ -995,7 +995,7 @@ export default function RemoteProjectPage() {
             <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-b from-indigo-100 to-purple-100 rounded-bl-full opacity-50 -z-10"></div>
               <h3 className="text-2xl font-bold mb-8 text-gray-900 pb-4 border-b flex items-center">
-                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 / 원격 프로젝트 이용 안내 </span>
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 프로젝트 시작하기 </span>
               </h3>
               <div className="space-y-10">
                 <div className="flex">
@@ -1003,8 +1003,8 @@ export default function RemoteProjectPage() {
                     <span className="text-indigo-600 font-bold text-2xl"> 1 </span>
                   </div>
                   <div className="ml-6">
-                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 프로젝트 찾기 </h4>
-                    <p className="text-gray-600 leading-relaxed"> 다양한 재택 / 원격 프로젝트 중 나의 기술 스택과 관심 분야에 맞는 프로젝트를 찾습니다.</p>
+                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 프로젝트 탐색 </h4>
+                    <p className="text-gray-600 leading-relaxed"> AI, 블록체인, IoT 등 내 전문 분야의 재택 프로젝트를 검색하고 상세 정보를 확인합니다.</p>
                   </div>
                 </div>
 
@@ -1013,8 +1013,8 @@ export default function RemoteProjectPage() {
                     <span className="text-indigo-600 font-bold text-2xl"> 2 </span>
                   </div>
                   <div className="ml-6">
-                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 지원 및 제안 </h4>
-                    <p className="text-gray-600 leading-relaxed"> 프로젝트에 지원하거나, 견적과 포트폴리오를 포함한 제안서를 제출합니다.</p>
+                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 포트폴리오 제출 </h4>
+                    <p className="text-gray-600 leading-relaxed"> 관련 경험과 포트폴리오를 포함한 제안서를 작성하여 클라이언트에게 지원합니다.</p>
                   </div>
                 </div>
 
@@ -1023,8 +1023,8 @@ export default function RemoteProjectPage() {
                     <span className="text-indigo-600 font-bold text-2xl"> 3 </span>
                   </div>
                   <div className="ml-6">
-                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 미팅 및 계약 </h4>
-                    <p className="text-gray-600 leading-relaxed"> 화상 미팅을 통해 클라이언트와 소통한 후, 이랜서 플랫폼을 통해 안전하게 계약을 체결합니다.</p>
+                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 화상 면접 및 계약 </h4>
+                    <p className="text-gray-600 leading-relaxed"> 온라인 면접을 통해 프로젝트 세부사항을 논의하고 안전한 계약을 체결합니다.</p>
                   </div>
                 </div>
 
@@ -1033,18 +1033,24 @@ export default function RemoteProjectPage() {
                     <span className="text-indigo-600 font-bold text-2xl"> 4 </span>
                   </div>
                   <div className="ml-6">
-                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 작업 및 협업 </h4>
-                    <p className="text-gray-600 leading-relaxed"> 협업 도구를 활용하여 정기적으로 진행 상황을 공유하고, 원격으로 프로젝트를 완성합니다.</p>
+                    <h4 className="text-xl font-medium text-gray-900 mb-2"> 원격 개발 및 납품 </h4>
+                    <p className="text-gray-600 leading-relaxed"> 정해진 일정에 따라 원격으로 개발하고, 정기 보고를 통해 프로젝트를 완성합니다.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-12">
+              <div className="mt-12 space-y-4">
                 <Link
-                  href="/freelancers/profile"
+                  href="/register"
                   className="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center py-4 rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg"
                 >
-                  프리랜서 프로필 등록하기
+                  프리랜서 가입하기
+                </Link>
+                <Link
+                  href="/jobs"
+                  className="block w-full bg-gray-100 hover:bg-gray-200 text-gray-800 text-center py-4 rounded-xl font-medium transition-all border border-gray-200 hover:border-gray-300"
+                >
+                  모든 프로젝트 보기
                 </Link>
               </div>
             </div>
@@ -1061,10 +1067,10 @@ export default function RemoteProjectPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 이랜서 재택 / 원격 프로젝트의 장점 </span>
+              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 이랜서 재택 프로젝트의 장점 </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              이랜서는 다양한 산업 분야의 재택 / 원격 프로젝트를 제공하며, 믿을 수 있는 플랫폼을 통해 안전한 거래를 보장합니다.
+              이랜서는 다양한 산업 분야의 재택 프로젝트를 제공하며, 믿을 수 있는 플랫폼을 통해 안전한 거래를 보장합니다.
             </p>
           </div>
 

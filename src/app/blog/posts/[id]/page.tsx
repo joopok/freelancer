@@ -113,21 +113,21 @@ export default function BlogPostPage() {
   // 로딩 중이거나 포스트가 없을 경우
   if (loading || !post) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors duration-300">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 포스트 헤더 */}
-      <div className="bg-gradient-to-r from-indigo-600 to-blue-500 py-16 px-4 sm:px-6 lg:px-8 text-white">
+      <div className="bg-gradient-to-r from-indigo-600 to-blue-500 dark:from-gray-800 dark:to-gray-700 py-16 px-4 sm:px-6 lg:px-8 text-white dark:text-gray-100 transition-colors duration-300">
         <div className="max-w-3xl mx-auto">
           <div className="mb-4">
             <Link 
               href={`/blog?category=${post.category}`}
-              className="inline-block bg-white bg-opacity-20 text-white text-sm px-3 py-1 rounded-full hover:bg-opacity-30 transition-colors"
+              className="inline-block bg-white dark:bg-gray-800 bg-opacity-20 text-white text-sm px-3 py-1 rounded-full hover:bg-opacity-30 transition-colors"
               onClick={(e) => {
                 e.preventDefault();
                 setLoading(true);
@@ -161,7 +161,7 @@ export default function BlogPostPage() {
       
       {/* 메인 포스트 콘텐츠 */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-xl shadow-md overflow-hidden mb-10">
+        <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-900/50 overflow-hidden mb-10 transition-colors duration-300">
           <div className="relative h-80 md:h-96">
             <Image
               src={post.imageUrl}
@@ -172,17 +172,17 @@ export default function BlogPostPage() {
           </div>
           <div className="p-8 md:p-10">
             <div 
-              className="prose prose-indigo max-w-none"
+              className="prose prose-indigo dark:prose-invert max-w-none"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
             
-            <div className="border-t border-gray-200 pt-6 mt-8">
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-8">
               <div className="flex flex-wrap gap-2">
                 {post.tags.map(tag => (
                   <Link
                     key={tag}
                     href={`/blog?tag=${tag}`}
-                    className="bg-gray-100 text-gray-600 text-sm px-3 py-1 rounded-full hover:bg-gray-200 transition-colors"
+                    className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm px-3 py-1 rounded-full hover:bg-gray-200 dark:bg-gray-600 transition-colors"
                     onClick={(e) => {
                       e.preventDefault();
                       setLoading(true);
@@ -194,7 +194,7 @@ export default function BlogPostPage() {
                 ))}
               </div>
               
-              <div className="flex items-center mt-6 bg-indigo-50 p-6 rounded-lg">
+              <div className="flex items-center mt-6 bg-indigo-50 dark:bg-gray-700 p-6 rounded-lg">
                 <div className="w-16 h-16 rounded-full overflow-hidden relative mr-4">
                   <Image 
                     src={post.authorImage}
@@ -204,9 +204,9 @@ export default function BlogPostPage() {
                   />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800">{post.author}</h3>
-                  <p className="text-gray-600 text-sm mb-2">프리랜서 분야 전문 에디터</p>
-                  <p className="text-gray-600">프리랜서로 10년간 활동한 경험을 바탕으로 실용적인 조언과 인사이트를 공유합니다.</p>
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-white">{post.author}</h3>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">프리랜서 분야 전문 에디터</p>
+                  <p className="text-gray-600 dark:text-gray-300">프리랜서로 10년간 활동한 경험을 바탕으로 실용적인 조언과 인사이트를 공유합니다.</p>
                 </div>
               </div>
             </div>
@@ -215,7 +215,7 @@ export default function BlogPostPage() {
         
         {/* 관련 포스트 */}
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">관련 포스트</h2>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">관련 포스트</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {relatedPosts.map(relatedPost => (
               <Link
@@ -228,7 +228,7 @@ export default function BlogPostPage() {
                   window.location.href = `/blog/posts/${relatedPost.id}`;
                 }}
               >
-                <div className="bg-white rounded-xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow duration-300 h-full">
+                <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow duration-300 h-full">
                   <div className="relative h-40">
                     <Image
                       src={relatedPost.imageUrl}
@@ -241,7 +241,7 @@ export default function BlogPostPage() {
                     </div>
                   </div>
                   <div className="p-4">
-                    <h3 className="text-md font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors">
+                    <h3 className="text-md font-semibold text-gray-800 dark:text-white group-hover:text-indigo-600 dark:text-indigo-400 transition-colors">
                       {relatedPost.title}
                     </h3>
                   </div>
@@ -255,7 +255,7 @@ export default function BlogPostPage() {
         <div className="flex justify-center">
           <Link 
             href="/blog"
-            className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
+            className="flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:text-indigo-300 transition-colors"
             onClick={(e) => {
               e.preventDefault();
               setLoading(true);

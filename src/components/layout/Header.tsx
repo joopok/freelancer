@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
+import ThemeToggle from '@/components/common/ThemeToggle';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { useLoading } from './Loading';
@@ -20,8 +21,6 @@ interface MenuItem {
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -144,26 +143,42 @@ export default function Header() {
     }
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      setLoading(true);
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setShowSearch(false);
-      setSearchQuery('');
-      
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
-    }
-  };
-
   const handleMenuMouseEnter = (href: string) => {
     setActiveMenu(href);
   };
 
   const handleMenuMouseLeave = () => {
     setActiveMenu(null);
+  };
+
+  // 페이지 이동 함수
+  const navigateTo = (href: string) => {
+    console.log('Navigating to:', href); // 디버깅용 로그
+    try {
+      setLoading(true);
+      
+      // 현재 경로와 동일한 경우 리로드
+      if (pathname === href) {
+        console.log('Same page, reloading...');
+        window.location.reload();
+        return;
+      }
+      
+      // Next.js router를 먼저 시도
+      console.log('Attempting router.push...');
+      router.push(href);
+      console.log('Navigation completed to:', href);
+      
+    } catch (error) {
+      console.error('Router navigation failed, trying window.location:', error);
+      // fallback으로 window.location 사용
+      window.location.href = href;
+    } finally {
+      // 페이지 이동 후 로딩 상태 해제
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    }
   };
 
   // 메뉴 아이템 정의 (블로그에 서브메뉴 추가)
@@ -175,325 +190,88 @@ export default function Header() {
       label: '블로그', 
       href: '/blog',
       subMenus: [
-        { 
-          label: '블로그 메인화면', 
-          href: '/blog',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-          )
-        },
-        { 
-          label: '개발테크', 
-          href: '/blog/dev-tech',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-            </svg>
-          )
-        },
-        { 
-          label: '디자인테크', 
-          href: '/blog/design-tech',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          )
-        },
-        { 
-          label: '구매테크', 
-          href: '/blog/purchase-tech',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          )
-        },
-        { 
-          label: '인사테크', 
-          href: '/blog/hr-tech',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          )
-        },
-        { 
-          label: '홍보&마케팅 테크', 
-          href: '/blog/marketing-tech',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-            </svg>
-          )
-        },
-        { 
-          label: '물류테크', 
-          href: '/blog/logistics-tech',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-            </svg>
-          )
-        },
-        { 
-          label: '전략테크', 
-          href: '/blog/strategy-tech',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          )
-        },
-        { 
-          label: '제조테크', 
-          href: '/blog/manufacturing-tech',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          )
-        },
-        { 
-          label: '밸런스 UP', 
-          href: '/blog/balance-up',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-            </svg>
-          )
-        },
-        { 
-          label: '실리콘밸리 AI 컬럼', 
-          href: '/blog/silicon-valley-ai',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-            </svg>
-          )
-        }
+        { label: '블로그 메인화면', href: '/blog' },
+        { label: '개발테크', href: '/blog/dev-tech' },
+        { label: '디자인테크', href: '/blog/design-tech' },
+        { label: '구매테크', href: '/blog/purchase-tech' },
+        { label: '인사테크', href: '/blog/hr-tech' },
+        { label: '홍보&마케팅 테크', href: '/blog/marketing-tech' },
+        { label: '물류테크', href: '/blog/logistics-tech' },
+        { label: '전략테크', href: '/blog/strategy-tech' },
+        { label: '제조테크', href: '/blog/manufacturing-tech' },
+        { label: '밸런스 UP', href: '/blog/balance-up' },
+        { label: '실리콘밸리 AI 컬럼', href: '/blog/silicon-valley-ai' }
       ]
     },
     { 
       label: '커뮤니티', 
       href: '/community',
       subMenus: [
-        { 
-          label: '자유게시판', 
-          href: '/community/free',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-            </svg>
-          )
-        },
-        { 
-          label: '갤러리', 
-          href: '/community/gallery',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          )
-        },
-        { 
-          label: '게시판', 
-          href: '/community/board',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-          )
-        },
-        { 
-          label: '질문답변', 
-          href: '/community/qna',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          )
-        },
-        { 
-          label: '스터디/모임', 
-          href: '/community/study',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          )
-        },
-        { 
-          label: '프로젝트 후기', 
-          href: '/community/project-review',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-            </svg>
-          )
-        },
-        { 
-          label: '정보공유', 
-          href: '/community/share',
-          icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-            </svg>
-          )
-        },
-        {
-          label: '문의하기',
-          href: '/community/contact',
-          icon: (
-            <svg xmlns= "http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" >
-            <path strokeLinecap="round" strokeLinejoin = "round" strokeWidth={ 2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          )
-        }
+        { label: '자유게시판', href: '/community/free' },
+        { label: '갤러리', href: '/community/gallery' },
+        { label: 'QnA', href: '/community/qna' },
+        { label: '스터디', href: '/community/study' },
+        { label: '프로젝트 리뷰', href: '/community/project-review' },
+        { label: '공유게시판', href: '/community/share' },
+        { label: '연락처', href: '/community/contact' }
       ]
     },
+    { label: '취업정보', href: '/jobs' }
   ];
 
-  const isActive = (href: string) => {
-    if (!pathname) return false;
-    if (href === '/') return pathname === href;
-    return pathname.startsWith(href);
-  };
-
-  // 페이지 이동 시 로딩 처리하는 함수
-  const handleNavigation = (href: string) => {
-    // 서브메뉴가 있는 항목은 단순히 서브메뉴만 토글
-    if (activeMenu === href) {
-      setActiveMenu(null);
-    } else {
-      setActiveMenu(href);
-    }
-  };
-
-  // 페이지 이동 함수
-  const navigateTo = (href: string) => {
-    if (href === pathname) return;
-    
-    setLoading(true);
-    setIsMenuOpen(false);
-    router.push(href);
-    
-    // 로딩 상태 1초 후 해제 (페이지 전환 효과를 위해)
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  };
-
   return (
-    <header className="border-b bg-white">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+    <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-white/20 dark:border-gray-700/20 shadow-lg shadow-black/5 dark:shadow-white/5 transition-all duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
           {/* 로고 */}
-          <Link 
-            href="/" 
-            className={clsx(
-              "font-bold text-xl transition-colors",
-              isActive('/') ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'
-            )}
-            onClick={(e) => {
-              e.preventDefault();
-              navigateTo('/');
-            }}
-          >
-            잡코리아 빌보드
-          </Link>
-  
+          <div className="flex-shrink-0">
+            <Link href="/" className="flex items-center">
+              <span className="text-2xl font-bold text-blue-600">JobKorea</span>
+              <span className="ml-2 text-lg text-gray-600">Billboard</span>
+            </Link>
+          </div>
 
-          {/* 모바일 메뉴 버튼 */}
-          <button
-            className="lg:hidden p-2"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {isMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
-
-          {/* 데스크톱 메뉴 */}
-          <nav className="hidden lg:flex items-center space-x-8">
-            {menuItems.map((item) => (
-              <div 
-                key={item.href}
-                className="relative group"
-                onMouseEnter={() => handleMenuMouseEnter(item.href)}
-                onMouseLeave={handleMenuMouseLeave}
-                ref={el => {
-                  subMenuRefs.current[item.href] = el;
-                }}
-              >
-                {item.subMenus ? (
-                  <div
-                    className={clsx(
-                      "text-base font-bold transition-colors flex items-center cursor-pointer",
-                      isActive(item.href) 
-                        ? 'text-blue-600' 
-                        : 'text-gray-600 hover:text-blue-600'
-                    )}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNavigation(item.href);
-                    }}
-                  >
-                    {item.icon}
-                    {item.label}
-                    <svg 
-                      className={`ml-1 w-4 h-4 transition-transform ${activeMenu === item.href ? 'rotate-180' : ''}`} 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                ) : (
+          {/* 데스크톱 네비게이션 */}
+          <nav className="hidden lg:flex items-center">
+            {menuItems.map((item, index) => (
+              <div key={item.href} className="flex items-center">
+                <div
+                  className="relative"
+                  onMouseEnter={() => handleMenuMouseEnter(item.href)}
+                  onMouseLeave={handleMenuMouseLeave}
+                  ref={(el) => { subMenuRefs.current[item.href] = el; }}
+                >
                   <Link
                     href={item.href}
-                    className={clsx(
-                      "text-base font-bold transition-colors flex items-center",
-                      isActive(item.href) 
-                        ? 'text-blue-600' 
-                        : 'text-gray-600 hover:text-blue-600'
-                    )}
+                    className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-lg font-medium transition-colors duration-200"
                     onClick={(e) => {
+                      // 기본 링크 동작을 막고 커스텀 네비게이션 사용
                       e.preventDefault();
+                      console.log('Menu clicked:', item.label, item.href); // 디버깅용 로그
                       navigateTo(item.href);
                     }}
                   >
-                    {item.icon}
                     {item.label}
                   </Link>
-                )}
-
-                {/* 서브메뉴 */}
-                {item.subMenus && (
-                  <AnimatePresence>
-                    {activeMenu === item.href && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
+                
+                  {/* 서브메뉴 */}
+                  {item.subMenus && activeMenu === item.href && (
+                    <AnimatePresence>
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
+                        exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-30 border border-gray-100"
+                        className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 min-w-48 border border-gray-200 dark:border-gray-700"
                       >
-                        {item.subMenus.map(subItem => (
+                        {item.subMenus.map((subItem) => (
                           <Link
                             key={subItem.href}
                             href={subItem.href}
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 first:rounded-t-md last:rounded-b-md transition-colors duration-200"
                             onClick={(e) => {
                               e.preventDefault();
+                              console.log('Submenu clicked:', subItem.label, subItem.href); // 디버깅용 로그
                               setActiveMenu(null);
                               navigateTo(subItem.href);
                             }}
@@ -503,92 +281,102 @@ export default function Header() {
                           </Link>
                         ))}
                       </motion.div>
-                    )}
-                  </AnimatePresence>
+                    </AnimatePresence>
+                  )}
+                </div>
+                
+                {/* 메뉴 구분선 (마지막 메뉴가 아닌 경우에만) */}
+                {index < menuItems.length - 1 && (
+                  <div className="mx-3 h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
                 )}
               </div>
             ))}
           </nav>
 
-          {/* 데스크톱 검색, 로그인/회원가입 */}
+          {/* 데스크톱 테마토글, 로그인/회원가입 */}
           <div className="hidden lg:flex items-center space-x-4">
-            {/* 검색 버튼 및 검색창 */}
-            <div className="relative">
-              <button
-                onClick={() => setShowSearch(!showSearch)}
-                className="p-2 text-gray-600 hover:text-blue-600 focus:outline-none"
-                aria-label="검색"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-              </button>
-              
-              {showSearch && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.1 }}
-                  className="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg z-20"
-                >
-                  <form onSubmit={handleSearchSubmit} className="p-2">
-                    <div className="flex items-center">
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="검색어를 입력하세요"
-                      />
-                      <button
-                        type="submit"
-                        className="whitespace-nowrap px-3 py-2 text-sm text-white bg-blue-600 rounded-r hover:bg-blue-700"
-                      >
-                        검색
-                      </button>
-                    </div>
-                  </form>
-                </motion.div>
-              )}
-            </div>
-            
+            {/* 테마 토글 */}
+            <ThemeToggle />
+
+            {/* 로그인/로그아웃 */}
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
-                <span className="text-gray-600">
-                  <span className="font-bold">{user?.name || user?.username1 || '사용자'}</span>님 환영합니다
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  안녕하세요, {user?.name || user?.email}님
                 </span>
-                <button
+                <motion.button
                   onClick={handleLogout}
-                  className="px-4 py-2 text-base font-bold text-white bg-orange-500 rounded hover:bg-orange-600 transition-colors"
+                  className="relative px-6 py-2 text-base font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-lg overflow-hidden group shadow-lg hover:shadow-xl transition-all duration-300"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  로그아웃
-                </button>
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <span className="relative z-10">로그아웃</span>
+                </motion.button>
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <Link
-                  href="/login"
-                  className="text-base font-bold text-gray-600 hover:text-blue-600"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleLoginClick();
-                  }}
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  로그인
-                </Link>
-                <Link
-                  href="/register"
-                  className="px-4 py-2 text-base font-bold text-white bg-orange-500 rounded hover:bg-orange-600 transition-colors"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigateTo('/register');
-                  }}
+                  <Link
+                    href="/login"
+                    className="relative text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 hover:from-purple-600 hover:to-pink-600 dark:hover:from-purple-400 dark:hover:to-pink-400 transition-all duration-300"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleLoginClick();
+                    }}
+                  >
+                    로그인
+                  </Link>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: 1 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  회원가입
-                </Link>
+                  <Link
+                    href="/register"
+                    className="relative px-6 py-2 text-base font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-lg overflow-hidden group shadow-lg hover:shadow-xl transition-all duration-300"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigateTo('/register');
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <span className="relative z-10">회원가입</span>
+                  </Link>
+                </motion.div>
               </div>
             )}
+          </div>
+
+          {/* 모바일 테마토글 & 메뉴 버튼 */}
+          <div className="lg:hidden flex items-center space-x-2">
+            {/* 모바일 테마 토글 */}
+            <ThemeToggle />
+            
+            {/* 모바일 메뉴 버튼 */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors duration-200"
+            >
+              <svg
+                className="h-6 w-6"
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                {isMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -597,92 +385,36 @@ export default function Header() {
           "lg:hidden",
           isMenuOpen ? "block" : "hidden"
         )}>
-          <div className="py-2 space-y-1">
-            {/* 모바일 검색창 */}
-            <form onSubmit={handleSearchSubmit} className="px-3 py-2">
-              <div className="flex items-center">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="검색어를 입력하세요"
-                />
-                <button
-                  type="submit"
-                  className="whitespace-nowrap px-3 py-2 text-sm text-white bg-blue-600 rounded-r hover:bg-blue-700"
-                >
-                  검색
-                </button>
-              </div>
-            </form>
-            
+          <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
             {menuItems.map((item) => (
               <div key={item.href}>
-                <div className="flex items-center justify-between">
-                  {item.subMenus ? (
-                    <div
-                      className={clsx(
-                        "block px-3 py-2 rounded-md text-base font-bold cursor-pointer",
-                        isActive(item.href)
-                          ? 'text-blue-600 bg-blue-50'
-                          : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-                      )}
-                      onClick={() => setActiveMenu(activeMenu === item.href ? null : item.href)}
-                    >
-                      {item.icon}
-                      {item.label}
-                    </div>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      className={clsx(
-                        "block px-3 py-2 rounded-md text-base font-bold",
-                        isActive(item.href)
-                          ? 'text-blue-600 bg-blue-50'
-                          : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-                      )}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigateTo(item.href);
-                      }}
-                    >
-                      {item.icon}
-                      {item.label}
-                    </Link>
-                  )}
-                  {item.subMenus && (
-                    <button
-                      className="px-3 py-2 text-gray-600"
-                      onClick={() => setActiveMenu(activeMenu === item.href ? null : item.href)}
-                    >
-                      <svg 
-                        className={`w-5 h-5 transition-transform ${activeMenu === item.href ? 'rotate-180' : ''}`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-                
+                <Link
+                  href={item.href}
+                  className="block px-3 py-2 text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    console.log('Mobile menu clicked:', item.label, item.href); // 디버깅용 로그
+                    setIsMenuOpen(false);
+                    navigateTo(item.href);
+                  }}
+                >
+                  {item.label}
+                </Link>
                 {/* 모바일 서브메뉴 */}
-                {item.subMenus && activeMenu === item.href && (
-                  <div className="ml-4 mt-1 space-y-1 border-l-2 border-blue-100 pl-3">
-                    {item.subMenus.map(subItem => (
+                {item.subMenus && (
+                  <div className="pl-6 space-y-1">
+                    {item.subMenus.map((subItem) => (
                       <Link
                         key={subItem.href}
                         href={subItem.href}
-                        className="block px-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md flex items-center"
+                        className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                         onClick={(e) => {
                           e.preventDefault();
+                          console.log('Mobile submenu clicked:', subItem.label, subItem.href); // 디버깅용 로그
                           setIsMenuOpen(false);
                           navigateTo(subItem.href);
                         }}
                       >
-                        {subItem.icon}
                         {subItem.label}
                       </Link>
                     ))}
@@ -690,11 +422,28 @@ export default function Header() {
                 )}
               </div>
             ))}
-            {!isLoggedIn && (
-              <div className="border-t border-gray-200 pt-2 mt-2">
+            
+            {/* 모바일 로그인/회원가입 */}
+            {isLoggedIn ? (
+              <div className="border-t border-gray-200 pt-4 pb-3">
+                <div className="px-3 text-sm text-gray-700 mb-2">
+                  안녕하세요, {user?.name || user?.email}님
+                </div>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="block w-full text-left px-3 py-2 text-base font-medium text-red-600 hover:text-red-800 hover:bg-gray-50"
+                >
+                  로그아웃
+                </button>
+              </div>
+            ) : (
+              <div className="border-t border-gray-200 pt-4 pb-3 space-y-1">
                 <Link
                   href="/login"
-                  className="block px-3 py-2 text-base font-bold text-gray-700 hover:bg-gray-50"
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
                   onClick={(e) => {
                     e.preventDefault();
                     setIsMenuOpen(false);
@@ -721,4 +470,4 @@ export default function Header() {
       </div>
     </header>
   );
-} 
+}

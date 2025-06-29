@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -14,404 +14,588 @@ interface Project {
   budget: string;
   deadline: string;
   type: '상주' | '외주';
-  category: string; // 프로젝트 카테고리
+  description?: string;
+  level?: string;
 }
 
 export default function ProjectPage() {
+  // 상태 관리
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [localLoading, setLocalLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
-  const [activeTab, setActiveTab] = useState("전체");
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [selectedDuration, setSelectedDuration] = useState<string>('');
+  const [selectedBudget, setSelectedBudget] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
-  
-  // 탭 슬라이딩 효과를 위한 상태 및 ref
-  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
-  const [indicatorStyle, setIndicatorStyle] = useState({
-    left: 0,
-    width: 0,
-  });
+  const [activeTab, setActiveTab] = useState("전체");
 
-  // 현재 인디케이터 위치를 ref로 저장 (렌더링 발생 없이 값 추적)
-  const currentIndicatorRef = useRef({
-    left: 0,
-    width: 0
-  });
-
-  const tabs = ["전체","개발","기획","퍼블","디자인","아케텍트","DBA","기타"];
+  const itemsPerPage = 10;
+  const tabs = ["전체", "웹개발", "앱개발", "시스템", "데이터", "AI/ML", "기타"];
   
-  // 상주 프로젝트 데이터
+  // 모든 기술 스택 목록
+  const allSkills = [
+    'React', 'Node.js', 'Python', 'Java', 'TypeScript',
+    'React Native', 'Flutter', 'AWS', 'Docker', 'Spring',
+    'Django', 'PHP', 'JavaScript', 'Vue.js', 'Angular'
+  ];
+  
+  // 상주 프로젝트 데이터 로드
   useEffect(() => {
-    // 실제 프로덕션에서는 API 요청으로 데이터를 가져오게 됩니다
-    const projectsData: Project[] = [
-      {
-        id: "2", 
-        title: "모바일 앱 프론트엔드 개발",
-        company: "(주)앱스튜디오",
-        skills: ["React Native", "TypeScript", "Redux"],
-        duration: "3개월",
-        budget: "3,200만원",
-        deadline: "D-5",
-        type: "상주",
-        category: "앱 개발",
-      },
-      {
-        id: "4",
-        title: "데이터 분석 대시보드 개발",
-        company: "(주)데이터랩스",
-        skills: ["React", "D3.js", "Python"],
-        duration: "2개월",
-        budget: "2,800만원",
-        deadline: "D-4",
-        type: "상주",
-        category: "데이터 분석",
-      },
-      {
-        id: "5",
-        title: "전사 ERP 시스템 고도화",
-        company: "(주)시스템솔루션",
-        skills: ["Java", "Spring", "Oracle"],
-        duration: "5개월",
-        budget: "6,500만원",
-        deadline: "D-10",
-        type: "상주",
-        category: "ERP 시스템",
-      },
-      {
-        id: "7",
-        title: "클라우드 마이그레이션 프로젝트",
-        company: "(주)클라우드웨이",
-        skills: ["AWS", "Docker", "Kubernetes"],
-        duration: "3개월",
-        budget: "5,500만원",
-        deadline: "D-8",
-        type: "상주",
-        category: "클라우드 마이그레이션",
-      },
-      {
-        id: "9",
-        title: "핀테크 보안 시스템 구축",
-        company: "(주)세이프텍",
-        skills: ["Java", "Spring Security", "OAuth"],
-        duration: "5개월",
-        budget: "6,000만원",
-        deadline: "D-9",
-        type: "상주",
-        category: "보안 시스템",
-      },
-      {
-        id: "12", 
-        title: "전자상거래 플랫폼 리뉴얼",
-        company: "(주)이마켓",
-        skills: ["React", "Node.js", "AWS"],
-        duration: "6개월",
-        budget: "7,500만원",
-        deadline: "D-4",
-        type: "상주",
-        category: "전자상거래 플랫폼",
-      },
-      {
-        id: "14",
-        title: "빅데이터 분석 플랫폼 구축",
-        company: "(주)빅데이터랩",
-        skills: ["Hadoop", "Spark", "Python"],
-        duration: "7개월",
-        budget: "8,000만원",
-        deadline: "D-3",
-        type: "상주",
-        category: "빅데이터 분석",
-      },
-      {
-        id: "16",
-        title: "핀테크 모바일 앱 리뉴얼",
-        company: "(주)파이낸셜테크",
-        skills: ["Flutter", "Firebase", "RESTful API"],
-        duration: "4개월",
-        budget: "5,500만원",
-        deadline: "D-7",
-        type: "상주",
-        category: "모바일 앱",
-      },
-      {
-        id: "17",
-        title: "클라우드 기반 ERP 시스템 구축",
-        company: "(주)클라우드ERP",
-        skills: ["AWS", "Java", "Spring Boot"],
-        duration: "8개월",
-        budget: "9,000만원",
-        deadline: "D-2",
-        type: "상주",
-        category: "클라우드 ERP",
-      },
-      {
-        id: "18", 
-        title: "대규모 데이터 분석 플랫폼 개발",
-        company: "(주)빅데이터솔루션",
-        skills: ["Python", "Hadoop", "Spark"],
-        duration: "6개월",
-        budget: "7,800만원",
-        deadline: "D-6",
-        type: "상주",
-        category: "데이터 분석",
-      },
-      {
-        id: "19", 
-        title: "금융권 보안 솔루션 개발",
-        company: "(주)금융보안",
-        skills: ["Java", "Spring Security", "Oracle"],
-        duration: "7개월",
-        budget: "8,500만원",
-        deadline: "D-5",
-        type: "상주",
-        category: "보안 솔루션",
-      },
-      {
-        id: "20", 
-        title: "헬스케어 모바일 앱 개발",
-        company: "(주)메디테크",
-        skills: ["React Native", "Firebase", "GraphQL"],
-        duration: "5개월",
-        budget: "6,200만원",
-        deadline: "D-3",
-        type: "상주",
-        category: "모바일 앱",
-      }
-    ];
-    
-    setProjects(projectsData);
-    setFilteredProjects(projectsData);
-    setLoading(false);
+    setLocalLoading(true);
+
+    const timer = setTimeout(() => {
+      const projectsData: Project[] = [
+        {
+          id: "2", 
+          title: "모바일 앱 프론트엔드 개발",
+          company: "(주)앱스튜디오",
+          skills: ["React Native", "TypeScript", "Redux"],
+          duration: "3개월",
+          budget: "3,200만원",
+          deadline: "D-5",
+          type: "상주",
+          description: "신규 서비스를 위한 모바일 앱 프론트엔드 개발 프로젝트입니다.",
+          level: "중급"
+        },
+        {
+          id: "4",
+          title: "데이터 분석 대시보드 개발",
+          company: "(주)데이터랩스",
+          skills: ["React", "D3.js", "Python"],
+          duration: "2개월",
+          budget: "2,800만원",
+          deadline: "D-4",
+          type: "상주",
+          description: "실시간 데이터 분석을 위한 대시보드 개발 프로젝트입니다.",
+          level: "중급"
+        },
+        {
+          id: "5",
+          title: "전사 ERP 시스템 고도화",
+          company: "(주)시스템솔루션",
+          skills: ["Java", "Spring", "Oracle"],
+          duration: "5개월",
+          budget: "6,500만원",
+          deadline: "D-10",
+          type: "상주",
+          description: "기존 ERP 시스템의 성능 개선 및 기능 확장 프로젝트입니다.",
+          level: "고급"
+        },
+        {
+          id: "7",
+          title: "클라우드 마이그레이션 프로젝트",
+          company: "(주)클라우드웨이",
+          skills: ["AWS", "Docker", "Kubernetes"],
+          duration: "3개월",
+          budget: "5,500만원",
+          deadline: "D-8",
+          type: "상주",
+          description: "온프레미스 시스템의 클라우드 마이그레이션 프로젝트입니다.",
+          level: "고급"
+        },
+        {
+          id: "9",
+          title: "핀테크 보안 시스템 구축",
+          company: "(주)세이프텍",
+          skills: ["Java", "Spring Security", "OAuth"],
+          duration: "5개월",
+          budget: "6,000만원",
+          deadline: "D-9",
+          type: "상주",
+          description: "금융권 보안 규정에 맞는 보안 시스템 구축 프로젝트입니다.",
+          level: "고급"
+        },
+        {
+          id: "12", 
+          title: "전자상거래 플랫폼 리뉴얼",
+          company: "(주)이마켓",
+          skills: ["React", "Node.js", "AWS"],
+          duration: "6개월",
+          budget: "7,500만원",
+          deadline: "D-4",
+          type: "상주",
+          description: "대규모 트래픽을 처리하는 이커머스 플랫폼 리뉴얼 프로젝트입니다.",
+          level: "중급"
+        },
+        {
+          id: "14",
+          title: "빅데이터 분석 플랫폼 구축",
+          company: "(주)빅데이터랩",
+          skills: ["Hadoop", "Spark", "Python"],
+          duration: "7개월",
+          budget: "8,000만원",
+          deadline: "D-3",
+          type: "상주",
+          description: "대용량 데이터 처리 및 분석을 위한 플랫폼 구축 프로젝트입니다.",
+          level: "고급"
+        },
+        {
+          id: "16",
+          title: "핀테크 모바일 앱 리뉴얼",
+          company: "(주)파이낸셜테크",
+          skills: ["Flutter", "Firebase", "RESTful API"],
+          duration: "4개월",
+          budget: "5,500만원",
+          deadline: "D-7",
+          type: "상주",
+          description: "사용자 경험 개선을 위한 모바일 앱 리뉴얼 프로젝트입니다.",
+          level: "중급"
+        },
+        {
+          id: "17",
+          title: "클라우드 기반 ERP 시스템 구축",
+          company: "(주)클라우드ERP",
+          skills: ["AWS", "Java", "Spring Boot"],
+          duration: "8개월",
+          budget: "9,000만원",
+          deadline: "D-2",
+          type: "상주",
+          description: "클라우드 네이티브 ERP 시스템 신규 구축 프로젝트입니다.",
+          level: "고급"
+        },
+        {
+          id: "18", 
+          title: "대규모 데이터 분석 플랫폼 개발",
+          company: "(주)빅데이터솔루션",
+          skills: ["Python", "Hadoop", "Spark"],
+          duration: "6개월",
+          budget: "7,800만원",
+          deadline: "D-6",
+          type: "상주",
+          description: "실시간 빅데이터 분석 및 처리 플랫폼 개발 프로젝트입니다.",
+          level: "고급"
+        },
+        {
+          id: "19", 
+          title: "금융권 보안 솔루션 개발",
+          company: "(주)금융보안",
+          skills: ["Java", "Spring Security", "Oracle"],
+          duration: "7개월",
+          budget: "8,500만원",
+          deadline: "D-5",
+          type: "상주",
+          description: "금융 서비스를 위한 고도화된 보안 솔루션 개발 프로젝트입니다.",
+          level: "고급"
+        },
+        {
+          id: "20", 
+          title: "헬스케어 모바일 앱 개발",
+          company: "(주)메디테크",
+          skills: ["React Native", "Firebase", "GraphQL"],
+          duration: "5개월",
+          budget: "6,200만원",
+          deadline: "D-3",
+          type: "상주",
+          description: "개인 건강 관리를 위한 헬스케어 모바일 앱 개발 프로젝트입니다.",
+          level: "중급"
+        }
+      ];
+
+      setProjects(projectsData);
+      setLocalLoading(false);
+    }, 800);
+
+    return () => {
+      clearTimeout(timer);
+    };
   }, []);
 
-  // 검색 필터링
-  useEffect(() => {
-    // 필터링 로직
-    const applyFilters = () => {
-      if (projects.length === 0) return; // 데이터가 없으면 실행하지 않음
-      
-      let results = [...projects];
-      
-      // 검색어로 필터링
-      if (searchTerm) {
-        const lowerCaseSearchTerm = searchTerm.toLowerCase();
-        results = results.filter(project => 
-          project.title.toLowerCase().includes(lowerCaseSearchTerm) ||
-          project.company.toLowerCase().includes(lowerCaseSearchTerm) ||
-          project.skills.some(skill => skill.toLowerCase().includes(lowerCaseSearchTerm))
-        );
-      }
-      
-      // 탭 카테고리로 필터링 (전체 탭은 필터링하지 않음)
-      if (activeTab !== "전체") {
-        // 카테고리와 탭 이름을 매칭시키기 위한 간단한 로직
-        // 실제 구현에서는 더 정교한 매핑이 필요할 수 있습니다
-        let categoryFilter = activeTab.toLowerCase();
-        results = results.filter(project => 
-          project.category.toLowerCase().includes(categoryFilter) || 
-          project.skills.some(skill => skill.toLowerCase().includes(categoryFilter))
-        );
-      }
-      
-      setFilteredProjects(results);
-    };
-    
-    applyFilters();
-    
-  }, [searchTerm, projects, activeTab]);
-  
-  // 페이지 리셋을 위한 별도 useEffect
-  useEffect(() => {
-    // 검색어나 활성 탭이 변경되면 페이지를 1로 리셋
-    setCurrentPage(1);
-  }, [searchTerm, activeTab]);
+  // 필터링된 프로젝트 계산
+  const filteredProjects = useMemo(() => {
+    return projects.filter(project => {
+      // 검색어 필터링
+      const matchesSearch = searchTerm === '' ||
+        project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (project.description && project.description.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  // 검색어 변경 핸들러
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-  
-  // 페이지네이션 계산
+      const matchesSkills = selectedSkills.length === 0 ||
+        selectedSkills.every(skill => project.skills.includes(skill));
+
+      const matchesDuration = selectedDuration === '' ||
+        (selectedDuration === '3' && parseInt(project.duration) <= 3) ||
+        (selectedDuration === '6' && parseInt(project.duration) <= 6) ||
+        (selectedDuration === '12' && parseInt(project.duration) <= 12);
+
+      const projectBudget = parseInt(project.budget.replace(/[^0-9]/g, ''));
+      const matchesBudget = selectedBudget === '' ||
+        (selectedBudget === '3000000' && projectBudget >= 3000000) ||
+        (selectedBudget === '5000000' && projectBudget >= 5000000) ||
+        (selectedBudget === '10000000' && projectBudget >= 10000000) ||
+        (selectedBudget === '30000000' && projectBudget >= 30000000) ||
+        (selectedBudget === '50000000' && projectBudget >= 50000000);
+
+      return matchesSearch && matchesSkills && matchesDuration && matchesBudget;
+    });
+  }, [projects, searchTerm, selectedSkills, selectedDuration, selectedBudget]);
+
+  // 페이지네이션된 프로젝트 계산
+  const paginatedProjects = useMemo(() => {
+    const indexOfLastProject = currentPage * itemsPerPage;
+    const indexOfFirstProject = indexOfLastProject - itemsPerPage;
+    return filteredProjects.slice(indexOfFirstProject, indexOfLastProject);
+  }, [filteredProjects, currentPage, itemsPerPage]);
+
+  // 총 페이지 수 계산
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredProjects.slice(indexOfFirstItem, indexOfLastItem);
-  
-  // 페이지 변경 핸들러
+
+  // 이벤트 핸들러
   const handlePageChange = (pageNumber: number) => {
+    if (pageNumber === currentPage) return;
     setCurrentPage(pageNumber);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  
-  // 탭 변경 핸들러
-  const handleTabChange = (tab: string) => {
-    if (tab !== activeTab) {
-      setActiveTab(tab);
-      
-      // 탭 변경 시 스크롤을 프로젝트 목록 섹션으로 부드럽게 이동 (필요한 경우)
-      const listSection = document.getElementById('project-list-section');
-      if (listSection) {
-        setTimeout(() => {
-          listSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      }
-    }
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
   };
 
-  // 인디케이터 위치 업데이트를 위한 useEffect
-  useEffect(() => {
-    // DOM이 준비되었을 때만 실행
-    if (!loading) {
-      const updateIndicator = () => {
-        const activeTabIndex = tabs.indexOf(activeTab);
-        if (activeTabIndex !== -1 && tabsRef.current[activeTabIndex]) {
-          const tabElement = tabsRef.current[activeTabIndex];
-          if (tabElement) {
-            // 값이 실제로 변경될 때만 상태 업데이트
-            const newLeft = tabElement.offsetLeft;
-            const newWidth = tabElement.offsetWidth;
-            
-            // 현재 Ref 값과 비교하여 실제 변경 시에만 상태 업데이트
-            const currentLeft = currentIndicatorRef.current.left;
-            const currentWidth = currentIndicatorRef.current.width;
-            
-            if (Math.abs(currentLeft - newLeft) > 1 || Math.abs(currentWidth - newWidth) > 1) {
-              // 먼저 ref 값 업데이트
-              currentIndicatorRef.current = {
-                left: newLeft,
-                width: newWidth
-              };
-              
-              // 그 다음 상태 업데이트 (렌더링 발생)
-              setIndicatorStyle({
-                left: newLeft,
-                width: newWidth,
-              });
-            }
-          }
-        }
-      };
+  const toggleSkillFilter = (skill: string) => {
+    setSelectedSkills(prev =>
+      prev.includes(skill)
+        ? prev.filter(s => s !== skill)
+        : [...prev, skill]
+    );
+    setCurrentPage(1);
+  };
 
-      // 초기 로드 시 인디케이터 위치 설정
-      const timer = setTimeout(updateIndicator, 100);
+  const handleDurationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedDuration(e.target.value);
+    setCurrentPage(1);
+  };
 
-      // 윈도우 리사이즈 이벤트에 디바운스 적용
-      let resizeTimer: NodeJS.Timeout;
-      const handleResize = () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(updateIndicator, 100);
-      };
+  const handleBudgetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedBudget(e.target.value);
+    setCurrentPage(1);
+  };
 
-      window.addEventListener('resize', handleResize);
-      
-      return () => {
-        clearTimeout(timer);
-        clearTimeout(resizeTimer);
-        window.removeEventListener('resize', handleResize);
-      };
-    }
-  }, [activeTab, tabs, loading]);
+  // 필터 초기화 함수
+  const resetFilters = () => {
+    setSelectedSkills([]);
+    setSelectedDuration('');
+    setSelectedBudget('');
+    setSearchTerm('');
+    setCurrentPage(1);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 상단 배너 */}
-      <div className="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 text-white relative overflow-hidden">
-        {/* 배경 패턴 요소 */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute w-40 h-40 bg-white rounded-full -top-10 -left-10 opacity-20 animate-pulse"></div>
-          <div className="absolute w-56 h-56 bg-white rounded-full top-20 right-10 opacity-10 animate-pulse-slow"></div>
-          <div className="absolute w-24 h-24 bg-white rounded-full bottom-10 left-1/4 opacity-15 animate-bounce-slow"></div>
-          <svg className="absolute right-0 bottom-0 opacity-20" width="400" height="400" viewBox="0 0 100 100">
+      <div className="bg-gradient-to-r from-blue-800 via-indigo-700 to-purple-600 dark:from-gray-900 dark:via-purple-900 dark:to-black text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20">
+          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
-              <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5" />
-              </pattern>
+              <radialGradient id="radialGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                <stop offset="0%" stopColor="white" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="white" stopOpacity="0" />
+              </radialGradient>
+              <linearGradient id="bannerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#1e40af" stopOpacity="0.8" />
+                <stop offset="50%" stopColor="#4338ca" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.8" />
+              </linearGradient>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2.5" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
             </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
+            <rect width="100%" height="100%" fill="url(#bannerGradient)" />
+            
+            {/* 애니메이션 요소들 */}
+            <g filter="url(#glow)">
+              <circle cx="70" cy="30" r="6" fill="white" opacity="0.4">
+                <animate attributeName="r" values="6;8;6" dur="4s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.4;0.7;0.4" dur="4s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="30" cy="70" r="4" fill="white" opacity="0.3">
+                <animate attributeName="r" values="4;6;4" dur="3s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.3;0.6;0.3" dur="3s" repeatCount="indefinite" />
+              </circle>
+            </g>
+            
+            {/* 움직이는 그라데이션 원형 */}
+            <circle cx="0" cy="0" r="20" fill="url(#radialGradient)">
+              <animateMotion path="M 50 50 L 90 30 L 50 70 L 10 50 Z" dur="15s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="0" cy="0" r="15" fill="url(#radialGradient)">
+              <animateMotion path="M 50 50 L 10 30 L 50 10 L 90 50 Z" dur="12s" repeatCount="indefinite" />
+            </circle>
+            
+            {/* 웨이브 애니메이션 */}
+            <path d="M0,0 L100,0 L100,100 L0,100 Z" fill="url(#bannerGradient)" opacity="0.5">
+              <animate attributeName="d" 
+                values="M0,0 L100,0 L100,100 L0,100 Z; 
+                        M0,0 L100,0 L90,100 L10,90 Z; 
+                        M0,0 L100,0 L100,100 L0,100 Z" 
+                dur="20s" 
+                repeatCount="indefinite" />
+            </path>
+            
+            {/* 입체 요소와 추가 효과 */}
+            <ellipse cx="20" cy="20" rx="30" ry="10" fill="white" opacity="0.05" />
+            <ellipse cx="80" cy="80" rx="20" ry="30" fill="white" opacity="0.05" />
+            
+            {/* 부유하는 다각형 요소 */}
+            <polygon points="85,25 90,35 80,35" fill="white" opacity="0.15">
+              <animateTransform attributeName="transform" type="rotate" from="0 85 30" to="360 85 30" dur="24s" repeatCount="indefinite" />
+            </polygon>
+            <polygon points="15,75 25,85 20,70" fill="white" opacity="0.1">
+              <animateTransform attributeName="transform" type="rotate" from="0 20 75" to="360 20 75" dur="30s" repeatCount="indefinite" />
+            </polygon>
           </svg>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between mb-8">
-            <div className="mb-8 md:mb-0 text-center md:text-left">
-              <div className="mb-4 inline-block">
-                <span className="text-xs font-semibold tracking-widest bg-blue-900 bg-opacity-50 px-3 py-1 rounded-full uppercase">
-                  프리미엄 매칭
+        {/* 배너 콘텐츠 */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-center">
+            <div className="md:w-2/3 mb-10 md:mb-0 md:pr-10">
+              <h1 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight leading-tight">
+                상주 <span className="text-blue-300 inline-block relative">
+                  프로젝트
+                  <div className="absolute -bottom-2 left-0 w-full h-1 bg-blue-300 opacity-50 rounded"></div>
+                  <div className="relative inline-block">
+                    <span className="absolute -right-5 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-white rounded-full opacity-70 animate-pulse-scale"></span>
+                  </div>
                 </span>
-              </div>
-              <h1 className="text-4xl md:text-5xl font-extrabold mb-4 relative">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100">
-                  상주 프로젝트
-                </span>
-                <div className="absolute -bottom-2 left-0 w-20 h-1 bg-blue-400 rounded-full md:w-32"></div>
               </h1>
-              <p className="text-xl md:text-2xl mb-6 text-blue-100 max-w-xl">
-                고객사 사무실에서 진행하는 검증된 상주 개발 프로젝트를 찾아보세요
+              <p className="text-xl md:text-2xl mb-10 text-blue-100 max-w-3xl font-light">
+                고객사 사무실에서 직접 진행하는 검증된 상주 개발 프로젝트를 찾아보세요
               </p>
-              <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                <div className="flex items-center bg-white bg-opacity-20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" />
+
+              {/* 검색창 */}
+              <div className="bg-white/10 dark:bg-gray-800/50 backdrop-blur-md p-2 flex items-center max-w-3xl rounded-2xl shadow-lg border border-white/20 dark:border-gray-600/30 hover:border-white/30 dark:hover:border-gray-500/50 transition-all group">
+                <input
+                  type="text"
+                  placeholder="기술 스택, 프로젝트명, 회사명으로 검색..."
+                  className="flex-1 px-6 py-4 outline-none text-gray-800 dark:text-white text-lg bg-white dark:bg-gray-700 rounded-xl shadow-inner dark:border-gray-600 dark:placeholder-gray-400"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
+                <button className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-indigo-500 dark:to-purple-500 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 dark:hover:from-indigo-600 dark:hover:to-purple-600 transition-all font-medium shadow-md ml-2 group-hover:shadow-lg transform group-hover:scale-[1.02] duration-200">
+                  검색
+                </button>
+              </div>
+              
+              {/* 배지 */}
+              <div className="flex flex-wrap gap-3 mt-8">
+                <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-blue-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>평균 3-6개월</span>
+                  <span>검증된 프로젝트</span>
                 </div>
-                <div className="flex items-center bg-white bg-opacity-20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-blue-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                   </svg>
-                  <span>평균 5,000만원</span>
+                  <span>200+ 클라이언트</span>
                 </div>
-                <div className="flex items-center bg-white bg-opacity-20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-blue-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
-                  <span>빠른 매칭 가능</span>
+                  <span>안정적인 장기 프로젝트</span>
                 </div>
               </div>
             </div>
-            <div className="w-full md:w-auto md:ml-8 relative">
-              <div className="bg-white rounded-xl p-3 shadow-lg transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 max-w-xl mx-auto md:mx-0">
-                <div className="text-gray-800 text-sm font-medium mb-3 px-2">
-                  원하는 프로젝트를 찾아보세요
-                </div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="기술 스택, 프로젝트명, 회사명..."
-                    className="w-full pl-12 pr-4 py-3 border-0 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all duration-200 outline-none text-gray-800"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                  />
-                </div>
-                <div className="grid grid-cols-3 gap-2 mt-3">
-                  <button className="bg-gray-100 text-gray-600 px-2 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors">
-                    React
-                  </button>
-                  <button className="bg-gray-100 text-gray-600 px-2 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors">
-                    Java
-                  </button>
-                  <button className="bg-gray-100 text-gray-600 px-2 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors">
-                    Python
-                  </button>
-                </div>
-                <button className="w-full mt-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center group">
-                  <span>프로젝트 검색</span>
-                  <svg className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            
+            {/* 우측 이미지 영역 - 모바일에서는 숨김 */}
+            <div className="hidden md:block md:w-1/3 relative">
+              <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-400 rounded-full opacity-20 blur-3xl"></div>
+              
+              {/* 빛을 내는 모형 추가 */}
+              <div className="absolute -top-10 -right-10 w-80 h-80 z-0 overflow-hidden">
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <svg width="200" height="200" viewBox="0 0 200 200">
+                    <defs>
+                      <filter id="beam-glow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                      </filter>
+                      <linearGradient id="beam-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#1e40af" stopOpacity="0.8" />
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity="0.8" />
+                      </linearGradient>
+                    </defs>
+                    
+                    {/* 첫 번째 빔 */}
+                    <g filter="url(#beam-glow)" className="beam-group">
+                      <path d="M 100,100 L 180,40" stroke="url(#beam-gradient)" strokeWidth="3" fill="none">
+                        <animate attributeName="opacity" values="0.3;0.8;0.3" dur="3s" repeatCount="indefinite" />
+                        <animate attributeName="strokeWidth" values="2;4;2" dur="3s" repeatCount="indefinite" />
+                      </path>
+                      <circle cx="180" cy="40" r="5" fill="#6366f1">
+                        <animate attributeName="r" values="4;7;4" dur="3s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite" />
+                      </circle>
+                    </g>
+                    
+                    {/* 두 번째 빔 */}
+                    <g filter="url(#beam-glow)" className="beam-group">
+                      <path d="M 100,100 L 170,100" stroke="url(#beam-gradient)" strokeWidth="3" fill="none">
+                        <animate attributeName="opacity" values="0.3;0.8;0.3" dur="4s" repeatCount="indefinite" />
+                        <animate attributeName="strokeWidth" values="2;4;2" dur="4s" repeatCount="indefinite" />
+                      </path>
+                      <circle cx="170" cy="100" r="5" fill="#6366f1">
+                        <animate attributeName="r" values="4;7;4" dur="4s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.6;1;0.6" dur="4s" repeatCount="indefinite" />
+                      </circle>
+                    </g>
+                    
+                    {/* 세 번째 빔 */}
+                    <g filter="url(#beam-glow)" className="beam-group">
+                      <path d="M 100,100 L 160,160" stroke="url(#beam-gradient)" strokeWidth="3" fill="none">
+                        <animate attributeName="opacity" values="0.3;0.8;0.3" dur="5s" repeatCount="indefinite" />
+                        <animate attributeName="strokeWidth" values="2;4;2" dur="5s" repeatCount="indefinite" />
+                      </path>
+                      <circle cx="160" cy="160" r="5" fill="#6366f1">
+                        <animate attributeName="r" values="4;7;4" dur="5s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.6;1;0.6" dur="5s" repeatCount="indefinite" />
+                      </circle>
+                    </g>
+                    
+                    {/* 중앙 원 */}
+                    <circle cx="100" cy="100" r="15" fill="#1e40af">
+                      <animate attributeName="r" values="12;15;12" dur="3s" repeatCount="indefinite" />
+                      <animate attributeName="fillOpacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite" />
+                    </circle>
                   </svg>
-                </button>
+                </div>
               </div>
-              <div className="absolute -bottom-10 -right-10 w-20 h-20 bg-blue-500 rounded-full opacity-20 animate-pulse-slow"></div>
+              
+              <div className="relative z-10 bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                      S
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-lg font-bold text-white">
+                        상주 프로젝트
+                        <div className="relative inline-block">
+                          <span className="absolute -right-5 top-0 w-6 h-6 bg-white rounded-full opacity-70 animate-pulse-scale"></span>
+                        </div>
+                      </h3>
+                      <div className="flex items-center text-sm text-blue-200">
+                        <span>오늘 업데이트 <span className="font-semibold">12건</span></span>
+                      </div>
+                    </div>
+                  </div>
+                  {/* 강조 태그 추가 */}
+                  <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs px-2 py-1 rounded-lg animate-pulse">
+                    인기
+                  </div>
+                </div>
+                
+                <div className="space-y-3 mt-4">
+                  <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl flex items-center group hover:bg-white/20 transition-all cursor-pointer">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-3 group-hover:scale-110 transition-transform">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="text-white text-sm">ERP 시스템 고도화</span>
+                      <div className="text-xs text-blue-200 opacity-0 group-hover:opacity-100 transition-opacity">월 평균 6,500만원</div>
+                    </div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl flex items-center group hover:bg-white/20 transition-all cursor-pointer">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-3 group-hover:scale-110 transition-transform">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="text-white text-sm">클라우드 마이그레이션</span>
+                      <div className="text-xs text-blue-200 opacity-0 group-hover:opacity-100 transition-opacity">월 평균 5,500만원</div>
+                    </div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl flex items-center group hover:bg-white/20 transition-all cursor-pointer">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-3 group-hover:scale-110 transition-transform">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="text-white text-sm">모바일 앱 개발</span>
+                      <div className="text-xs text-blue-200 opacity-0 group-hover:opacity-100 transition-opacity">월 평균 3,200만원</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 relative">
+                  <button className="w-full bg-white/10 backdrop-blur-md border border-white/20 text-white py-3 rounded-xl hover:bg-white/20 transition-colors text-sm font-medium relative z-10 group">
+                    <span className="group-hover:scale-105 transition-transform inline-block">프로젝트 더보기</span>
+                  </button>
+                  {/* 강조 효과 */}
+                  <div className="absolute -bottom-1 -right-1 w-full h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl -z-0 opacity-50 animate-pulse"></div>
+                </div>
+                
+                {/* 프로젝트 통계 뱃지 */}
+                <div className="absolute -bottom-3 -right-3 bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-1 rounded-lg text-white text-xs shadow-lg flex items-center space-x-1 transform rotate-3">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
+                  </svg>
+                  <span>180% 성장률</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 애니메이션을 위한 스타일 */}
+        {/* 인터랙티브 애니메이션 요소 */}
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden">
+          <div className="relative h-16">
+            {/* 웨이브 애니메이션 */}
+            <div className="absolute bottom-0 left-0 w-full">
+              <svg className="w-full h-12" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path
+                  d="M0,0 C150,90 350,0 500,80 C650,160 750,40 900,100 C1050,160 1150,60 1200,80 L1200,120 L0,120 Z"
+                  className="fill-white opacity-70"
+                >
+                  <animate
+                    attributeName="d"
+                    dur="10s"
+                    repeatCount="indefinite"
+                    values="
+                    M0, 0 C150, 90 350, 0 500, 80 C650, 160 750, 40 900, 100 C1050, 160 1150, 60 1200, 80 L1200, 120 L0, 120 Z;
+                    M0, 0 C150, 40 350, 80 500, 20 C650, 60 750, 120 900, 40 C1050, 20 1150, 80 1200, 60 L1200, 120 L0, 120 Z;
+                    M0, 0 C150, 90 350, 0 500, 80 C650, 160 750, 40 900, 100 C1050, 160 1150, 60 1200, 80 L1200, 120 L0, 120 Z"
+                  />
+                </path>
+              </svg>
+            </div>
+
+            {/* 부유하는 아이콘들 */}
+            <div className="absolute bottom-4 left-1/4 animate-bounce-slow opacity-80">
+              <div className="bg-white p-2 rounded-full shadow-lg">
+                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+
+            <div className="absolute bottom-8 left-1/2 animate-float opacity-80">
+              <div className="bg-white p-2 rounded-full shadow-lg">
+                <svg className="w-6 h-6 text-indigo-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+
+            <div className="absolute bottom-6 left-3/4 animate-pulse opacity-80">
+              <div className="bg-white p-2 rounded-full shadow-lg">
+                <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 애니메이션 스타일 */}
         <style jsx>{`
           @keyframes bounce-slow {
             0%, 100% {
@@ -422,12 +606,29 @@ export default function ProjectPage() {
             }
           }
           
-          @keyframes pulse-slow {
+          @keyframes float {
             0%, 100% {
-              opacity: 0.1;
+              transform: translateY(0) translateX(0);
+            }
+            25% {
+              transform: translateY(-8px) translateX(5px);
             }
             50% {
-              opacity: 0.3;
+              transform: translateY(0) translateX(10px);
+            }
+            75% {
+              transform: translateY(8px) translateX(5px);
+            }
+          }
+          
+          @keyframes pulse-scale {
+            0%, 100% {
+              transform: scale(1);
+              opacity: 0.7;
+            }
+            50% {
+              transform: scale(1.5);
+              opacity: 1;
             }
           }
           
@@ -435,243 +636,488 @@ export default function ProjectPage() {
             animation: bounce-slow 3s infinite;
           }
           
-          .animate-pulse-slow {
-            animation: pulse-slow 4s infinite;
+          .animate-float {
+            animation: float 6s ease-in-out infinite;
+          }
+          
+          .animate-pulse-scale {
+            animation: pulse-scale 2s ease-in-out infinite;
           }
         `}</style>
-          </div>
-
-
-      {/* 탭 네비게이션 */}
-      <div className="border-b bg-white sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex relative">
-            {tabs.map((tab, index) => (
-              <button
-                key={tab}
-                ref={(el) => (tabsRef.current[index] = el)}
-                onClick={() => handleTabChange(tab)}
-                className={`py-4 px-6 relative group ${
-                  activeTab === tab
-                    ? "text-purple-600 font-medium"
-                    : "text-gray-500 hover:text-purple-500"
-                } transition-colors duration-300`}
-              >
-                {tab}
-              </button>
-            ))}
-            {/* 슬라이딩 인디케이터 */}
-            <div 
-              className="absolute bottom-0 bg-purple-600 transition-all duration-300 ease-in-out"
-              style={{
-                left: `${indicatorStyle.left}px`,
-                width: `${indicatorStyle.width}px`,
-                height: '3px'
-              }}
-            />
-          </nav>
-        </div>
       </div>
 
-      {/* 프로젝트 목록 */}
-      <div id="project-list-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">상주 프로젝트 목록</h2>
-            <p className="text-gray-600 mt-1">총 {filteredProjects.length}개의 프로젝트가 있습니다</p>
-          </div>
-          <div className="flex space-x-2">
-            <button className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-gray-700">
-              최신순
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-gray-700">
-              마감임박순
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-gray-700">
-              금액순
-            </button>
-          </div>
-        </div>
+      {/* 메인 콘텐츠 영역 */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* 왼쪽 사이드바 - 필터 */}
+          <div className="lg:w-80 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-md h-fit border border-gray-100 dark:border-gray-700 sticky top-8">
+            <h3 className="text-xl font-bold mb-8 text-gray-900 dark:text-white border-b dark:border-gray-700 pb-4 flex items-center">
+              <svg className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              프로젝트 필터
+            </h3>
 
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentItems.map((project) => (
-              <div 
-                key={project.id} 
-                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 overflow-hidden"
-              >
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
-                      {project.deadline}
-                    </span>
-                    <span className="text-sm font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
-                      {project.type}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-bold mb-2 text-gray-900 hover:text-blue-600 transition-colors">
-                    {project.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4">{project.company}</p>
-                  
-                  <div className="mb-4">
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {project.skills.map((skill) => (
-                        <span 
-                          key={skill} 
-                          className="bg-blue-50 text-blue-600 text-xs px-2 py-1 rounded-md"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">기간: {project.duration}</span>
-                      <span className="font-medium text-gray-900">예산: {project.budget}</span>
-                    </div>
-                  </div>
-                  
-                  <Link
-                    href={`/project/${project.id}`}
-                    className="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 rounded-md transition-colors mt-4"
+            {/* 기술 스택 필터 */}
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+                기술 스택
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {allSkills.map(skill => (
+                  <button
+                    key={skill}
+                    onClick={() => toggleSkillFilter(skill)}
+                    className={`text-xs px-3 py-1.5 rounded-full transition-all ${selectedSkills.includes(skill)
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-indigo-500 dark:to-purple-500 text-white shadow-sm'
+                      : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-300'
+                    }`}
                   >
-                    상세보기
-                  </Link>
-                </div>
+                    {skill}
+                  </button>
+                ))}
               </div>
-            ))}
+            </div>
+
+            {/* 개발 기간 필터 */}
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+                개발 기간
+              </h4>
+              <select
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500 focus:border-blue-400 dark:focus:border-blue-500 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
+                value={selectedDuration}
+                onChange={handleDurationChange}
+              >
+                <option value=""> 전체 </option>
+                <option value="3"> 3개월 이내 </option>
+                <option value="6"> 6개월 이내 </option>
+                <option value="12"> 12개월 이내 </option>
+              </select>
+            </div>
+
+            {/* 예산 필터 */}
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                예산
+              </h4>
+              <select
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500 focus:border-blue-400 dark:focus:border-blue-500 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
+                value={selectedBudget}
+                onChange={handleBudgetChange}
+              >
+                <option value=""> 전체 </option>
+                <option value="3000000"> 300만원 이상 </option>
+                <option value="5000000"> 500만원 이상 </option>
+                <option value="10000000"> 1,000만원 이상 </option>
+                <option value="30000000"> 3,000만원 이상 </option>
+                <option value="50000000"> 5,000만원 이상 </option>
+              </select>
+            </div>
+
+            {/* 필터 초기화 버튼 */}
+            <button
+              onClick={resetFilters}
+              className="w-full py-3 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 text-gray-800 dark:text-gray-300 rounded-xl transition-all text-sm font-medium border border-gray-200 dark:border-gray-600 hover:shadow-sm flex items-center justify-center"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              필터 초기화
+            </button>
           </div>
-        )}
 
-        {/* 페이지네이션 */}
-        <div className="flex justify-center mt-12">
-          <nav className="flex items-center space-x-2">
-            <button
-              onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-gray-700 disabled:opacity-50"
-            >
-              이전
-            </button>
-            
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              // 페이지 네비게이션 로직 - 현재 페이지 주변 페이지 보여주기
-              let pageToShow;
-              if (totalPages <= 5) {
-                pageToShow = i + 1;
-              } else if (currentPage <= 3) {
-                pageToShow = i + 1;
-              } else if (currentPage >= totalPages - 2) {
-                pageToShow = totalPages - 4 + i;
-              } else {
-                pageToShow = currentPage - 2 + i;
-              }
-              
-              return (
-                <button
-                  key={pageToShow}
-                  onClick={() => handlePageChange(pageToShow)}
-                  className={`px-3 py-2 border rounded-md ${
-                    currentPage === pageToShow
-                      ? 'border-blue-500 bg-blue-500 text-white'
-                      : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-700'
-                  }`}
-                >
-                  {pageToShow}
+          {/* 오른쪽 메인 콘텐츠 - 프로젝트 목록 */}
+          <div className="flex-1">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                  <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text"> 상주 프로젝트 </span>
+                  <span className="ml-2 text-sm font-normal bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full"> NEW </span>
+                </h2>
+                <p className="text-gray-600 dark:text-gray-300"> 총 <span className="font-semibold text-blue-600 dark:text-blue-400">{filteredProjects.length}</span>개의 프로젝트가 있습니다</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all flex items-center gap-1 shadow-sm">
+                  <svg className="w-4 h-4 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  최신순
                 </button>
-              );
-            })}
+                <button className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all flex items-center gap-1 shadow-sm">
+                  <svg className="w-4 h-4 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  마감임박순
+                </button>
+                <button className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all flex items-center gap-1 shadow-sm">
+                  <svg className="w-4 h-4 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  금액순
+                </button>
+              </div>
+            </div>
 
-            <button
-              onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-gray-700 disabled:opacity-50"
-            >
-              다음
-            </button>
-          </nav>
+            {/* 로딩 인디케이터 - 로컬 로딩만 사용하고 전역 로딩은 StateProvider에서 처리 */}
+            {localLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+              </div>
+            ) : (
+              filteredProjects.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {paginatedProjects.map((project) => (
+                    <div
+                      key={project.id}
+                      className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden group relative"
+                    >
+                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-indigo-500 dark:to-purple-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                      <div className="p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <span className="bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-400 dark:to-red-400 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">
+                            {project.deadline}
+                          </span>
+                          <span className="text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-700">
+                            {project.type}
+                          </span>
+                        </div>
+                        <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                          {project.title}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-300 mb-3 flex items-center">
+                          <svg className="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                          {project.company}
+                        </p>
+
+                        {project.description && (
+                          <p className="text-gray-700 dark:text-gray-300 mb-4 text-sm line-clamp-2 bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600"> {project.description} </p>
+                        )}
+
+                        <div className="mb-4">
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {project.skills.map((skill) => (
+                              <span
+                                key={skill}
+                                className="bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 text-xs px-3 py-1 rounded-full border border-blue-100 dark:border-blue-700"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                          <div className="flex justify-between text-sm bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
+                            <span className="text-gray-600 dark:text-gray-300 flex items-center">
+                              <svg className="w-4 h-4 mr-1 text-blue-400 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zM9 9h6v6H9V9z" />
+                              </svg>
+                              {project.duration}
+                            </span>
+                            <span className="font-medium text-gray-900 dark:text-white flex items-center">
+                              <svg className="w-4 h-4 mr-1 text-blue-400 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              {project.budget}
+                            </span>
+                          </div>
+                        </div>
+
+                        <Link
+                          href={`/project/${project.id}`}
+                          className="block w-full text-center bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/50 dark:to-indigo-900/50 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-800/50 dark:hover:to-indigo-800/50 text-blue-700 dark:text-blue-300 font-medium py-3 rounded-xl transition-all mt-4 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-indigo-600 dark:group-hover:from-indigo-500 dark:group-hover:to-purple-500 group-hover:text-white border border-blue-100 dark:border-blue-700 group-hover:border-transparent"
+                        >
+                          상세보기
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-sm border border-gray-100 dark:border-gray-700">
+                  <svg className="w-20 h-20 mx-auto text-gray-300 dark:text-gray-600 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-3"> 일치하는 프로젝트가 없습니다 </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6"> 검색어나 필터 조건을 변경해 보세요.</p>
+                  <button
+                    onClick={() => {
+                      setSelectedSkills([]);
+                      setSelectedDuration('');
+                      setSelectedBudget('');
+                      setSearchTerm('');
+                    }}
+                    className="px-6 py-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors inline-flex items-center"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    필터 초기화
+                  </button>
+                </div>
+              )
+            )}
+
+            {/* 페이지네이션 */}
+            {filteredProjects.length > 0 && (
+              <div className="flex justify-center mt-12">
+                <nav className="flex items-center space-x-3">
+                  <button
+                    className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-blue-300 dark:hover:border-indigo-500 hover:text-blue-600 dark:hover:text-indigo-400"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    이전
+                  </button>
+
+                  <div className="flex items-center space-x-2">
+                    {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
+                      let pageNumber: number;
+                      if (totalPages <= 5) {
+                        pageNumber = index + 1;
+                      } else if (currentPage <= 3) {
+                        pageNumber = index + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNumber = totalPages - 4 + index;
+                      } else {
+                        pageNumber = currentPage - 2 + index;
+                      }
+
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => handlePageChange(pageNumber)}
+                          className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${currentPage === pageNumber
+                            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-indigo-500 dark:to-purple-500 text-white shadow-md'
+                            : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-indigo-500 hover:text-blue-600 dark:hover:text-indigo-400'
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-blue-300 dark:hover:border-indigo-500 hover:text-blue-600 dark:hover:text-indigo-400"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    다음
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </nav>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* 상주 프로젝트 정보 */}
-      <div className="bg-gray-100 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 py-24 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-300 dark:bg-indigo-600 rounded-full filter blur-3xl opacity-20 -z-10"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-300 dark:bg-purple-600 rounded-full filter blur-3xl opacity-20 -z-10"></div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             <div>
-              <h2 className="text-2xl font-bold mb-6 text-gray-900">상주 프로젝트란?</h2>
-              <div className="space-y-4 text-gray-600">
-                <p>
-                  <span className="font-medium text-blue-600">상주 프로젝트</span>는 고객사 사무실에서 직접 프로젝트를 수행하는 근무 형태를 말합니다. 이랜서는 검증된 IT 프리랜서 전문가들을 고객사에 매칭해드립니다.
+              <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white flex items-center">
+                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text"> 상주 프로젝트란 ? </span>
+                <div className="ml-4 h-1 w-24 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 rounded-full"></div>
+              </h2>
+              <div className="space-y-6 text-gray-600 dark:text-gray-300">
+                <p className="text-lg leading-relaxed">
+                  <span className="font-medium text-blue-600 dark:text-blue-400"> 상주 프로젝트 </span>는 고객사 사무실에서 직접 프로젝트를 수행하는 근무 형태를 말합니다. 이랜서는 검증된 IT 프리랜서 전문가들을 고객사에 매칭해드립니다.
                 </p>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li>고객사 내부 개발팀과 긴밀한 협업 가능</li>
-                  <li>프로젝트 진행 상황 실시간 모니터링 및 피드백</li>
-                  <li>보안이 중요한 프로젝트에 적합</li>
-                  <li>안정적인 프로젝트 관리 및 진행</li>
-                  <li>초기 단계부터 참여하여 프로젝트 방향성 수립</li>
+                <ul className="list-none space-y-4">
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 h-6 w-6 bg-blue-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <svg className="h-4 w-4 text-blue-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                      </svg>
+                    </div>
+                    <span> 고객사 내부 개발팀과 긴밀한 협업 가능 </span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 h-6 w-6 bg-blue-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <svg className="h-4 w-4 text-blue-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                      </svg>
+                    </div>
+                    <span> 프로젝트 진행 상황 실시간 모니터링 및 피드백 </span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 h-6 w-6 bg-blue-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <svg className="h-4 w-4 text-blue-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                      </svg>
+                    </div>
+                    <span> 보안이 중요한 프로젝트에 적합 </span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 h-6 w-6 bg-blue-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <svg className="h-4 w-4 text-blue-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                      </svg>
+                    </div>
+                    <span> 안정적인 프로젝트 관리 및 진행 </span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 h-6 w-6 bg-blue-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <svg className="h-4 w-4 text-blue-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4 4-4" />
+                      </svg>
+                    </div>
+                    <span> 초기 단계부터 참여하여 프로젝트 방향성 수립 </span>
+                  </li>
                 </ul>
-                <p>
+                <p className="text-lg leading-relaxed">
                   상주 프로젝트는 일반적으로 3개월 이상의 장기 프로젝트에 적합하며, 풀타임 근무 형태로 진행됩니다. 고객사의 업무 환경 및 문화에 적응할 수 있는 전문가와의 매칭을 중요시합니다.
                 </p>
               </div>
             </div>
-            
-            <div className="bg-white p-8 rounded-xl shadow-sm">
-              <h3 className="text-xl font-bold mb-4 text-gray-900">상주 프로젝트 이용 안내</h3>
-              <div className="space-y-6">
+
+            <div className="bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-b from-blue-100 to-indigo-100 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-bl-full opacity-50 -z-10"></div>
+              <h3 className="text-2xl font-bold mb-8 text-gray-900 dark:text-white pb-4 border-b dark:border-gray-600 flex items-center">
+                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text"> 상주 프로젝트 이용 안내 </span>
+              </h3>
+              <div className="space-y-10">
                 <div className="flex">
-                  <div className="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-lg">1</span>
+                  <div className="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-2xl flex items-center justify-center shadow-sm">
+                    <span className="text-blue-600 dark:text-indigo-400 font-bold text-2xl"> 1 </span>
                   </div>
-                  <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">프로젝트 등록</h4>
-                    <p className="text-gray-600">필요한 기술 스택과 프로젝트 내용을 상세히 기재하여 등록합니다.</p>
+                  <div className="ml-6">
+                    <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-2"> 프로젝트 등록 </h4>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed"> 필요한 기술 스택과 프로젝트 내용을 상세히 기재하여 등록합니다.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex">
-                  <div className="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-lg">2</span>
+                  <div className="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-2xl flex items-center justify-center shadow-sm">
+                    <span className="text-blue-600 dark:text-indigo-400 font-bold text-2xl"> 2 </span>
                   </div>
-                  <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">전문가 매칭</h4>
-                    <p className="text-gray-600">프로젝트에 적합한 전문가를 매칭해드립니다. 여러 전문가의 이력서를 검토할 수 있습니다.</p>
+                  <div className="ml-6">
+                    <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-2"> 전문가 매칭 </h4>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed"> 프로젝트에 적합한 전문가를 매칭해드립니다. 여러 전문가의 이력서를 검토할 수 있습니다.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex">
-                  <div className="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-lg">3</span>
+                  <div className="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-2xl flex items-center justify-center shadow-sm">
+                    <span className="text-blue-600 dark:text-indigo-400 font-bold text-2xl"> 3 </span>
                   </div>
-                  <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">인터뷰 및 계약</h4>
-                    <p className="text-gray-600">최종 후보자와 인터뷰 후, 이랜서 플랫폼을 통해 안전한 계약을 체결합니다.</p>
+                  <div className="ml-6">
+                    <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-2"> 인터뷰 및 계약 </h4>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed"> 최종 후보자와 인터뷰 후, 이랜서 플랫폼을 통해 안전한 계약을 체결합니다.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex">
-                  <div className="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-lg">4</span>
+                  <div className="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-2xl flex items-center justify-center shadow-sm">
+                    <span className="text-blue-600 dark:text-indigo-400 font-bold text-2xl"> 4 </span>
                   </div>
-                  <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">프로젝트 진행</h4>
-                    <p className="text-gray-600">프로젝트 완료 후 검수를 거쳐 대금을 지급합니다. 필요시 계약 연장도 가능합니다.</p>
+                  <div className="ml-6">
+                    <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-2"> 프로젝트 진행 </h4>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed"> 프로젝트 완료 후 검수를 거쳐 대금을 지급합니다. 필요시 계약 연장도 가능합니다.</p>
                   </div>
                 </div>
               </div>
-              
-              <div className="mt-8">
+
+              <div className="mt-12">
                 <Link
                   href="/projects/register"
-                  className="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  className="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-indigo-500 dark:to-purple-500 text-white text-center py-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 dark:hover:from-indigo-600 dark:hover:to-purple-600 transition-all shadow-md hover:shadow-lg"
                 >
                   상주 프로젝트 등록하기
                 </Link>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 장점 및 통계 */}
+      <div className="py-24 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-blue-200 dark:bg-indigo-600 rounded-full filter blur-3xl opacity-20 -z-10"></div>
+          <div className="absolute bottom-1/3 right-1/4 w-72 h-72 bg-indigo-200 dark:bg-purple-600 rounded-full filter blur-3xl opacity-20 -z-10"></div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text"> 이랜서 상주 프로젝트의 장점 </span>
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              이랜서는 다양한 산업 분야의 상주 프로젝트를 제공하며, 믿을 수 있는 플랫폼을 통해 안전한 거래를 보장합니다.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-600 group">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-8 h-8 text-blue-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-indigo-400 transition-colors"> 긴밀한 협업 </h3>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed"> 고객사 내부 개발팀과 직접 소통하며 프로젝트의 모든 과정에 참여할 수 있습니다.</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-600 group">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-8 h-8 text-blue-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-indigo-400 transition-colors"> 안전한 계약과 대금 </h3>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed"> 이랜서의 안전한 계약 시스템과 대금보호 서비스로 안심하고 프로젝트를 진행할 수 있습니다.</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-600 group">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-8 h-8 text-blue-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-indigo-400 transition-colors"> 검증된 고객사 </h3>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed"> 이랜서에 등록된 모든 프로젝트와 고객사는 검증 과정을 거쳐 신뢰할 수 있는 파트너입니다.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 p-10 rounded-2xl shadow-lg">
+            <div className="text-center transform hover:scale-105 transition-transform duration-300">
+              <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text mb-3"> 97 % </p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium"> 프로젝트 완료율 </p>
+            </div>
+            <div className="text-center transform hover:scale-105 transition-transform duration-300">
+              <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text mb-3"> 12,000 + </p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium"> 등록된 프리랜서 </p>
+            </div>
+            <div className="text-center transform hover:scale-105 transition-transform duration-300">
+              <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text mb-3"> 2,800 + </p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium"> 완료된 상주 프로젝트 </p>
+            </div>
+            <div className="text-center transform hover:scale-105 transition-transform duration-300">
+              <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text mb-3"> 4.9 / 5 </p>
+              <p className="text-gray-700 dark:text-gray-300 font-medium"> 고객 만족도 </p>
             </div>
           </div>
         </div>

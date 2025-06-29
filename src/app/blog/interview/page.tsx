@@ -65,12 +65,12 @@ export default function FreelancerInterviewPage() {
   }, [generatePosts]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 카테고리 헤더 */}
-      <div className="bg-white border-b">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-3xl font-bold text-gray-900">프리랜서 인터뷰</h1>
-          <p className="mt-2 text-lg text-gray-600">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white dark:text-white">프리랜서 인터뷰</h1>
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-300 dark:text-gray-300">
             성공적인 프리랜서들의 생생한 경험과 인사이트를 만나보세요.
           </p>
         </div>
@@ -93,7 +93,7 @@ export default function FreelancerInterviewPage() {
               >
                 <Link
                   href={`/blog/posts/${post.id}`}
-                  className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-100 block"
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:shadow-gray-900/50 hover:shadow-md dark:hover:shadow-gray-900/70 transition-shadow overflow-hidden border border-gray-100 dark:border-gray-700 block transition-colors duration-300"
                 >
                   <div className="relative h-48">
                     <Image
@@ -103,27 +103,27 @@ export default function FreelancerInterviewPage() {
                       className="object-cover"
                     />
                     {post.role && (
-                      <div className="absolute top-4 right-4 bg-blue-600 text-white text-xs px-3 py-1 rounded-full">
+                      <div className="absolute top-4 right-4 bg-blue-600 dark:bg-blue-700 text-white text-xs px-3 py-1 rounded-full">
                         {post.role}
                       </div>
                     )}
                   </div>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-blue-600">
+                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
                         {post.category}
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
                         {post.date}
                       </span>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
                       {post.title}
                     </h3>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
                       {post.excerpt}
                     </p>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
                       <span>{post.author}</span>
                       <div className="flex items-center space-x-4">
                         <span className="flex items-center group">

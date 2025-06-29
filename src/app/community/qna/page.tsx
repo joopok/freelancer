@@ -201,7 +201,7 @@ export default function CommunityQnaPage() {
   };
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 헤더 섹션 */}
       <div className="bg-gradient-to-r from-indigo-600 to-blue-500 py-16 px-4 sm:px-6 lg:px-8 text-white">
         <div className="max-w-7xl mx-auto text-center">
@@ -229,14 +229,14 @@ export default function CommunityQnaPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* 왼쪽 사이드바 */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">카테고리</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6 border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 transition-colors duration-300">카테고리</h3>
               <nav className="space-y-2">
                 {categories.map((category) => (
                   <a
                     key={category}
                     href="#"
-                    className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors"
+                    className="block px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300"
                   >
                     {category}
                   </a>
@@ -244,14 +244,14 @@ export default function CommunityQnaPage() {
               </nav>
             </div>
             
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">인기 태그</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6 border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 transition-colors duration-300">인기 태그</h3>
               <div className="flex flex-wrap gap-2">
                 {popularTags.map((tag) => (
                   <a
                     key={tag}
                     href="#"
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 hover:bg-indigo-200 transition-colors"
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors duration-300"
                   >
                     #{tag}
                   </a>
@@ -259,7 +259,7 @@ export default function CommunityQnaPage() {
               </div>
             </div>
             
-            <div className="bg-gray-900 rounded-lg shadow-sm p-6 text-white">
+            <div className="bg-gray-900 dark:bg-gray-700 rounded-lg shadow-sm p-6 text-white border border-gray-200 dark:border-gray-600 transition-colors duration-300">
               <h3 className="text-lg font-medium mb-3">질문 작성 팁</h3>
               <ul className="space-y-3 text-gray-300 text-sm">
                 <li className="flex">
@@ -287,35 +287,35 @@ export default function CommunityQnaPage() {
           {/* 오른쪽 메인 콘텐츠 */}
           <div className="lg:col-span-3">
             {/* 검색 및 필터 */}
-            <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6 border border-gray-200 dark:border-gray-700 transition-colors duration-300">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex space-x-2">
                   <button
                     onClick={() => setActiveTab('latest')}
-                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 ${
                       activeTab === 'latest'
-                        ? 'bg-indigo-100 text-indigo-700'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                   >
                     최신순
                   </button>
                   <button
                     onClick={() => setActiveTab('popular')}
-                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 ${
                       activeTab === 'popular'
-                        ? 'bg-indigo-100 text-indigo-700'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                   >
                     인기순
                   </button>
                   <button
                     onClick={() => setActiveTab('unanswered')}
-                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 ${
                       activeTab === 'unanswered'
-                        ? 'bg-indigo-100 text-indigo-700'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                   >
                     미해결 질문
@@ -327,11 +327,11 @@ export default function CommunityQnaPage() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="질문 또는 태그 검색"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-300"
                   />
                   <button 
                     type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-r-md hover:bg-indigo-700 transition-colors"
+                    className="bg-indigo-600 dark:bg-indigo-700 text-white px-4 py-2 rounded-r-md hover:bg-indigo-700 dark:hover:bg-indigo-800 transition-colors duration-300"
                   >
                     검색
                   </button>
@@ -346,7 +346,7 @@ export default function CommunityQnaPage() {
                   <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-indigo-600"></div>
                 </div>
               ) : sortedQuestions.length === 0 ? (
-                <div className="flex flex-col justify-center items-center h-64 bg-white rounded-lg shadow-sm p-6 text-gray-500">
+                <div className="flex flex-col justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 transition-colors duration-300">
                   <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -359,7 +359,7 @@ export default function CommunityQnaPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="bg-white rounded-lg shadow-sm overflow-hidden"
+                    className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 transition-colors duration-300"
                   >
                     <Link href={`/community/qna/${question.id}`} className="block">
                       <div className="p-6">
@@ -376,13 +376,13 @@ export default function CommunityQnaPage() {
                               </div>
                             </div>
                             <div className="text-sm">
-                              <span className="font-medium text-gray-900">{question.author}</span>
-                              <span className="text-gray-500 mx-2">•</span>
-                              <span className="text-gray-500">{question.date}</span>
+                              <span className="font-medium text-gray-900 dark:text-white transition-colors duration-300">{question.author}</span>
+                              <span className="text-gray-500 dark:text-gray-400 mx-2 transition-colors duration-300">•</span>
+                              <span className="text-gray-500 dark:text-gray-400 transition-colors duration-300">{question.date}</span>
                             </div>
                           </div>
                           <div className="flex space-x-2">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 transition-colors duration-300">
                               {question.category}
                             </span>
                             {question.isResolved ? (
@@ -397,24 +397,24 @@ export default function CommunityQnaPage() {
                           </div>
                         </div>
                         
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2 hover:text-indigo-600 transition-colors">
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">
                           {question.title}
                         </h3>
                         
-                        <p className="text-gray-600 line-clamp-2 mb-4">{question.content}</p>
+                        <p className="text-gray-600 dark:text-gray-300 line-clamp-2 mb-4 transition-colors duration-300">{question.content}</p>
                         
                         <div className="flex flex-wrap gap-2 mb-4">
                           {question.tags.map((tag) => (
                             <span 
                               key={tag} 
-                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-300 transition-colors duration-300"
                             >
                               #{tag}
                             </span>
                           ))}
                         </div>
                         
-                        <div className="flex justify-between items-center text-sm text-gray-500">
+                        <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
                           <div className="flex space-x-4">
                             <div className="flex items-center">
                               <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -430,7 +430,7 @@ export default function CommunityQnaPage() {
                               <span>{question.likes}</span>
                             </div>
                           </div>
-                          <div className="flex items-center text-indigo-600 font-medium">
+                          <div className="flex items-center text-indigo-600 dark:text-indigo-400 font-medium transition-colors duration-300">
                             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                             </svg>

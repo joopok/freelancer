@@ -1,0 +1,63 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# **AI Protocol: Strict Library Integration Procedure**
+
+**Directive:** You have recently made critical, sequential errors during the integration of the `next-intl` library. This demonstrates a failure in your implementation process. To prevent recurrence, you **MUST** adopt the following meticulous, step-by-step protocol for integrating any new library, especially those that interact with the Next.js build process, routing, or rendering environments.
+
+**Case Study of Failure - `next-intl` Integration:**
+1.  **Provider Failure:** `useTranslations` was used without wrapping the root layout in `NextIntlClientProvider`.
+2.  **Plugin Failure:** The `withNextIntl` plugin was omitted from `next.config.js`.
+3.  **Middleware Failure:** The `matcher` in `middleware.ts` was misconfigured, failing to cover all page routes.
+4.  **Directory Structure Failure:** The entire directory structure was not moved under `[locale]` as required.
+5.  **Component-Rule Violation:** A client-side hook (`useMessages`) was used in a Server Component (`layout.tsx`).
+6.  **File-System Blindness:** An unexpected root file (`App.tsx`) was interfering with routing, which went unnoticed.
+
+The root cause was a lack of holistic, procedural diligence. This protocol is the mandatory corrective action. The user's own fix in [`i18n.ts`](mdc:src/i18n.ts) to safeguard against `undefined` locales is a valuable defensive measure, but your primary goal is to create a setup so robust that such safeguards are never triggered.
+
+---
+
+## ✅ **Mandatory Library Integration Checklist**
+
+Before marking any integration task as complete, you **MUST** verify and validate every single step of this checklist. Deviation is not permitted.
+
+### **Phase 1: Pre-Implementation Analysis**
+
+1.  **RTFM (Read The Full Manual):**
+    -   **Action:** Open the library's official documentation. Locate and thoroughly read the "Getting Started," "Installation," and "App Router Integration" guides from beginning to end.
+    -   **Verification:** Do not proceed until you have a complete mental model of all required setup steps and their interdependencies.
+
+### **Phase 2: Holistic Implementation**
+
+2.  **Build Configuration (`next.config.js`):**
+    -   **Question:** Does this library require a Next.js plugin (e.g., `withNextIntl`, `withBundleAnalyzer`)?
+    -   **Action:** If yes, immediately wrap the `nextConfig` export with the required plugin(s) as per the documentation.
+    -   **File to check:** [next.config.js](mdc:next.config.js)
+
+3.  **Routing & Middleware (`middleware.ts`):**
+    -   **Question:** Does this library affect routing or require middleware?
+    -   **Action:** If yes, create or update `middleware.ts`. Pay **critical attention** to the `config.matcher`. It **MUST** correctly cover all relevant paths while excluding API routes and static assets (`/((?!api|_next|_vercel|.*\\..*).*)`). A restrictive matcher is a critical error.
+    -   **File to check:** [src/middleware.ts](mdc:src/middleware.ts)
+
+4.  **Global Context Providers & Root Layout (`layout.tsx`):**
+    -   **Question:** Does this library use React Context, requiring a global provider? Does it impact the root layout?
+    -   **Action:** Wrap the `children` prop in the **root layout** (e.g., `src/app/[locale]/layout.tsx`) with the necessary provider(s).
+    -   **Action:** Ensure the root layout respects Server/Client component rules. **NEVER** use client hooks in a server-only layout file. Use `async` and `await` for server-side data fetching.
+    -   **File to check:** `src/app/[locale]/layout.tsx` (or the project's root layout)
+
+5.  **Directory Structure & File System:**
+    -   **Question:** Does this library mandate a specific directory structure (e.g., `[locale]` folders)?
+    -   **Action:** Before implementing any code, perform all required structural changes first. This includes moving ALL relevant folders and files.
+    -   **Action:** Scan the project for any legacy or unexpected files (like the old `App.tsx`) that could conflict with the new structure.
+
+### **Phase 3: Final Verification**
+
+6.  **Full System Restart & Comprehensive Test:**
+    -   **Action:** After completing all configuration, **stop and restart the development server**.
+    -   **Verification:** Test the new functionality not just on the main page, but across multiple, distinct routes (e.g., `/`, `/login`, `/blog`, a dynamic route). Confirm there are no console errors on either the server or the client.
+
+---
+
+**Final Mandate:** You will not declare a task complete until this entire protocol has been followed. Partial or incomplete integrations are unacceptable failures. Adhere to this procedure without deviation.

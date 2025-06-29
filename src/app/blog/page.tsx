@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useLoading } from '@/components/layout/Loading';
 import { useBlogPosts } from '@/hooks/useBlogPosts';
 import { useAuthStore } from '@/store/auth';
-import BlogMenuSearch from '@/components/blog/BlogMenuSearch.tsx';
+import BlogMenuSearch from '@/components/blog/BlogMenuSearch';
 // 숫자 포맷팅 함수
 const formatNumber = (num: number): string => {
   if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
@@ -77,11 +77,11 @@ const ShareModal = ({ isOpen, onClose, post }: { isOpen: boolean; onClose: () =>
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-60 z-50 flex items-center justify-center">
+      <div className="bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-gray-900">공유하기</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white dark:text-white">공유하기</h3>
+          <button onClick={onClose} className="text-gray-500 dark:text-gray-400 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -89,16 +89,16 @@ const ShareModal = ({ isOpen, onClose, post }: { isOpen: boolean; onClose: () =>
         </div>
 
         <div className="space-y-4">
-          <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
             <input
               type="text"
               value={shareUrl}
               readOnly
-              className="flex-1 text-sm text-gray-600 bg-transparent"
+              className="flex-1 text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300 bg-transparent"
             />
             <button
               onClick={handleCopy}
-              className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700"
+              className="px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
             >
               {copied ? '복사됨!' : '복사'}
             </button>
@@ -109,12 +109,12 @@ const ShareModal = ({ isOpen, onClose, post }: { isOpen: boolean; onClose: () =>
               <button
                 key={platform}
                 onClick={() => handleShare(platform)}
-                className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-lg transition-colors"
+                className="flex flex-col items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
                 <svg className={`w-6 h-6 ${platform === 'twitter' ? 'text-blue-400' : platform === 'facebook' ? 'text-blue-600' : platform === 'linkedin' ? 'text-blue-700' : 'text-yellow-500'}`} fill="currentColor" viewBox="0 0 24 24">
                   {/* SVG paths for each platform */}
                 </svg>
-                <span className="text-xs text-gray-600 mt-1">{platform === 'twitter' ? '트위터' : platform === 'facebook' ? '페이스북' : platform === 'linkedin' ? '링크드인' : '카카오'}</span>
+                <span className="text-xs text-gray-600 dark:text-gray-300 dark:text-gray-300 mt-1">{platform === 'twitter' ? '트위터' : platform === 'facebook' ? '페이스북' : platform === 'linkedin' ? '링크드인' : '카카오'}</span>
               </button>
             ))}
           </div>
@@ -628,12 +628,12 @@ export default function BlogPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-800 dark:bg-gray-900 transition-colors duration-300">
       {/* 헤더 섹션 */}
-      <header className="border-b bg-gray-50">
+      <header className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Blog. 전체</h1>
-          <p className="text-lg text-gray-600">잡코아 빌보드 블로그에서만 볼 수 있는 최신 IT 컨텐츠를 만나보세요.</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white dark:text-white mb-2">Blog. 전체</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300 dark:text-gray-300">잡코아 빌보드 블로그에서만 볼 수 있는 최신 IT 컨텐츠를 만나보세요.</p>
         </div>
       </header>
 
@@ -644,8 +644,8 @@ export default function BlogPage() {
         {sections.map((section, index) => (
           <section key={section.title} className={`mb-12 ${index === 0 ? 'mt-4' : ''}`}>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">{section.title}</h2>
-              <Link href={`/blog/${section.title.toLowerCase().replace(/ /g, '-')}`} className="text-sm text-gray-600 hover:text-gray-900 flex items-center">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white dark:text-white">{section.title}</h2>
+              <Link href={`/blog/${section.title.toLowerCase().replace(/ /g, '-')}`} className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white dark:text-white dark:hover:text-white flex items-center transition-colors">
                 더보기
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -654,28 +654,28 @@ export default function BlogPage() {
             </div>
       
             {index === 0 ? (
-              <div className="border rounded-xl p-6 bg-gray-50">
+              <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-6 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
                 <div className="space-y-6">
                   {section.posts.map((post) => (
-                    <div key={post.id} className="flex gap-6 bg-white rounded-lg overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow p-4">
+                    <div key={post.id} className="flex gap-6 bg-white dark:bg-gray-800 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-700 dark:border-gray-700 hover:shadow-lg dark:hover:shadow-gray-900/50 dark:hover:shadow-gray-900/50 transition-all duration-300 p-4">
                       <Link href={`/blog/posts/${post.id}`} className="flex gap-6 w-full">
                         <div className="relative w-64 h-40 flex-shrink-0">
                           <Image src={post.thumbnail} alt={post.title} fill className="object-cover rounded-lg" />
                         </div>
                         <div className="flex-1">
                           {post.category && (
-                            <span className="inline-block px-2 py-1 text-sm font-medium bg-blue-600 text-white rounded-full mb-3">
+                            <span className="inline-block px-2 py-1 text-sm font-medium bg-blue-600 dark:bg-blue-700 text-white rounded-full mb-3">
                               {post.category}
                             </span>
                           )}
-                          <h3 className="text-lg font-bold text-gray-900 mb-2">{post.title}</h3>
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{post.excerpt}</p>
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white dark:text-white mb-2">{post.title}</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300 mb-3 line-clamp-2">{post.excerpt}</p>
                           <div className="flex flex-wrap gap-2 mb-3">
                             {post.tags.map((tag) => (
-                              <span key={tag} className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-full">{tag}</span>
+                              <span key={tag} className="text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">{tag}</span>
                             ))}
                           </div>
-                          <div className="flex justify-between items-center text-sm text-gray-500">
+                          <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
                             <div className="flex items-center gap-4">
                               <span>{post.date}</span>
                               <span>조회수 {formatNumber(post.views)}</span>
@@ -685,7 +685,7 @@ export default function BlogPage() {
                                 e.preventDefault();
                                 handleShareClick(post);
                               }} 
-                              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 rounded-full transition-colors"
                             >
                               <Image src="/images/icons/share.svg" alt="공유하기" width={20} height={20} className="opacity-50" />
                             </button>
@@ -699,20 +699,20 @@ export default function BlogPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {section.posts.map((post) => (
-                  <div key={post.id} className="bg-white rounded-lg overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow">
+                  <div key={post.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-700 hover:shadow-lg dark:hover:shadow-gray-900/50 transition-shadow">
                     <Link href={`/blog/posts/${post.id}`}>
                       <div className="relative h-48">
                         <Image src={post.thumbnail} alt={post.title} fill className="object-cover" />
                       </div>
                       <div className="p-4">
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">{post.title}</h3>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{post.excerpt}</p>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{post.title}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">{post.excerpt}</p>
                         <div className="flex flex-wrap gap-2 mb-3">
                           {post.tags.map((tag) => (
-                            <span key={tag} className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-full">{tag}</span>
+                            <span key={tag} className="text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">{tag}</span>
                           ))}
                         </div>
-                        <div className="flex justify-between items-center text-sm text-gray-500">
+                        <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
                           <div className="flex items-center gap-4">
                     <span>{post.date}</span>
                             <span>조회수 {formatNumber(post.views)}</span>
@@ -722,7 +722,7 @@ export default function BlogPage() {
                               e.preventDefault();
                               handleShareClick(post);
                             }} 
-                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 rounded-full transition-colors"
                           >
                             <Image src="/images/icons/share.svg" alt="공유하기" width={20} height={20} className="opacity-50" />
                           </button>
@@ -740,8 +740,8 @@ export default function BlogPage() {
         {Object.entries(categoryContents).map(([key, category]) => (
           <section key={key} className="mb-12">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">{category.title}</h2>
-              <Link href={`/blog/category/${key}`} className="text-sm text-gray-600 hover:text-gray-900 flex items-center">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{category.title}</h2>
+              <Link href={`/blog/category/${key}`} className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white dark:text-white flex items-center">
                 더보기
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -751,7 +751,7 @@ export default function BlogPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {category.posts.map((post) => (
-                <div key={post.id} className="group bg-white rounded-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div key={post.id} className="group bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                   <Link href={`/blog/posts/${post.id}`}>
                     <div className="relative h-48 overflow-hidden">
                       <Image
@@ -770,10 +770,10 @@ export default function BlogPage() {
                     <div className="p-5">
                       <div className="flex flex-wrap gap-2 mb-3">
                         {post.tags?.map((tag) => (
-                          <span key={tag} className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors duration-300">{tag}</span>
+                          <span key={tag} className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full group-hover:bg-blue-50 dark:group-hover:bg-blue-900/50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">{tag}</span>
                     ))}
                   </div>
-                      <div className="flex justify-between items-center text-sm text-gray-500">
+                      <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
                         <div className="flex items-center gap-4">
                           <span>{post.date}</span>
                           <span>조회수 {formatNumber(post.views)}</span>
@@ -783,7 +783,7 @@ export default function BlogPage() {
                             e.preventDefault();
                             handleShareClick(post);
                           }} 
-                          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 rounded-full transition-colors"
                         >
                           <Image src="/images/icons/share.svg" alt="공유하기" width={20} height={20} className="opacity-50" />
                         </button>
@@ -808,18 +808,18 @@ export default function BlogPage() {
 
       {/* CTA 섹션 - 로그인하지 않은 사용자에게만 표시 */}
       {!isLoggedIn && (
-        <section className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white py-16">
+        <section className="bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-gray-800 dark:to-gray-700 text-white py-16 transition-colors duration-300">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">지금 시작하세요</h2>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto mb-10">
+            <p className="text-xl text-blue-100 dark:text-gray-300 max-w-3xl mx-auto mb-10">
               프리랜서와 기업 모두에게 최고의 경험을 제공하는 잡코리아 빌보드에서
               당신의 성공 스토리를 시작하세요.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/register" className="bg-white text-blue-700 hover:bg-blue-50 px-8 py-4 rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl">
+              <Link href="/register" className="bg-white dark:bg-gray-700 text-blue-700 dark:text-white hover:bg-blue-50 dark:hover:bg-gray-600 px-8 py-4 rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl">
                 회원가입
               </Link>
-              <Link href="/login" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-700 px-8 py-4 rounded-lg font-bold text-lg transition-all">
+              <Link href="/login" className="bg-transparent border-2 border-white text-white hover:bg-white dark:hover:bg-gray-700 hover:text-blue-700 dark:hover:text-white px-8 py-4 rounded-lg font-bold text-lg transition-all">
                 로그인
               </Link>
             </div>
