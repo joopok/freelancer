@@ -103,7 +103,7 @@ NextIntlClientProvider (i18n context)
 - Main page simplified after removing complex home components
 
 ### API Configuration
-- Backend API proxy: `http://localhost:8081`
+- Backend API proxy: `http://localhost:8080`
 - CORS handled via Next.js rewrites in `next.config.js`
 - JWT tokens stored in localStorage with 30-day expiry
 

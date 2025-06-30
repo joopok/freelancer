@@ -4,59 +4,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-// Removed framer-motion to fix build errors
-import { 
-  RemoteWorkDetail, 
-  RemoteCompanyInfo, 
-  WorkStage, 
-  ContactPerson, 
-  RemoteWorkingConditions,
-  VirtualOfficeInfo,
-  CollaborationTool,
-  ProductivityMetric,
-  RemoteWorkPolicy,
-  TeamCulture,
-  RemoteEnvironment,
-  RemoteWorkReview,
-  RemoteWorkQuestion,
-  SimilarRemoteWork
-} from '@/types/athome';
+import { RemoteWorkDetail } from '@/types/athome';
+import { colors, mockRemoteWorkReviews, mockRemoteWorkQuestions } from '@/data/athomeData';
+import { ProjectService } from '@/services/database';
 
-// 깔끔한 색상 팔레트 정의
-const colors = {
-  primary: {
-    bg: 'bg-blue-50 dark:bg-blue-900/10',
-    border: 'border-blue-200 dark:border-blue-700',
-    text: 'text-blue-700 dark:text-blue-300',
-    button: 'bg-blue-600 hover:bg-blue-700 text-white',
-    accent: 'bg-blue-600'
-  },
-  success: {
-    bg: 'bg-green-50 dark:bg-green-900/10',
-    border: 'border-green-200 dark:border-green-700',
-    text: 'text-green-700 dark:text-green-300',
-    accent: 'bg-green-600'
-  },
-  warning: {
-    bg: 'bg-amber-50 dark:bg-amber-900/10',
-    border: 'border-amber-200 dark:border-amber-700',
-    text: 'text-amber-700 dark:text-amber-300',
-    accent: 'bg-amber-600'
-  },
-  danger: {
-    bg: 'bg-red-50 dark:bg-red-900/10',
-    border: 'border-red-200 dark:border-red-700',
-    text: 'text-red-700 dark:text-red-300',
-    accent: 'bg-red-600'
-  },
-  neutral: {
-    bg: 'bg-gray-50 dark:bg-gray-800',
-    border: 'border-gray-200 dark:border-gray-600',
-    text: 'text-gray-700 dark:text-gray-300',
-    accent: 'bg-gray-600'
-  },
-  card: 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600'
-};
+
 
 export default function RemoteWorkDetailPage() {
   const params = useParams();
@@ -88,14 +40,7 @@ export default function RemoteWorkDetailPage() {
   const [currentActiveTeams, setCurrentActiveTeams] = useState(8);
   
   // 실시간 통계
-  const [realtimeStats, setRealtimeStats] = useState({
-    applicants: 34,
-    views: 892,
-    bookmarks: 156,
-    onlineInterviews: 12,
-    averageResponseTime: '2시간',
-    successfulHires: 23
-  });
+  const [realtimeStats, setRealtimeStats] = useState(mockRealtimeStats);
 
   // 가상 오피스 투어 상태
   const [virtualTourStep, setVirtualTourStep] = useState(0);
@@ -157,303 +102,109 @@ export default function RemoteWorkDetailPage() {
       
       // 임시 데이터 생성 (실제로는 API에서 가져옴)
       setTimeout(() => {
-        const mockRemoteCompanyInfo: RemoteCompanyInfo = {
-          name: '(주)글로벌리모트',
-          industry: 'IT/소프트웨어',
-          size: '스타트업 (50-100명)',
-          location: '서울특별시 (본사)',
-          website: 'https://globalremote.co.kr',
-          description: '100% 원격근무 기반의 혁신적인 테크 스타트업입니다. 전 세계 15개국에 팀원들이 분산되어 있으며, 비동기 커뮤니케이션과 성과 중심의 문화를 추구합니다. AI와 클라우드 기술에 특화된 솔루션을 개발하고 있습니다.',
-          founded: '2019년',
-          employees: '85명',
-          ceo: '김○○',
-          remoteWorkHistory: '창립 때부터 100% 원격근무',
-          remoteWorkPercentage: 100,
-          globalTeams: true,
-          officeLocations: ['서울 (가상본사)', '도쿄 (지사)', '실리콘밸리 (지사)'],
-          remoteFirstPolicy: true,
-          diversityAndInclusion: [
-            '15개국 다국적 팀',
-            '시간대 다양성 존중',
-            '문화적 포용성',
-            '접근성 지원',
-            '성별/연령 균형'
-          ]
-        };
+        import { RemoteWorkDetail } from '@/types/athome';
+import { 
+  colors,
+  mockRemoteWork,
+  mockSimilarRemoteWorks,
+  mockRemoteWorkReviews,
+  mockRemoteWorkQuestions,
+  mockRealtimeStats
+} from '@/data/athomeData';
 
-        const mockRemoteEnvironment: RemoteEnvironment = {
-          officeSetupSupport: true,
-          equipmentProvided: [
-            '최신 맥북 프로 또는 윈도우 노트북',
-            '외부 모니터 2대',
-            '인체공학적 의자',
-            '스탠딩 데스크',
-            '웹캠 및 마이크',
-            '키보드 & 마우스',
-            '노이즈 캔슬링 헤드폰'
-          ],
-          internetAllowance: 80000,
-          workspaceStipend: 300000,
-          ergonomicSupport: true,
-          techSupport: '24/7 글로벌 IT 지원',
-          securityRequirements: [
-            'VPN 필수 사용',
-            '2단계 인증',
-            '보안 소프트웨어 설치',
-            'BYOD 정책 준수',
-            '정기 보안 교육'
-          ],
-          workingSpaceRecommendations: [
-            '조용한 전용 공간',
-            '안정적인 인터넷 (최소 100Mbps)',
-            '자연광이 들어오는 환경',
-            '온도 조절 가능',
-            '문 닫힘 가능한 독립 공간'
-          ]
-        };
+export default function RemoteWorkDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const remoteWorkId = params.id as string;
+  
+  const [remoteWork, setRemoteWork] = useState<RemoteWorkDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'overview' | 'environment' | 'culture' | 'tools' | 'company' | 'reviews'>('overview');
+  const [activeSubTab, setActiveSubTab] = useState<'questions' | 'reviews'>('questions');
+  
+  // 모달 상태들
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [showCompanyModal, setShowCompanyModal] = useState(false);
+  const [showVirtualOfficeModal, setShowVirtualOfficeModal] = useState(false);
+  const [showEnvironmentSetupModal, setShowEnvironmentSetupModal] = useState(false);
+  const [showProductivityModal, setShowProductivityModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [showVideoCallModal, setShowVideoCallModal] = useState(false);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [showToolsModal, setShowToolsModal] = useState(false);
+  const [showPolicyModal, setShowPolicyModal] = useState(false);
+  
+  // 인터랙티브 상태들
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [skillMatchScore, setSkillMatchScore] = useState(0);
+  const [remoteWorkScore, setRemoteWorkScore] = useState(0);
+  const [currentOnlineWorkers, setCurrentOnlineWorkers] = useState(24);
+  const [currentActiveTeams, setCurrentActiveTeams] = useState(8);
+  
+  // 실시간 통계
+  const [realtimeStats, setRealtimeStats] = useState(mockRealtimeStats);
 
-        const mockVirtualOffice: VirtualOfficeInfo = {
-          platform: 'MetaOffice Pro',
-          features: [
-            '3D 가상 오피스',
-            '실시간 아바타',
-            '공간 오디오',
-            '화면 공유',
-            '가상 화이트보드',
-            '비공식 만남 공간',
-            '집중 모드',
-            '활동 상태 표시'
-          ],
-          virtualRooms: [
-            {
-              id: 'room1',
-              name: '메인 워크스페이스',
-              purpose: '일반 업무',
-              capacity: 50,
-              tools: ['Slack', 'Zoom', 'Figma'],
-              availability: '24/7'
-            },
-            {
-              id: 'room2', 
-              name: '집중 룸',
-              purpose: '딥워크',
-              capacity: 10,
-              tools: ['노이즈 차단', '집중 타이머'],
-              availability: '09:00-18:00'
-            },
-            {
-              id: 'room3',
-              name: '브레인스토밍 룸',
-              purpose: '창의적 협업',
-              capacity: 15,
-              tools: ['Miro', 'FigJam', '화이트보드'],
-              availability: '24/7'
-            }
-          ],
-          socialSpaces: [
-            '가상 커피룸',
-            '게임 라운지',
-            '북클럽 공간',
-            '운동 챌린지 룸'
-          ],
-          meetingRooms: 8,
-          collaborationSpaces: [
-            '프로젝트 전용 룸',
-            '고객 미팅룸',
-            '1:1 멘토링 공간'
-          ],
-          digitalWhiteboards: true,
-          screenSharingQuality: '4K 지원'
-        };
+  // 가상 오피스 투어 상태
+  const [virtualTourStep, setVirtualTourStep] = useState(0);
+  const [isVirtualTourActive, setIsVirtualTourActive] = useState(false);
 
-        const mockWorkStages: WorkStage[] = [
-          {
-            id: '1',
-            name: '원격 온보딩 및 환경 설정',
-            description: '새로운 팀원을 위한 체계적인 원격 온보딩 프로세스와 업무 환경 구축을 진행합니다.',
-            duration: '1주',
-            deliverables: ['환경 설정 완료', '팀 소개 세션', '멘토 배정'],
-            collaborationLevel: '높음',
-            tools: ['Slack', 'Zoom', 'Notion', 'Loom']
-          },
-          {
-            id: '2',
-            name: '프로젝트 기획 및 설계',
-            description: '비동기 협업을 통한 요구사항 분석과 시스템 아키텍처 설계를 수행합니다.',
-            duration: '2주',
-            deliverables: ['요구사항 문서', '기술 설계서', '프로토타입'],
-            collaborationLevel: '중간',
-            tools: ['Figma', 'Miro', 'GitHub', 'Linear']
-          },
-          {
-            id: '3',
-            name: '개발 및 구현',
-            description: '분산된 팀원들과의 협업을 통해 실제 개발을 진행합니다.',
-            duration: '6주',
-            deliverables: ['핵심 기능 개발', 'CI/CD 파이프라인', '테스트 코드'],
-            collaborationLevel: '중간',
-            tools: ['VS Code Live Share', 'GitHub', 'Docker', 'AWS']
-          }
-        ];
+  // 환경 설정 도우미 상태
+  const [environmentSetupStep, setEnvironmentSetupStep] = useState(0);
+  const [selectedTimezone, setSelectedTimezone] = useState('Asia/Seoul');
+  const [workingHoursPreference, setWorkingHoursPreference] = useState('flexible');
 
-        const mockContactPerson: ContactPerson = {
-          name: '이원격',
-          position: '리모트 팀 리드',
-          email: 'remote.lead@globalremote.co.kr',
-          phone: '+82-10-1234-5678',
-          responseTime: '평균 1시간',
-          timezone: 'Asia/Seoul (UTC+9)',
-          preferredCommunication: 'Slack → 이메일 → 화상통화',
-          availableHours: '09:00-18:00 KST (유연)'
-        };
+  // 실시간 통계 업데이트
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRealtimeStats(prev => ({
+        ...prev,
+        views: prev.views + Math.floor(Math.random() * 5) + 1,
+        applicants: prev.applicants + (Math.random() > 0.8 ? 1 : 0),
+        onlineInterviews: Math.max(5, prev.onlineInterviews + Math.floor(Math.random() * 3) - 1)
+      }));
+      setCurrentOnlineWorkers(prev => Math.max(15, prev + Math.floor(Math.random() * 6) - 2));
+      setCurrentActiveTeams(prev => Math.max(3, prev + Math.floor(Math.random() * 4) - 1));
+    }, 8000); // 8초마다 업데이트
 
-        const mockRemoteWorkingConditions: RemoteWorkingConditions = {
-          workingHours: '코어타임 14:00-17:00 KST',
-          workingDays: '주 5일 (유연)',
-          timeZoneFlexibility: '높음 (±4시간 허용)',
-          meetingOverlapHours: '14:00-17:00 KST',
-          coreHours: '팀별 최소 3시간 겹침',
-          overtimePolicy: '사전 승인제, 150% 보상',
-          vacationPolicy: '무제한 휴가제',
-          sickLeavePolicy: '즉시 사용 가능',
-          communicationExpectations: [
-            '24시간 내 응답 (urgent 제외)',
-            '회의 24시간 전 아젠다 공유',
-            '일일 스탠드업 비동기 참여',
-            '주간 회고 필수 참여'
-          ],
-          performanceTracking: 'OKR 기반 분기별 평가'
-        };
+    return () => clearInterval(interval);
+  }, []);
 
-        const mockCollaborationTools: CollaborationTool[] = [
-          {
-            id: 'slack',
-            name: 'Slack',
-            category: '커뮤니케이션',
-            description: '실시간 메시징 및 팀 커뮤니케이션',
-            features: ['채널 기반 대화', '화상 통화', '파일 공유', '앱 통합'],
-            integrations: ['GitHub', 'Jira', 'Calendar', 'Zoom'],
-            learningCurve: '쉬움',
-            supportLevel: '전문 관리자 배치',
-            cost: '회사 부담'
-          },
-          {
-            id: 'notion',
-            name: 'Notion',
-            category: '문서 관리',
-            description: '통합 워크스페이스 및 지식 관리',
-            features: ['문서 작성', '데이터베이스', '프로젝트 관리', '위키'],
-            integrations: ['Slack', 'GitHub', 'Calendar'],
-            learningCurve: '중간',
-            supportLevel: '교육 프로그램 제공',
-            cost: '회사 부담'
-          }
-        ];
+  // 스킬 매칭 점수 계산
+  useEffect(() => {
+    if (remoteWork) {
+      // 사용자의 보유 스킬 (실제로는 로그인한 사용자의 프로필에서 가져옴)
+      const userSkills = ['React', 'TypeScript', 'Node.js', 'Python', 'AWS', 'Git']; 
+      
+      const matchingSkills = remoteWork.skills.filter(skill => 
+        userSkills.some(userSkill => 
+          userSkill.toLowerCase().includes(skill.toLowerCase()) || 
+          skill.toLowerCase().includes(userSkill.toLowerCase())
+        )
+      );
+      
+      const score = Math.round((matchingSkills.length / remoteWork.skills.length) * 100);
+      setSkillMatchScore(score);
+      
+      // 원격근무 적합도 점수 계산
+      let remoteScore = 0;
+      if (remoteWork.isFullyRemote) remoteScore += 30;
+      if (remoteWork.remoteWorkEnvironment?.officeSetupSupport) remoteScore += 20;
+      if (remoteWork.workingConditions?.timeZoneFlexibility === 'High') remoteScore += 25;
+      if (remoteWork.virtualOffice?.digitalWhiteboards) remoteScore += 15;
+      if (remoteWork.teamCulture?.communicationStyle === 'Asynchronous-first') remoteScore += 10;
+      
+      setRemoteWorkScore(Math.min(100, remoteScore));
+    }
+  }, [remoteWork]);
 
-        const mockRemoteWork: RemoteWorkDetail = {
-          id: remoteWorkId,
-          title: 'AI 기반 글로벌 추천 시스템 개발 (100% 원격)',
-          company: '(주)글로벌리모트',
-          skills: ['React', 'TypeScript', 'Python', 'TensorFlow', 'AWS', 'Docker'],
-          duration: '6개월',
-          budget: '8,000만원',
-          deadline: 'D-5',
-          type: '재택',
-          description: '전 세계 사용자를 대상으로 한 AI 기반 개인화 추천 시스템을 개발하는 100% 원격근무 프로젝트',
-          level: '시니어',
-          category: 'AI/ML',
-          timeZone: 'Asia/Seoul (UTC+9)',
-          communicationTools: ['Slack', 'Zoom', 'Notion', 'Miro'],
-          workingHours: '코어타임 14:00-17:00',
-          benefits: ['장비 지원', '홈오피스 수당', '무제한 휴가', '교육비 지원'],
-          applicants: 34,
-          views: 892,
-          isUrgent: false,
-          isFullyRemote: true,
-          teamSize: 8,
-          experienceRequired: '3년 이상',
-          detailedDescription: `
-🌍 **글로벌 스케일의 AI 추천 시스템 프로젝트**
-
-전 세계 500만 사용자가 사용하는 플랫폼의 핵심 추천 엔진을 개발하는 프로젝트입니다. 
-머신러닝과 딥러닝 기술을 활용하여 사용자 행동 패턴을 분석하고, 
-실시간으로 개인화된 컨텐츠를 추천하는 시스템을 구축합니다.
-
-🚀 **기술적 도전과제:**
-• 대용량 실시간 데이터 처리 (초당 10만건 이상)
-• 다국가 사용자를 위한 문화적 맥락 고려
-• A/B 테스트를 통한 지속적인 모델 개선
-• MLOps 파이프라인 구축 및 자동화
-
-💼 **100% 원격근무 환경:**
-• 15개국 팀원들과의 글로벌 협업
-• 비동기 커뮤니케이션 중심
-• 자율적인 업무 시간 관리
-• 성과 중심의 평가 시스템
-          `,
-          requirements: [
-            'React 및 TypeScript 4년 이상 경험',
-            'Python 및 머신러닝 라이브러리 3년 이상',
-            'AWS 클라우드 서비스 실무 경험',
-            '대용량 데이터 처리 경험',
-            '원격근무 경험 2년 이상',
-            '영어 커뮤니케이션 가능 (중급 이상)'
-          ],
-          responsibilities: [
-            'AI 추천 알고리즘 설계 및 구현',
-            '프론트엔드 사용자 인터페이스 개발',
-            '실시간 데이터 파이프라인 구축',
-            'A/B 테스트 설계 및 분석',
-            '성능 모니터링 및 최적화',
-            '국제팀과의 비동기 협업'
-          ],
-          preferredSkills: [
-            'TensorFlow/PyTorch 실무 경험',
-            'Kubernetes 및 Docker 활용',
-            'GraphQL 및 Apollo 경험',
-            '다국어 서비스 개발 경험',
-            'Remote-first 문화 경험',
-            'OKR 기반 목표 관리 경험'
-          ],
-          remoteWorkEnvironment: mockRemoteEnvironment,
-          companyInfo: mockRemoteCompanyInfo,
-          workStages: mockWorkStages,
-          applicationDeadline: '2024-12-31',
-          startDate: '2025-01-15',
-          contactPerson: mockContactPerson,
-          remoteBenefits: [
-            '홈오피스 구축비 300만원 지원',
-            '월 인터넷비 8만원 지원',
-            '연간 코워킹스페이스 이용권',
-            '인체공학적 장비 무제한 지원',
-            '글로벌 컨퍼런스 참석비',
-            '온라인 교육 플랫폼 무제한',
-            '정신건강 상담 서비스',
-            '연 2회 팀 워크샵 (해외 가능)'
-          ],
-          workingConditions: mockRemoteWorkingConditions,
-          evaluationCriteria: [
-            '기술 역량 및 문제 해결 능력 (40%)',
-            '원격 협업 및 커뮤니케이션 (25%)',
-            '자기 주도적 업무 수행 (20%)',
-            '글로벌 마인드셋 (15%)'
-          ],
-          submissionGuidelines: [
-            '이력서 및 포트폴리오 (영문 선호)',
-            '원격근무 경험 상세 기술',
-            'GitHub 프로필 및 주요 프로젝트',
-            '선호 시간대 및 업무 스타일',
-            '영어 커뮤니케이션 수준 증빙',
-            '홈오피스 환경 사진 (선택)'
-          ],
-          virtualOffice: mockVirtualOffice,
-          collaborationTools: mockCollaborationTools,
-          productivityMetrics: [],
-          remoteWorkPolicy: {} as RemoteWorkPolicy,
-          teamCulture: {} as TeamCulture
-        };
-
-        setRemoteWork(mockRemoteWork);
+  // 재택근무 상세 데이터 로드
+  useEffect(() => {
+    const loadRemoteWorkDetail = async () => {
+      setLoading(true);
+      
+      // 임시 데이터 생성 (실제로는 API에서 가져옴)
+      setTimeout(() => {
+        setRemoteWork(mockRemoteWork(remoteWorkId));
         setLoading(false);
       }, 900);
     };

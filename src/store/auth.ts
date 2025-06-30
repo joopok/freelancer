@@ -9,7 +9,7 @@ import { jwtDecode } from 'jwt-decode';
 export const convertToSessionUser = (user: User): SessionUser => {
   return {
     id: user.id,
-    name: user.name || user.username1, // 이름이 없을 경우 사용자명을 사용
+    username: user.username || user.username, // 이름이 없을 경우 사용자명을 사용
     type: user.role === 'ADMIN' ? 'company' : 'individual', // 역할에 따라 타입 결정
   };
 };

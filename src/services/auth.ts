@@ -12,15 +12,15 @@ export const authService = {
    * 로그인 API 호출
    * 사용자 로그인을 처리하고 인증 토큰을 반환합니다.
    */
-  async login(username1: string, password: string): Promise<AuthResponse> {
+  async login(username: string, password: string): Promise<AuthResponse> {
     try {
       // 입력값 검증
-      if (!username1 || !password) {
+      if (!username || !password) {
         throw new Error('아이디와 비밀번호를 모두 입력해주세요.');
       }
       
       // 로그인 API 호출
-      const loginData: LoginRequest = { username1, password };
+      const loginData: LoginRequest = { username, password };
       const response = await api.post<any>('/auth/login', loginData);
       
       // 응답 데이터 검증
@@ -37,9 +37,9 @@ export const authService = {
         error: responseData.message || null,
         token: responseData.data?.access_token || null,
         user: responseData.data ? {
-          id: responseData.data.username1 || responseData.data.username || '',
-          username1: responseData.data.username1 || responseData.data.username || '',
-          name: responseData.data.name || responseData.data.username || responseData.data.username1 || '',
+          id: responseData.data.id || responseData.data.id || '',
+          username: responseData.data.username || responseData.data.username || '',
+          name: responseData.data.name || responseData.data.username || responseData.data.username || '',
           email: responseData.data.email || '',
           role: responseData.data.role || ''
         } : undefined
@@ -105,9 +105,24 @@ export const authService = {
         return { success: false, error: '로그인 페이지에서는 세션 체크를 수행하지 않습니다.' } as AuthResponse;
       }
       
-      // 세션 체크 API 호출
-      const response = await api.get<AuthResponse>('/auth/session');
-      return response.data;
+      // 세션 체크 API 호출 (Java backend endpoint)
+      const response = await api.get<any>('/auth/session-info');
+      
+      // Java backend response format에 맞게 변환
+      const responseData = response.data;
+      
+      return {
+        success: responseData.success,
+        error: responseData.message || null,
+        token: responseData.data?.access_token || null,
+        user: responseData.data ? {
+          id: responseData.data.id || responseData.data.id || '',
+          username: responseData.data.username || responseData.data.username || '',
+          name: responseData.data.name || responseData.data.username || responseData.data.username || '',
+          email: responseData.data.email || '',
+          role: responseData.data.role || ''
+        } : undefined
+      } as AuthResponse;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         // 401 오류는 정상적인 로그아웃 상태로 처리

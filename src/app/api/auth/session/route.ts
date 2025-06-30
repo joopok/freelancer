@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { corsOptionsHandler, addCorsHeaders } from '../../cors';
 import { decodeToken, verifyToken } from '@/utils/jwt';
+import { UserService } from '@/services/database';
 
 // OPTIONS 요청 처리 - CORS 프리플라이트 요청 대응
 export async function OPTIONS() {
@@ -36,11 +37,24 @@ export async function GET(request: Request) {
     
     // 토큰에서 사용자 정보 추출
     const payload = decodeToken(token);
-    if (!payload) {
+    if (!payload || !payload.id) {
       return NextResponse.json(
         { 
           success: false, 
           error: '토큰에서 사용자 정보를 추출할 수 없습니다.' 
+        },
+        { status: 401 }
+      );
+    }
+
+    // 데이터베이스에서 사용자 정보 조회 (최신 정보 확인)
+    const user = await UserService.findById(parseInt(payload.id));
+
+    if (!user || user.status !== 'active') {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: '사용자 정보를 찾을 수 없거나 비활성화된 계정입니다.' 
         },
         { status: 401 }
       );
@@ -50,12 +64,12 @@ export async function GET(request: Request) {
     const response = NextResponse.json({
       success: true,
       user: {
-        id: payload.id,
-        username1: payload.id, // 필수 필드이므로 id로 대체
-        name: payload.name || '',
-        email: payload.email || '',
-        role: payload.roles?.[0] || payload.role || '', // JWT 페이로드의 roles 배열 또는 role 필드 사용
-        type: payload.type || 'individual'
+        id: user.id.toString(),
+        username: user.username,
+        name: user.full_name || user.username,
+        email: user.email,
+        type: user.role === 'client' ? 'company' : 'individual',
+        role: user.role
       },
       token: token // 토큰도 함께 반환
     });

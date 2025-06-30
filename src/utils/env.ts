@@ -5,7 +5,7 @@
 
 // API URL 설정 (기본값 제공)
 // NEXT_PUBLIC_API_URL 환경 변수가 있으면 그 값을 사용하고, 없으면 기본값 사용
-let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
+let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 // 상대 경로인 경우(예: /api) 검증 로직을 건너뜁니다
 if (apiUrl.startsWith('http')) {
@@ -33,7 +33,7 @@ if (typeof window !== 'undefined' && apiUrl.startsWith('/')) {
   // 브라우저 환경에서 상대 경로 사용
 } else if (typeof window === 'undefined' && !apiUrl.startsWith('http')) {
   // 서버 사이드에서 상대 경로가 지정된 경우 절대 URL로 변환
-  apiUrl = `http://localhost:8081${apiUrl.startsWith('/') ? apiUrl : `/${apiUrl}`}`;
+  apiUrl = `http://localhost:8080${apiUrl.startsWith('/') ? apiUrl : `/${apiUrl}`}`;
 }
 
 export const API_URL = apiUrl;

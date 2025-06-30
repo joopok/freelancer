@@ -55,7 +55,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8081/:path*'  // /api 부분 제거
+        destination: 'http://localhost:8080/api/:path*'  // Java backend expects /api prefix
       }
     ];
   }

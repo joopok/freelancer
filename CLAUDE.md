@@ -41,6 +41,13 @@ npm run find-unused-files  # Find unused files in the project
 
 # Testing
 # Note: No test framework is currently configured. Consider adding Jest/Vitest for unit tests.
+
+# Database Operations
+npm run test:db      # Test database connection to MariaDB
+npm run db:schema    # Apply database schema (requires MariaDB running on 192.168.0.109:3306)
+
+# TypeScript Checks
+npx tsc --noEmit     # Type checking without emitting files
 ```
 
 ## High-Level Architecture
@@ -96,16 +103,30 @@ LoadingProvider (global loading states)
 ## Important Context
 
 ### Recent Project State
-- Major refactoring: Cleaned up unused components and consolidated file structure
-- Authentication stabilized after fixing JWT processing and auto-logout bugs  
-- Theme system implemented with dark/light mode toggle and system detection
-- Blog system expanded with 15+ specialized categories
-- Dynamic routing added for detailed pages (athome/[id], freelancer/[id], project/[id])
+- **Authentication System**: Complete JWT-based flow with Spring Boot backend integration
+- **Login Experience**: Spinner feedback and smooth navigation to main page on success
+- **Backend Integration**: Connected to Java Spring Boot server with MyBatis ORM
+- **Database Schema**: Synchronized frontend/backend field mappings for user authentication
+- **Theme System**: Dark/light mode with system detection and localStorage persistence
+- **Architecture**: Cleaned up unused components, consolidated file structure
+- **Dynamic Routing**: Added for detailed pages (athome/[id], freelancer/[id], project/[id])
 
 ### API Configuration
-- Backend API proxy: `http://localhost:8081`
-- CORS handled via Next.js rewrites in `next.config.js`
-- JWT tokens stored in localStorage with 30-day expiry
+- **Backend Integration**: Spring Boot server at `http://localhost:8080`
+- **Proxy Configuration**: Next.js rewrites `/api/*` → `http://localhost:8080/api/*` 
+- **Authentication**: JWT tokens stored in localStorage with 30-day expiry
+- **Environment Variables**: Managed through `src/utils/env.ts` with defaults
+  - API URL: `http://localhost:8080` (configurable via `NEXT_PUBLIC_API_URL`)
+  - Mock API: Disabled by default (`NEXT_PUBLIC_USE_MOCK_API=false`)
+  - API Timeout: 30 seconds (`NEXT_PUBLIC_API_TIMEOUT=30000`)
+  - Cache Time: 5 minutes (`NEXT_PUBLIC_API_CACHE_TIME=300000`)
+  - Auth Token: `auth_token` (`NEXT_PUBLIC_AUTH_TOKEN_NAME`)
+
+### Database Connection
+- **Database**: MariaDB running on `192.168.0.109:3306`
+- **Schema**: `JobKoreaBillboard` 
+- **Connection Testing**: `npm run test:db`
+- **Schema Management**: SQL files in `database/` directory
 
 ### Performance Considerations
 - Bundle analyzer available for optimization insights
@@ -120,6 +141,21 @@ When modifying the codebase:
 3. Ensure all API calls go through service layer
 4. Add types to `src/types/` if used in multiple places
 5. Follow Tailwind-only styling with design tokens from `tailwind.config.js`
+
+### TypeScript Safety Requirements
+- **Type Coverage**: Maintain ≥ 95% type coverage
+- **No 'any' Usage**: Zero 'any' types allowed in production code
+- **Runtime Validation**: Use type guards for all external data (API responses, user input)
+- **Error Handling**: Use Result<T, E> pattern instead of throwing exceptions
+
+### Dark Mode Implementation Protocol
+- **CSS Foundation**: All components must have dark mode variants using `dark:` prefix
+- **State Synchronization**: Theme changes must update both Zustand store AND DOM classList
+- **Systematic Coverage**: Every component must include dark variants for:
+  - Backgrounds: `bg-white dark:bg-gray-900`
+  - Text: `text-gray-900 dark:text-gray-100`
+  - Borders: `border-gray-200 dark:border-gray-700`
+  - Shadows: `shadow-lg dark:shadow-white/5`
 
 ## Project Structure
 
@@ -188,6 +224,16 @@ public/
     └── [social-icons]      # Social media icons
 ```
 
+### Database Structure
+```
+database/
+├── DDL/                    # Table creation scripts
+├── DML/                    # Data insertion scripts
+├── DCL/                    # Permission scripts
+├── ERD/                    # Entity Relationship Diagrams
+└── schema.sql             # Complete database schema
+```
+
 ### Key Feature Areas
 1. **Blog System**: 15+ specialized categories including AI columns, tech news, Silicon Valley insights, balance-up, design-tech, hr-tech, logistics-tech, manufacturing-tech, marketing-tech, purchase-tech, and strategy-tech
 2. **Community Platform**: Discussion boards, Q&A, project reviews, study groups, and gallery
@@ -214,10 +260,30 @@ npm run dev
 Development server runs on http://localhost:3000 by default.
 
 ### Environment Configuration
-Add to `.env.local`:
+Required environment variables (create `.env.local`):
+```env
+# API Configuration  
+NEXT_PUBLIC_API_URL=http://localhost:8080
+NEXT_PUBLIC_USE_MOCK_API=false
+NEXT_PUBLIC_API_TIMEOUT=30000
+NEXT_PUBLIC_API_CACHE_TIME=300000
+NEXT_PUBLIC_AUTH_TOKEN_NAME=auth_token
+NEXT_PUBLIC_AUTH_REFRESH_TOKEN_NAME=refresh_token
+NODE_ENV=development
+
+# Database Configuration (for backend integration)
+DB_HOST=192.168.0.109
+DB_PORT=3306
+DB_USER=your_username
+DB_PASSWORD=your_password
+DB_NAME=JobKoreaBillboard
+
+# JWT Configuration (backend)
+JWT_SECRET=jobkorea-billboard-secret-key-2024
+JWT_EXPIRY=30d
 ```
-NEXT_PUBLIC_USE_MOCK_API=true
-```
+
+**Note**: All `NEXT_PUBLIC_*` variables are exposed to the browser. Server-only variables (DB credentials, JWT secrets) should not use the `NEXT_PUBLIC_` prefix.
 
 ## Key Implementation Patterns
 
@@ -324,3 +390,85 @@ git checkout HEAD -- [filename]
 - TypeScript files with 800+ errors after edit operations
 - Files affected: `athome/page.tsx`, `freelancer/page.tsx`
 - Recovery pattern: Git restore → Re-apply changes incrementally
+
+## Pre-commit Checklist
+
+Before committing code, ensure:
+1. **Build passes**: `npm run build` (zero errors)
+2. **Lint passes**: `npm run lint` (zero warnings)
+3. **Type check passes**: `npx tsc --noEmit`
+4. **Bundle size check**: `npm run analyze` (if significant changes)
+5. **Unused dependencies**: `npm run depcheck`
+6. **Dark mode implemented**: All new components have dark variants
+7. **Accessibility**: All interactive elements have proper ARIA labels
+
+## Backend Integration Guide
+
+### Spring Boot Connection
+The application integrates with a Java Spring Boot backend. Critical integration points:
+
+1. **API Proxy Configuration** (already configured in `next.config.js`):
+   ```javascript
+   // Next.js rewrites:
+   '/api/:path*' → 'http://localhost:8080/api/:path*'
+   ```
+
+2. **Authentication Flow**:
+   - **Login**: `POST /api/auth/login` → Spring Boot `/api/auth/login`
+   - **Session Check**: `GET /api/auth/session` → Spring Boot `/api/auth/session-info`
+   - **Logout**: `POST /api/auth/logout` → Spring Boot `/api/auth/logout`
+
+3. **Request/Response Formats**:
+   ```typescript
+   // Login Request
+   { username: string, password: string }
+   
+   // Login Response
+   { success: boolean, token: string, user: User, error?: string }
+   
+   // Session Response  
+   { success: boolean, data: { id, username, email, role }, message?: string }
+   ```
+
+4. **Database Schema Synchronization**:
+   - Frontend expects: `{ password, name, username, email, role }`
+   - Backend model should match these field names
+   - Use MyBatis XML mappers for field name translation if needed
+
+5. **CORS Requirements** (Spring Boot `WebConfig.java`):
+   ```java
+   @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+   ```
+
+## Component Development Standards
+
+### Mandatory Component Props
+All interactive components must include:
+```typescript
+interface ComponentProps {
+  className?: string;          // For style extension
+  'aria-label'?: string;       // Accessibility
+  disabled?: boolean;          // Disabled state
+  loading?: boolean;           // Loading state
+  // Component-specific props...
+}
+```
+
+### State Management Pattern
+Use discriminated unions for component states:
+```typescript
+type AsyncState<T> = 
+  | { status: 'idle' }
+  | { status: 'loading'; progress?: number }
+  | { status: 'success'; data: T }
+  | { status: 'error'; error: string; retryable: boolean }
+```
+
+### Performance Requirements
+- Components with >100 items: Use virtualization
+- Bundle size >50KB: Use dynamic imports
+- Memoize expensive computations (>16ms)
+- Meet Core Web Vitals targets:
+  - LCP < 2.5s
+  - FID < 100ms
+  - CLS < 0.1

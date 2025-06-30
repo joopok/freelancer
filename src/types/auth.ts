@@ -5,7 +5,7 @@ export interface LoginFormData {
 
 export interface SessionUser {
   id: string;
-  username1?: string;
+  username?: string;
   name?: string;
   email?: string;
   role?: string;
@@ -37,7 +37,7 @@ export interface Session {
 
 export interface User {
   id: string;
-  username1: string;
+  username: string;
   name?: string;
   email?: string;
   role?: string;
@@ -45,6 +45,6 @@ export interface User {
 }
 
 export interface LoginRequest {
-  username1: string;
+  username: string;
   password: string;
 } 
