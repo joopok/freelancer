@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import ThemeToggle from '@/components/common/ThemeToggle';
+import { Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { useLoading } from './Loading';
@@ -245,11 +246,21 @@ export default function Header() {
             {/* 테마 토글 */}
             <ThemeToggle />
 
+            {/* 설정 아이콘 */}
+            <motion.button
+              whileHover={{ scale: 1.1, rotate: 15 }}
+              whileTap={{ scale: 0.9 }}
+              className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-800 focus:ring-blue-500 transition-all duration-200"
+              aria-label="Settings"
+            >
+              <Settings className="h-5 w-5" />
+            </motion.button>
+
             {/* 로그인/로그아웃 */}
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-700 dark:text-gray-300">
-                  안녕하세요, {user?.name || user?.email}님
+                  안녕하세요, {user?.name || user?.username || user?.email}님
                 </span>
                 <motion.button
                   onClick={handleLogout}
@@ -302,6 +313,16 @@ export default function Header() {
             {/* 모바일 테마 토글 */}
             <ThemeToggle />
             
+            {/* 모바일 설정 아이콘 */}
+            <motion.button
+              whileHover={{ scale: 1.1, rotate: 15 }}
+              whileTap={{ scale: 0.9 }}
+              className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+              aria-label="Settings"
+            >
+              <Settings className="h-5 w-5" />
+            </motion.button>
+
             {/* 모바일 메뉴 버튼 */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
