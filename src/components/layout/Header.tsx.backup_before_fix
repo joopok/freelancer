@@ -90,29 +90,50 @@ export default function Header() {
     };
   }, [activeMenu]);
 
+  
+
   const handleLogout = async () => {
     try {
-      // 1. 즉시 로컬 상태 초기화 (로딩 상태 없이)
+      // 즉시 로딩 상태 설정
+      setLoading(true, '로그아웃 처리 시작');
+      console.log('로그아웃 프로세스 시작 -', new Date().toISOString());
+      
+      // 1. 먼저 로컬 상태 초기화 (페이지 전환 전에 수행)
+      console.log('로컬 스토어 상태 초기화');
       logout();
       
-      // 2. 로컬 스토리지에서 토큰 제거
+      // 2. 로컬 스토리지에서 자체적으로 토큰 제거 (중복 제거이지만 안전성을 위해)
       if (typeof window !== 'undefined') {
+        console.log('로컬 스토리지에서 토큰 및 인증 상태 제거 중');
         localStorage.removeItem('auth_token');
+        // Zustand 영속 상태 강제 초기화 (필요한 경우)
         localStorage.removeItem('auth-storage');
+        console.log('로컬 스토리지 정리 완료');
       }
       
-      // 3. 백엔드 로그아웃 API 호출 (비동기로 수행, 결과 대기 안함)
-      authService.logout().catch(error => {
+      // 3. 백엔드 로그아웃 API 호출 (비동기로 수행)
+      console.log('백엔드 로그아웃 API 호출 중');
+      authService.logout().then(() => {
+        console.log('백엔드 로그아웃 요청 성공');
+      }).catch(error => {
         console.warn('로그아웃 API 호출 중 오류:', error);
+        // 백엔드 오류가 있어도 클라이언트 측 로그아웃은 계속 진행
       });
       
-      // 4. 즉시 홈으로 이동 (로딩 상태 없이)
+      // 4. 홈으로 이동
+      console.log('홈 페이지로 이동 준비');
       router.push('/');
+      
+      // 5. 약간의 지연 후 로딩 상태 종료 (페이지 전환 애니메이션을 위해)
+      setTimeout(() => {
+        console.log('로그아웃 프로세스 완료 -', new Date().toISOString());
+        setLoading(false, '로그아웃 처리 완료');
+      }, 500); // 시간을 1000ms에서 500ms로 줄임
     } catch (error) {
-      console.error('로그아웃 중 오류:', error);
+      console.error('로그아웃 중 예상치 못한 오류 발생:', error);
       // 오류가 발생해도 로컬 로그아웃은 진행
       logout();
-      router.push('/');
+      setLoading(false, '로그아웃 오류 발생');
     }
   };
 
@@ -124,15 +145,7 @@ export default function Header() {
     setActiveMenu(null);
   };
 
-  // 네비게이션 함수
-  const navigateTo = (href: string) => {
-    router.push(href);
-  };
-
-  // 로그인 클릭 핸들러
-  const handleLoginClick = () => {
-    router.push('/login');
-  };
+  
 
   // 메뉴 아이템 정의 (블로그에 서브메뉴 추가)
   const menuItems: MenuItem[] = [
