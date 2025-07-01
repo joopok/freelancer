@@ -31,19 +31,31 @@ export const authService = {
       // API 응답 구조에 맞게 데이터 변환
       const responseData = response.data;
       
+      // 디버깅을 위한 로그 추가
+      console.log('AuthService - 서버 응답 데이터:', responseData);
+      console.log('AuthService - 사용자 데이터:', responseData.data);
+      console.log('AuthService - Role 값:', responseData.data?.role);
+
       // API 응답 구조 매핑
       const authResponse: AuthResponse = {
         success: responseData.success,
         error: responseData.message || null,
         token: responseData.data?.access_token || null,
         user: responseData.data ? {
-          id: responseData.data.id || responseData.data.id || '',
-          username: responseData.data.username || responseData.data.username || '',
-          name: responseData.data.name || responseData.data.username || responseData.data.username || '',
+          id: responseData.data.id || '',
+          username: responseData.data.username || '',
+          name: responseData.data.name || responseData.data.username || '',
           email: responseData.data.email || '',
-          role: responseData.data.role || ''
+          password: responseData.data.password || undefined,
+          fullName: responseData.data.fullName || responseData.data.full_name || responseData.data.name || '',
+          role: responseData.data.role || '',
+          createdAt: responseData.data.createdAt || responseData.data.created_at || '',
+          updatedAt: responseData.data.updatedAt || responseData.data.updated_at || '',
+          profileImage: responseData.data.profileImage || responseData.data.profile_image || undefined
         } : undefined
       };
+
+      console.log('AuthService - 변환된 사용자 정보:', authResponse.user);
       
       return authResponse;
     } catch (error: unknown) {
@@ -116,11 +128,16 @@ export const authService = {
         error: responseData.message || null,
         token: responseData.data?.access_token || null,
         user: responseData.data ? {
-          id: responseData.data.id || responseData.data.id || '',
-          username: responseData.data.username || responseData.data.username || '',
-          name: responseData.data.name || responseData.data.username || responseData.data.username || '',
+          id: responseData.data.id || '',
+          username: responseData.data.username || '',
+          name: responseData.data.name || responseData.data.username || '',
           email: responseData.data.email || '',
-          role: responseData.data.role || ''
+          password: responseData.data.password || undefined,
+          fullName: responseData.data.fullName || responseData.data.full_name || responseData.data.name || '',
+          role: responseData.data.role || '',
+          createdAt: responseData.data.createdAt || responseData.data.created_at || '',
+          updatedAt: responseData.data.updatedAt || responseData.data.updated_at || '',
+          profileImage: responseData.data.profileImage || responseData.data.profile_image || undefined
         } : undefined
       } as AuthResponse;
     } catch (error: unknown) {

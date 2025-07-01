@@ -1,28 +1,17 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import MultiSearchInput from '@/components/common/MultiSearchInput';
-
-// 프리랜서 타입 정의
-interface Freelancer {
-  id: string;
-  name: string;
-  experience: string;
-  type: '개인' | '팀' | '법인사업자';
-  skills: string[];
-  description: string;
-  rating: number;
-  projectCount: number;
-  viewCount: number;
-  proposalCount: number;
-  category: string; // 프리랜서 카테고리
-}
+import { freelancerService, type FreelancerSearchParams } from '@/services/freelancer';
+import type { Freelancer } from '@/types/freelancer';
 
 export default function FreelancerPage() {
   // 상태 관리
   const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
   const [localLoading, setLocalLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [totalCount, setTotalCount] = useState(0);
   const [searchTerms, setSearchTerms] = useState<string[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [selectedExperience, setSelectedExperience] = useState<string>('');
@@ -40,119 +29,52 @@ export default function FreelancerPage() {
     'React Native', 'Flutter', 'AWS', 'Docker', 'Spring',
     'Django', 'PHP', 'JavaScript', 'Vue.js', 'Angular'
   ];
-  
-const getNameByIndex = (index: number): string => {
-  const surnames = ['김', '이', '박', '정', '최'];
-  const surnameIndex = index % surnames.length;
-  return `${surnames[surnameIndex]}${'*'.repeat(2)}`;
-};
-
-  // 카테고리 할당 함수
-  const getCategoryByIndex = (index: number): string => {
-    const categories = ["개발자", "기획자", "퍼블리셔", "디자이너", "기타"];
-    return categories[index % categories.length];
-  };
 
   // 프리랜서 데이터 로드
-  useEffect(() => {
-    setLocalLoading(true);
+  const loadFreelancers = async () => {
+    try {
+      setLocalLoading(true);
+      setError(null);
 
-    const timer = setTimeout(() => {
-    // 실제 프로덕션에서는 API 요청으로 데이터를 가져오게 됩니다
-    const types: ('개인' | '팀' | '법인사업자')[] = ['개인', '팀', '법인사업자'];
-    const sampleSkills = [
-      ['React', 'TypeScript', 'Node.js'],
-      ['Java', 'Spring', 'MySQL'],
-      ['Python', 'Django', 'PostgreSQL'],
-      ['Flutter', 'Dart', 'Firebase'],
-      ['Vue.js', 'JavaScript', 'AWS'],
-      ['Angular', 'NestJS', 'MongoDB'],
-    ];
-  
-    const freelancersData = Array.from({ length: 100 }, (_, i) => ({
-      id: (i + 1).toString(),
-      name: getNameByIndex(i),
-      experience: `${i % 15}년 경력`,
-      type: types[i % types.length],
-      skills: sampleSkills[i % sampleSkills.length],
-      description: "안녕하세요. 열정적인 개발자입니다.",
-      rating: 4 + (i % 10) / 10,
-      projectCount: (i % 50) + 1,
-      viewCount: 10 + (i % 90),
-      proposalCount: 1 + (i % 19),
-        category: getCategoryByIndex(i),
-    }));
-    
-    setFreelancers(freelancersData);
+      const searchParams: FreelancerSearchParams = {
+        page: currentPage,
+        pageSize: itemsPerPage,
+        category: activeTab === "전체" ? undefined : activeTab,
+        type: selectedType || undefined,
+        experience: selectedExperience || undefined,
+        skills: selectedSkills.length > 0 ? selectedSkills : undefined,
+        search: searchTerms.length > 0 ? searchTerms.join(' ') : undefined,
+        sortBy: sortBy ? (sortBy as any) : undefined,
+        sortOrder: 'desc'
+      };
+
+      console.log('Loading freelancers with params:', searchParams);
+      const response = await freelancerService.getFreelancers(searchParams);
+      
+      if (response.success && response.data) {
+        setFreelancers(response.data.freelancers);
+        setTotalCount(response.data.totalCount);
+      } else {
+        setError(response.error || 'Failed to load freelancers');
+        setFreelancers([]);
+        setTotalCount(0);
+      }
+    } catch (err) {
+      console.error('Error loading freelancers:', err);
+      setError('프리랜서 목록을 불러오는데 실패했습니다.');
+      setFreelancers([]);
+      setTotalCount(0);
+    } finally {
       setLocalLoading(false);
-    }, 800);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, []);
-
-  // 필터링 및 정렬된 프리랜서 계산
-  const filteredFreelancers = useMemo(() => {
-    let filtered = freelancers.filter(freelancer => {
-      // 다중 검색어 필터링 - 모든 검색어가 포함되어야 함 (AND 조건)
-      const matchesSearch = searchTerms.length === 0 ||
-        searchTerms.every(term => {
-          const lowerTerm = term.toLowerCase();
-          return freelancer.name.toLowerCase().includes(lowerTerm) ||
-                 freelancer.description.toLowerCase().includes(lowerTerm) ||
-                 freelancer.skills.some(skill => skill.toLowerCase().includes(lowerTerm));
-        });
-
-      // 기술 스택 필터링
-      const matchesSkills = selectedSkills.length === 0 ||
-        selectedSkills.every(skill => freelancer.skills.includes(skill));
-
-      // 경력 필터링
-      const yearsExp = parseInt(freelancer.experience);
-      const matchesExperience = selectedExperience === '' ||
-        (selectedExperience === '3' && yearsExp <= 3) ||
-        (selectedExperience === '6' && yearsExp <= 6) ||
-        (selectedExperience === '10' && yearsExp <= 10) ||
-        (selectedExperience === '11' && yearsExp > 10);
-
-      // 개인/팀/법인 필터링
-      const matchesType = selectedType === '' || freelancer.type === selectedType;
-
-      // 탭 필터링
-      const matchesTab = activeTab === "전체" || freelancer.category === activeTab;
-
-      return matchesSearch && matchesSkills && matchesExperience && matchesType && matchesTab;
-    });
-
-    // 정렬 적용
-    if (sortBy) {
-      filtered = filtered.sort((a, b) => {
-        switch (sortBy) {
-          case 'rating':
-            return b.rating - a.rating; // 평점 높은순
-          case 'experience':
-            return parseInt(b.experience) - parseInt(a.experience); // 경력 높은순
-          case 'viewCount':
-            return b.viewCount - a.viewCount; // 조회수 많은순
-          default:
-            return 0;
-        }
-      });
     }
+  };
 
-    return filtered;
-  }, [freelancers, searchTerms, selectedSkills, selectedExperience, selectedType, activeTab, sortBy]);
-
-  // 페이지네이션된 프리랜서 계산
-  const paginatedFreelancers = useMemo(() => {
-    const indexOfLastFreelancer = currentPage * itemsPerPage;
-    const indexOfFirstFreelancer = indexOfLastFreelancer - itemsPerPage;
-    return filteredFreelancers.slice(indexOfFirstFreelancer, indexOfLastFreelancer);
-  }, [filteredFreelancers, currentPage, itemsPerPage]);
+  useEffect(() => {
+    loadFreelancers();
+  }, [currentPage, activeTab, selectedType, selectedExperience, selectedSkills, searchTerms, sortBy]);
 
   // 총 페이지 수 계산
-  const totalPages = Math.ceil(filteredFreelancers.length / itemsPerPage);
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   // 이벤트 핸들러
   const handlePageChange = (pageNumber: number) => {
@@ -349,7 +271,7 @@ const getNameByIndex = (index: number): string => {
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-3">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
+                      </svg>
                     </div>
                     <span className="text-white text-sm">프로젝트 매니저</span>
                   </div>
@@ -357,8 +279,8 @@ const getNameByIndex = (index: number): string => {
                 
                 <button className="w-full bg-white/10 backdrop-blur-md border border-white/20 text-white py-3 mt-6 rounded-xl hover:bg-white/20 transition-colors text-sm font-medium">
                   지금 가입하기
-                  </button>
-                </div>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -408,8 +330,8 @@ const getNameByIndex = (index: number): string => {
                 <svg className="w-6 h-6 text-blue-800" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                 </svg>
-          </div>
-        </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -630,7 +552,7 @@ const getNameByIndex = (index: number): string => {
                   <span className="bg-gradient-to-r from-blue-600 to-blue-700 text-transparent bg-clip-text"> 프리랜서 </span>
                   <span className="ml-2 text-sm font-normal bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full"> NEW </span>
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300"> 총 <span className="font-semibold text-blue-600 dark:text-blue-400">{filteredFreelancers.length}</span>명의 프리랜서가 있습니다</p>
+                <p className="text-gray-600 dark:text-gray-300"> 총 <span className="font-semibold text-blue-600 dark:text-blue-400">{totalCount}</span>명의 프리랜서가 있습니다</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button 
@@ -687,13 +609,27 @@ const getNameByIndex = (index: number): string => {
 
             {/* 로딩 인디케이터 */}
             {localLoading ? (
-          <div className="flex justify-center items-center h-64">
+              <div className="flex justify-center items-center h-64">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 dark:border-blue-400"></div>
-          </div>
-        ) : (
-              filteredFreelancers.length > 0 ? (
+              </div>
+            ) : error ? (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
+                <svg className="w-16 h-16 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 className="text-lg font-medium text-red-800 dark:text-red-200 mb-2">데이터 로드 실패</h3>
+                <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+                <button
+                  onClick={loadFreelancers}
+                  className="px-4 py-2 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-800/50 transition-colors"
+                >
+                  다시 시도
+                </button>
+              </div>
+            ) : (
+              freelancers.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {paginatedFreelancers.map((freelancer) => (
+                  {freelancers.map((freelancer) => (
               <div
                 key={freelancer.id}
                       className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden group relative"
@@ -703,10 +639,10 @@ const getNameByIndex = (index: number): string => {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center">
                             <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center text-blue-600 font-bold">
-                        {freelancer.name[0]}
+                        {freelancer.name?.[0] || 'F'}
                       </div>
                       <div className="ml-3">
-                              <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{freelancer.name}</h3>
+                              <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{freelancer.name || '이름 없음'}</h3>
                         <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                           <span>{freelancer.experience}</span>
                           <span className="mx-2">•</span>
@@ -787,7 +723,7 @@ const getNameByIndex = (index: number): string => {
         )}
 
           {/* 페이지네이션 */}
-            {filteredFreelancers.length > 0 && (
+            {freelancers.length > 0 && (
         <div className="flex justify-center mt-12">
                 <nav className="flex items-center space-x-3">
               <button

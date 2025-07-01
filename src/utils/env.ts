@@ -5,7 +5,7 @@
 
 // API URL 설정 (기본값 제공)
 // NEXT_PUBLIC_API_URL 환경 변수가 있으면 그 값을 사용하고, 없으면 기본값 사용
-let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+let apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 // 상대 경로인 경우(예: /api) 검증 로직을 건너뜁니다
 if (apiUrl.startsWith('http')) {
@@ -52,7 +52,7 @@ export const USE_API_CACHE = process.env.NEXT_PUBLIC_USE_API_CACHE === 'true';
 export const API_CACHE_TIME = parseInt(process.env.NEXT_PUBLIC_API_CACHE_TIME || '300000', 10); // 기본 5분 (300000ms)
 
 // API 타임아웃 설정
-export const API_TIMEOUT = parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '30000', 10); // 기본 30초로 증가
+export const API_TIMEOUT = parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '10000', 10); // 기본 10초로 줄임
 
 // API 인증 설정
 export const AUTH_TOKEN_NAME = process.env.NEXT_PUBLIC_AUTH_TOKEN_NAME || 'auth_token';

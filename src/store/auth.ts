@@ -9,8 +9,16 @@ import { jwtDecode } from 'jwt-decode';
 export const convertToSessionUser = (user: User): SessionUser => {
   return {
     id: user.id,
-    username: user.username || user.username, // 이름이 없을 경우 사용자명을 사용
-    type: user.role === 'ADMIN' ? 'company' : 'individual', // 역할에 따라 타입 결정
+    username: user.username,
+    name: user.name,
+    email: user.email,
+    password: user.password,
+    fullName: user.fullName,
+    role: user.role,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+    type: user.role === 'ADMIN' || user.role === 'admin' ? 'company' : 
+          user.role === 'client' ? 'company' : 'individual', // 역할에 따라 타입 결정
   };
 };
 
@@ -176,7 +184,14 @@ export const useAuthStore = create<AuthState>()(
           // 토큰에서 사용자 정보 추출
           const sessionUser: SessionUser = {
             id: payload?.id || payload?.sub || '',
+            username: payload?.username || '',
             name: payload?.name || '',
+            email: payload?.email || '',
+            password: payload?.password || undefined,
+            fullName: payload?.fullName || payload?.full_name || payload?.name || '',
+            role: payload?.role || '',
+            createdAt: payload?.createdAt || payload?.created_at || '',
+            updatedAt: payload?.updatedAt || payload?.updated_at || '',
             type: payload?.type || 'individual',
           };
           

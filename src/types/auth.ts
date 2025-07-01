@@ -8,7 +8,11 @@ export interface SessionUser {
   username?: string;
   name?: string;
   email?: string;
+  password?: string;
+  fullName?: string;
   role?: string;
+  createdAt?: string;
+  updatedAt?: string;
   type: 'individual' | 'company';
 }
 
@@ -40,7 +44,11 @@ export interface User {
   username: string;
   name?: string;
   email?: string;
+  password?: string;
+  fullName?: string;
   role?: string;
+  createdAt?: string;
+  updatedAt?: string;
   profileImage?: string;
 }
 

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import { useThemeStore } from '@/store/theme';
-import { Settings, User, BookOpen, LogOut, Bell, Shield, HelpCircle, Moon, Sun, Building2, UserCheck } from 'lucide-react';
+import { Settings, User, BookOpen, LogOut, Bell, Shield, HelpCircle, Moon, Sun, Building2, UserCheck, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { useLoading } from './Loading';
@@ -37,6 +37,16 @@ export default function Header() {
   };
   
   const [userType, setUserType] = useState<'individual' | 'company'>(getUserType());
+  
+  // 디버깅을 위한 콘솔 로그
+  useEffect(() => {
+    console.log('Header - 사용자 정보:', {
+      isLoggedIn,
+      user,
+      role: user?.role,
+      userType
+    });
+  }, [isLoggedIn, user, userType]);
   
   // 사용자 로그인 상태 변경 시 토글 상태 업데이트
   useEffect(() => {
@@ -267,51 +277,60 @@ export default function Header() {
 
             {/* 개인/기업 토글 & 설정 아이콘 */}
             <div className="flex items-center space-x-2">
-              {/* 개인/기업 토글 */}
-              <div className={`flex items-center rounded-lg p-1 ${
-                isLoggedIn ? 'bg-gray-100 dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-800'
-              }`}>
-                <button
-                  onClick={() => {
-                    if (!isLoggedIn || (isLoggedIn && user?.role !== 'client')) {
-                      setUserType('individual');
-                    }
-                  }}
-                  disabled={!isLoggedIn || (isLoggedIn && user?.role === 'client')}
-                  className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ${
-                    !isLoggedIn
-                      ? 'text-gray-400 dark:text-gray-500 cursor-default'
-                      : userType === 'individual'
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : user?.role === 'client'
-                      ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 cursor-pointer'
-                  }`}
-                >
-                  <UserCheck className="h-4 w-4 mr-1" />
-                  개인
-                </button>
-                <button
-                  onClick={() => {
-                    if (!isLoggedIn || (isLoggedIn && user?.role !== 'freelancer')) {
-                      setUserType('company');
-                    }
-                  }}
-                  disabled={!isLoggedIn || (isLoggedIn && user?.role === 'freelancer')}
-                  className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ${
-                    !isLoggedIn
-                      ? 'text-gray-400 dark:text-gray-500 cursor-default'
-                      : userType === 'company'
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : user?.role === 'freelancer'
-                      ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 cursor-pointer'
-                  }`}
-                >
-                  <Building2 className="h-4 w-4 mr-1" />
-                  기업
-                </button>
-              </div>
+              {/* 개인/기업/관리자 토글 */}
+              {isLoggedIn && user?.role && (user.role.toLowerCase() === 'admin' || user.role === 'ADMIN') ? (
+                <div className="flex items-center bg-purple-100 dark:bg-purple-800 rounded-lg p-1">
+                  <div className="flex items-center px-3 py-1 rounded-md text-sm font-medium bg-purple-500 text-white shadow-sm">
+                    <Crown className="h-4 w-4 mr-1" />
+                    관리자
+                  </div>
+                </div>
+              ) : (
+                <div className={`flex items-center rounded-lg p-1 ${
+                  isLoggedIn ? 'bg-gray-100 dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-800'
+                }`}>
+                  <button
+                    onClick={() => {
+                      if (!isLoggedIn || (isLoggedIn && user?.role !== 'client')) {
+                        setUserType('individual');
+                      }
+                    }}
+                    disabled={!isLoggedIn || (isLoggedIn && user?.role === 'client')}
+                    className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ${
+                      !isLoggedIn
+                        ? 'text-gray-400 dark:text-gray-500 cursor-default'
+                        : userType === 'individual'
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : user?.role === 'client'
+                        ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 cursor-pointer'
+                    }`}
+                  >
+                    <UserCheck className="h-4 w-4 mr-1" />
+                    개인
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!isLoggedIn || (isLoggedIn && user?.role !== 'freelancer')) {
+                        setUserType('company');
+                      }
+                    }}
+                    disabled={!isLoggedIn || (isLoggedIn && user?.role === 'freelancer')}
+                    className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ${
+                      !isLoggedIn
+                        ? 'text-gray-400 dark:text-gray-500 cursor-default'
+                        : userType === 'company'
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : user?.role === 'freelancer'
+                        ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 cursor-pointer'
+                    }`}
+                  >
+                    <Building2 className="h-4 w-4 mr-1" />
+                    기업
+                  </button>
+                </div>
+              )}
               
               {/* 설정 아이콘 */}
               <div className="relative" ref={settingsRef}>
@@ -546,50 +565,60 @@ export default function Header() {
             <div className="border-t border-gray-200 pt-4 pb-3 space-y-3">
               {/* 모바일 개인/기업 토글 */}
               <div className="px-3">
-                <div className={`flex items-center rounded-lg p-1 ${
-                  isLoggedIn ? 'bg-gray-100 dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-800'
-                }`}>
-                  <button
-                    onClick={() => {
-                      if (!isLoggedIn || (isLoggedIn && user?.role !== 'client')) {
-                        setUserType('individual');
-                      }
-                    }}
-                    disabled={!isLoggedIn || (isLoggedIn && user?.role === 'client')}
-                    className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 flex-1 justify-center ${
-                      !isLoggedIn
-                        ? 'text-gray-400 dark:text-gray-500 cursor-default'
-                        : userType === 'individual'
-                        ? 'bg-blue-500 text-white shadow-sm'
-                        : user?.role === 'client'
-                        ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                        : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 cursor-pointer'
-                    }`}
-                  >
-                    <UserCheck className="h-4 w-4 mr-1" />
-                    개인
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (!isLoggedIn || (isLoggedIn && user?.role !== 'freelancer')) {
-                        setUserType('company');
-                      }
-                    }}
-                    disabled={!isLoggedIn || (isLoggedIn && user?.role === 'freelancer')}
-                    className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 flex-1 justify-center ${
-                      !isLoggedIn
-                        ? 'text-gray-400 dark:text-gray-500 cursor-default'
-                        : userType === 'company'
-                        ? 'bg-blue-500 text-white shadow-sm'
-                        : user?.role === 'freelancer'
-                        ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                        : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 cursor-pointer'
-                    }`}
-                  >
-                    <Building2 className="h-4 w-4 mr-1" />
-                    기업
-                  </button>
-                </div>
+                {/* 모바일 개인/기업/관리자 토글 */}
+                {isLoggedIn && user?.role && (user.role.toLowerCase() === 'admin' || user.role === 'ADMIN') ? (
+                  <div className="flex items-center bg-purple-100 dark:bg-purple-800 rounded-lg p-1">
+                    <div className="flex items-center px-3 py-1 rounded-md text-sm font-medium bg-purple-500 text-white shadow-sm flex-1 justify-center">
+                      <Crown className="h-4 w-4 mr-1" />
+                      관리자
+                    </div>
+                  </div>
+                ) : (
+                  <div className={`flex items-center rounded-lg p-1 ${
+                    isLoggedIn ? 'bg-gray-100 dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-800'
+                  }`}>
+                    <button
+                      onClick={() => {
+                        if (!isLoggedIn || (isLoggedIn && user?.role !== 'client')) {
+                          setUserType('individual');
+                        }
+                      }}
+                      disabled={!isLoggedIn || (isLoggedIn && user?.role === 'client')}
+                      className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 flex-1 justify-center ${
+                        !isLoggedIn
+                          ? 'text-gray-400 dark:text-gray-500 cursor-default'
+                          : userType === 'individual'
+                          ? 'bg-blue-500 text-white shadow-sm'
+                          : user?.role === 'client'
+                          ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                          : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 cursor-pointer'
+                      }`}
+                    >
+                      <UserCheck className="h-4 w-4 mr-1" />
+                      개인
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (!isLoggedIn || (isLoggedIn && user?.role !== 'freelancer')) {
+                          setUserType('company');
+                        }
+                      }}
+                      disabled={!isLoggedIn || (isLoggedIn && user?.role === 'freelancer')}
+                      className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 flex-1 justify-center ${
+                        !isLoggedIn
+                          ? 'text-gray-400 dark:text-gray-500 cursor-default'
+                          : userType === 'company'
+                          ? 'bg-blue-500 text-white shadow-sm'
+                          : user?.role === 'freelancer'
+                          ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                          : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 cursor-pointer'
+                      }`}
+                    >
+                      <Building2 className="h-4 w-4 mr-1" />
+                      기업
+                    </button>
+                  </div>
+                )}
               </div>
               
               {isLoggedIn ? (

@@ -125,6 +125,14 @@ export default function LoginPage() {
         throw apiError;
       }
 
+      // 디버깅을 위한 로그
+      console.log('Login - API 응답:', {
+        success: response.success,
+        token: response.token ? '토큰 있음' : '토큰 없음',
+        user: response.user,
+        error: response.error
+      });
+
       if (response.success) {
         // 성공 응답이 왔지만 데이터 체크
         if (response.token) {
@@ -140,6 +148,7 @@ export default function LoginPage() {
           
           if (response.user) {
             // 사용자 정보도 있으면 상태에 저장
+            console.log('Login - 사용자 정보 설정:', response.user);
             setUser(response.user);
             setTimeout(() => router.push("/"), 500);
           } else {
@@ -147,6 +156,7 @@ export default function LoginPage() {
           }
         } else if (response.user) {
           // 토큰은 없지만 사용자 정보는 있는 경우 (부분 로그인)
+          console.log('Login - 토큰 없이 사용자 정보만:', response.user);
           setUser(response.user);
           setError("로그인이 부분적으로 완료되었습니다. 일부 기능이 제한될 수 있습니다.");
           setTimeout(() => router.push("/"), 1500);
