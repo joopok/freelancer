@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
     console.log('📋 쿼리 파라미터:', queryParams);
 
     // 데이터 조회
-    const freelancers = await executeQuery<Freelancer[]>(query, queryParams);
+    const freelancers = await executeQuery<Freelancer>(query, queryParams);
 
     // 전체 개수 조회 (페이지네이션용)
     let countQuery = `SELECT COUNT(*) as total FROM freelancers WHERE 1=1`;
@@ -109,23 +109,29 @@ export async function GET(request: NextRequest) {
       countParams.push(parseFloat(maxRate));
     }
 
-    const countResult = await executeQuery<[{total: number}]>(countQuery, countParams);
+    const countResult = await executeQuery<{ total: number }>(countQuery, countParams);
     const total = countResult[0]?.total || 0;
 
     // 스킬 문자열을 배열로 변환
-    const processedFreelancers = freelancers.map(freelancer => ({
+    const processedFreelancers = freelancers.map((freelancer: Freelancer) => ({
       ...freelancer,
-      skills: typeof freelancer.skills === 'string' 
-        ? freelancer.skills.split(',').map(skill => skill.trim()).filter(Boolean)
-        : freelancer.skills
+      skills: typeof (freelancer.skills as any) === 'string' 
+        ? (freelancer.skills as any).split(',').map((skill: string) => skill.trim()).filter(Boolean)
+        : [] // skills가 문자열이 아니면 빈 배열로 처리
     }));
 
     console.log(`✅ ${processedFreelancers.length}명의 프리랜서 조회 완료 (전체: ${total}명)`);
 
     return NextResponse.json({
       success: true,
-      data: processedFreelancers,
-      pagination: {
+      data: {
+        freelancers: processedFreelancers,
+        totalCount: total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+        limit,
+      },
+      pagination: { // 기존 pagination 정보도 유지 (혹은 data 객체와 통합)
         page,
         limit,
         total,

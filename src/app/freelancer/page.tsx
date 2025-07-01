@@ -666,7 +666,7 @@ export default function FreelancerPage() {
                 
                   <div className="mb-4">
                           <div className="flex flex-wrap gap-2 mb-4">
-                  {freelancer.skills.map((skill) => (
+                  {Array.isArray(freelancer.skills) && freelancer.skills.map((skill) => (
                     <span
                       key={skill}
                                 className="bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800"
