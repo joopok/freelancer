@@ -4,8 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
-import ThemeToggle from '@/components/common/ThemeToggle';
-import { Settings } from 'lucide-react';
+import { useThemeStore } from '@/store/theme';
+import { Settings, User, BookOpen, LogOut, Bell, Shield, HelpCircle, Moon, Sun, Building2, UserCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { useLoading } from './Loading';
@@ -23,13 +23,29 @@ interface MenuItem {
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { user, isLoggedIn, setUser, logout } = useAuthStore();
   const { setLoading } = useLoading();
+  const { isDarkMode, toggleTheme } = useThemeStore();
+  
+  // 사용자 역할에 따른 토글 상태 초기화
+  const getUserType = () => {
+    if (!isLoggedIn || !user?.role) return 'individual';
+    return user.role === 'freelancer' ? 'individual' : 'company';
+  };
+  
+  const [userType, setUserType] = useState<'individual' | 'company'>(getUserType());
+  
+  // 사용자 로그인 상태 변경 시 토글 상태 업데이트
+  useEffect(() => {
+    setUserType(getUserType());
+  }, [isLoggedIn, user?.role]);
   
   // 서브메뉴 참조 생성
   const subMenuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const settingsRef = useRef<HTMLDivElement | null>(null);
 
   // 세션 체크 로직 개선
   useEffect(() => {
@@ -83,13 +99,18 @@ export default function Header() {
       )) {
         setActiveMenu(null);
       }
+      
+      // 설정 메뉴 외부 클릭 감지
+      if (isSettingsOpen && settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+        setIsSettingsOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [activeMenu]);
+  }, [activeMenu, isSettingsOpen]);
 
   const handleLogout = async () => {
     try {
@@ -241,78 +262,222 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* 데스크톱 테마토글, 로그인/회원가입 */}
+          {/* 데스크톱 설정 */}
           <div className="hidden lg:flex items-center space-x-4">
-            {/* 테마 토글 */}
-            <ThemeToggle />
 
-            {/* 설정 아이콘 */}
-            <motion.button
-              whileHover={{ scale: 1.1, rotate: 15 }}
-              whileTap={{ scale: 0.9 }}
-              className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-800 focus:ring-blue-500 transition-all duration-200"
-              aria-label="Settings"
-            >
-              <Settings className="h-5 w-5" />
-            </motion.button>
-
-            {/* 로그인/로그아웃 */}
-            {isLoggedIn ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  안녕하세요, {user?.name || user?.username || user?.email}님
-                </span>
-                <motion.button
-                  onClick={handleLogout}
-                  className="relative px-6 py-2 text-base font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-lg overflow-hidden group shadow-lg hover:shadow-xl transition-all duration-300"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
+            {/* 개인/기업 토글 & 설정 아이콘 */}
+            <div className="flex items-center space-x-2">
+              {/* 개인/기업 토글 */}
+              <div className={`flex items-center rounded-lg p-1 ${
+                isLoggedIn ? 'bg-gray-100 dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-800'
+              }`}>
+                <button
+                  onClick={() => {
+                    if (!isLoggedIn || (isLoggedIn && user?.role !== 'client')) {
+                      setUserType('individual');
+                    }
+                  }}
+                  disabled={!isLoggedIn || (isLoggedIn && user?.role === 'client')}
+                  className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ${
+                    !isLoggedIn
+                      ? 'text-gray-400 dark:text-gray-500 cursor-default'
+                      : userType === 'individual'
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : user?.role === 'client'
+                      ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 cursor-pointer'
+                  }`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <span className="relative z-10">로그아웃</span>
-                </motion.button>
+                  <UserCheck className="h-4 w-4 mr-1" />
+                  개인
+                </button>
+                <button
+                  onClick={() => {
+                    if (!isLoggedIn || (isLoggedIn && user?.role !== 'freelancer')) {
+                      setUserType('company');
+                    }
+                  }}
+                  disabled={!isLoggedIn || (isLoggedIn && user?.role === 'freelancer')}
+                  className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ${
+                    !isLoggedIn
+                      ? 'text-gray-400 dark:text-gray-500 cursor-default'
+                      : userType === 'company'
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : user?.role === 'freelancer'
+                      ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 cursor-pointer'
+                  }`}
+                >
+                  <Building2 className="h-4 w-4 mr-1" />
+                  기업
+                </button>
               </div>
-            ) : (
-              <div className="flex items-center space-x-4">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Link
-                    href="/login"
-                    className="relative text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 hover:from-purple-600 hover:to-pink-600 dark:hover:from-purple-400 dark:hover:to-pink-400 transition-all duration-300"
+              
+              {/* 설정 아이콘 */}
+              <div className="relative" ref={settingsRef}>
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 15 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-800 focus:ring-blue-500 transition-all duration-200"
+                aria-label="Settings"
+              >
+                <Settings className="h-5 w-5" />
+              </motion.button>
+              
+              {/* 설정 드롭다운 메뉴 */}
+              <AnimatePresence>
+                {isSettingsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl z-50 border border-gray-200 dark:border-gray-700 overflow-hidden"
                   >
-                    로그인
-                  </Link>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05, rotate: 1 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Link
-                    href="/register"
-                    className="relative px-6 py-2 text-base font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-lg overflow-hidden group shadow-lg hover:shadow-xl transition-all duration-300"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      router.push('/register');
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <span className="relative z-10">회원가입</span>
-                  </Link>
-                </motion.div>
+                    {isLoggedIn && (
+                      <>
+                        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            안녕하세요, {user?.name || user?.username || '사용자'}님
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {user?.email || ''}
+                          </p>
+                        </div>
+                        
+                        <div className="py-2">
+                          <button
+                            onClick={() => {
+                              toggleTheme();
+                            }}
+                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          >
+                            {isDarkMode ? (
+                              <>
+                                <Sun className="h-4 w-4 mr-3" />
+                                라이트 모드
+                              </>
+                            ) : (
+                              <>
+                                <Moon className="h-4 w-4 mr-3" />
+                                다크 모드
+                              </>
+                            )}
+                          </button>
+                          
+                          <Link
+                            href="/profile"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            onClick={() => setIsSettingsOpen(false)}
+                          >
+                            <User className="h-4 w-4 mr-3" />
+                            프로필 관리
+                          </Link>
+                          
+                          <Link
+                            href="/myprojects"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            onClick={() => setIsSettingsOpen(false)}
+                          >
+                            <BookOpen className="h-4 w-4 mr-3" />
+                            내 프로젝트
+                          </Link>
+                          
+                          <Link
+                            href="/notifications"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            onClick={() => setIsSettingsOpen(false)}
+                          >
+                            <Bell className="h-4 w-4 mr-3" />
+                            알림 설정
+                          </Link>
+                          
+                          <Link
+                            href="/security"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            onClick={() => setIsSettingsOpen(false)}
+                          >
+                            <Shield className="h-4 w-4 mr-3" />
+                            보안 설정
+                          </Link>
+                        </div>
+                        
+                        <div className="border-t border-gray-200 dark:border-gray-700 py-2">
+                          <Link
+                            href="/help"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            onClick={() => setIsSettingsOpen(false)}
+                          >
+                            <HelpCircle className="h-4 w-4 mr-3" />
+                            도움말
+                          </Link>
+                          
+                          <button
+                            onClick={() => {
+                              setIsSettingsOpen(false);
+                              handleLogout();
+                            }}
+                            className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          >
+                            <LogOut className="h-4 w-4 mr-3" />
+                            로그아웃
+                          </button>
+                        </div>
+                      </>
+                    )}
+                    
+                    {!isLoggedIn && (
+                      <div className="py-2">
+                        <button
+                          onClick={() => {
+                            toggleTheme();
+                          }}
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          {isDarkMode ? (
+                            <>
+                              <Sun className="h-4 w-4 mr-3" />
+                              라이트 모드
+                            </>
+                          ) : (
+                            <>
+                              <Moon className="h-4 w-4 mr-3" />
+                              다크 모드
+                            </>
+                          )}
+                        </button>
+                        
+                        <Link
+                          href="/login"
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          onClick={() => setIsSettingsOpen(false)}
+                        >
+                          <User className="h-4 w-4 mr-3" />
+                          로그인
+                        </Link>
+                        
+                        <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2">
+                          <Link
+                            href="/help"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            onClick={() => setIsSettingsOpen(false)}
+                          >
+                            <HelpCircle className="h-4 w-4 mr-3" />
+                            도움말
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
               </div>
-            )}
+            </div>
           </div>
 
-          {/* 모바일 테마토글 & 메뉴 버튼 */}
+          {/* 모바일 메뉴 버튼 */}
           <div className="lg:hidden flex items-center space-x-2">
-            {/* 모바일 테마 토글 */}
-            <ThemeToggle />
-            
             {/* 모바일 설정 아이콘 */}
             <motion.button
               whileHover={{ scale: 1.1, rotate: 15 }}
@@ -377,48 +542,64 @@ export default function Header() {
               </div>
             ))}
             
-            {/* 모바일 로그인/회원가입 */}
-            {isLoggedIn ? (
-              <div className="border-t border-gray-200 pt-4 pb-3">
-                <div className="px-3 text-sm text-gray-700 mb-2">
-                  안녕하세요, {user?.name || user?.email}님
+            {/* 모바일 개인/기업 토글 및 로그인/회원가입 */}
+            <div className="border-t border-gray-200 pt-4 pb-3 space-y-3">
+              {/* 모바일 개인/기업 토글 */}
+              <div className="px-3">
+                <div className={`flex items-center rounded-lg p-1 ${
+                  isLoggedIn ? 'bg-gray-100 dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-800'
+                }`}>
+                  <button
+                    onClick={() => {
+                      if (!isLoggedIn || (isLoggedIn && user?.role !== 'client')) {
+                        setUserType('individual');
+                      }
+                    }}
+                    disabled={!isLoggedIn || (isLoggedIn && user?.role === 'client')}
+                    className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 flex-1 justify-center ${
+                      !isLoggedIn
+                        ? 'text-gray-400 dark:text-gray-500 cursor-default'
+                        : userType === 'individual'
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : user?.role === 'client'
+                        ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 cursor-pointer'
+                    }`}
+                  >
+                    <UserCheck className="h-4 w-4 mr-1" />
+                    개인
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!isLoggedIn || (isLoggedIn && user?.role !== 'freelancer')) {
+                        setUserType('company');
+                      }
+                    }}
+                    disabled={!isLoggedIn || (isLoggedIn && user?.role === 'freelancer')}
+                    className={`flex items-center px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 flex-1 justify-center ${
+                      !isLoggedIn
+                        ? 'text-gray-400 dark:text-gray-500 cursor-default'
+                        : userType === 'company'
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : user?.role === 'freelancer'
+                        ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-blue-500 cursor-pointer'
+                    }`}
+                  >
+                    <Building2 className="h-4 w-4 mr-1" />
+                    기업
+                  </button>
                 </div>
-                <button
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    handleLogout();
-                  }}
-                  className="block w-full text-left px-3 py-2 text-base font-medium text-red-600 hover:text-red-800 hover:bg-gray-50"
-                >
-                  로그아웃
-                </button>
               </div>
-            ) : (
-              <div className="border-t border-gray-200 pt-4 pb-3 space-y-1">
-                <Link
-                  href="/login"
-                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setIsMenuOpen(false);
-                    handleLoginClick();
-                  }}
-                >
-                  로그인
-                </Link>
-                <Link
-                  href="/register"
-                  className="block px-3 py-2 text-base font-bold text-white bg-orange-500 hover:bg-orange-600 mt-2 rounded"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setIsMenuOpen(false);
-                    navigateTo('/register');
-                  }}
-                >
-                  회원가입
-                </Link>
-              </div>
-            )}
+              
+              {isLoggedIn ? (
+                <div>
+                  <div className="px-3 text-sm text-gray-700 mb-2">
+                    안녕하세요, {user?.name || user?.email}님
+                  </div>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
