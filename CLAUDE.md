@@ -48,7 +48,15 @@ npm run db:schema    # Apply database schema (requires MariaDB running on 192.16
 
 # TypeScript Checks
 npx tsc --noEmit     # Type checking without emitting files
+npx type-coverage --detail --strict --at-least 95  # Check type coverage
 ```
+
+## Current Active Features
+Based on recent development activity:
+- **Skills API**: New `/api/freelancers/skills/` endpoint for dynamic skill loading
+- **Multi-Search**: Advanced search with tag-based filtering across freelancer pages
+- **Dynamic Routing**: Active development on freelancer detail pages and skill management
+- **Database Integration**: MariaDB connection with comprehensive schema management
 
 ## High-Level Architecture
 
@@ -93,12 +101,17 @@ LoadingProvider (global loading states)
 3. **Tailwind CSS Only**: Style exclusively with Tailwind utilities and `clsx` for conditionals
 4. **Centralize API Calls**: All external API calls must go through `src/services/`
 5. **Type Everything**: Shared types go in `src/types/`, use TypeScript strictly
+6. **Result Types**: Use Result<T, E> pattern for all error-prone operations
+7. **Runtime Validation**: Validate all external data with Zod schemas or type guards
+8. **Named Exports**: Prefer named exports over default exports for components
 
 ### MUST NOT DO:
 1. **Never abuse 'use client'**: Don't add it unless you need useState, useEffect, or event handlers
 2. **No custom CSS files**: Never create .css or .module.css files
 3. **No direct API calls in components**: Always use the service layer
 4. **No relative imports**: Never use `../../../` paths
+5. **No 'any' types**: Zero tolerance for 'any' in production code
+6. **No uncaught exceptions**: All errors must be handled gracefully
 
 ## Important Context
 
@@ -110,6 +123,8 @@ LoadingProvider (global loading states)
 - **Theme System**: Dark/light mode with system detection and localStorage persistence
 - **Architecture**: Cleaned up unused components, consolidated file structure
 - **Dynamic Routing**: Added for detailed pages (athome/[id], freelancer/[id], project/[id])
+- **Active Development**: Currently working on freelancer page improvements and skills API integration
+- **Skills Management**: New `/api/freelancers/skills/` endpoint for dynamic skill loading from database
 
 ### API Configuration
 - **Backend Integration**: Spring Boot server at `http://localhost:8080`
@@ -143,10 +158,13 @@ When modifying the codebase:
 5. Follow Tailwind-only styling with design tokens from `tailwind.config.js`
 
 ### TypeScript Safety Requirements
-- **Type Coverage**: Maintain ≥ 95% type coverage
+- **Type Coverage**: Maintain ≥ 95% type coverage via `npx type-coverage --detail --strict --at-least 95`
 - **No 'any' Usage**: Zero 'any' types allowed in production code
-- **Runtime Validation**: Use type guards for all external data (API responses, user input)
+- **Runtime Validation**: Use Zod schemas and type guards for all external data (API responses, user input)
 - **Error Handling**: Use Result<T, E> pattern instead of throwing exceptions
+- **Branded Types**: Use branded types for domain-specific identifiers (UserId, EmailAddress, etc.)
+- **Discriminated Unions**: Use for state management (AsyncState<T> pattern)
+- **Comprehensive Validation**: All API boundaries must have runtime type validation
 
 ### Dark Mode Implementation Protocol
 - **CSS Foundation**: All components must have dark mode variants using `dark:` prefix
@@ -397,10 +415,13 @@ Before committing code, ensure:
 1. **Build passes**: `npm run build` (zero errors)
 2. **Lint passes**: `npm run lint` (zero warnings)
 3. **Type check passes**: `npx tsc --noEmit`
-4. **Bundle size check**: `npm run analyze` (if significant changes)
-5. **Unused dependencies**: `npm run depcheck`
-6. **Dark mode implemented**: All new components have dark variants
-7. **Accessibility**: All interactive elements have proper ARIA labels
+4. **Type coverage**: `npx type-coverage --detail --strict --at-least 95`
+5. **Bundle size check**: `npm run analyze` (if significant changes)
+6. **Unused dependencies**: `npm run depcheck`
+7. **Dark mode implemented**: All new components have dark variants
+8. **Accessibility**: All interactive elements have proper ARIA labels
+9. **Runtime validation**: All API endpoints have proper validation
+10. **Error handling**: All async operations use Result<T, E> pattern
 
 ## Backend Integration Guide
 
@@ -451,6 +472,35 @@ interface ComponentProps {
   disabled?: boolean;          // Disabled state
   loading?: boolean;           // Loading state
   // Component-specific props...
+}
+```
+
+### Advanced Type Patterns (Required)
+Based on project cursor rules, implement these patterns:
+
+```typescript
+// Result Type - MANDATORY for error handling
+type Result<T, E = string> = 
+  | { success: true; data: T }
+  | { success: false; error: E };
+
+// Branded Types - MANDATORY for domain identifiers
+type Brand<T, B> = T & { __brand: B };
+type UserId = Brand<string, 'UserId'>;
+type FreelancerId = Brand<string, 'FreelancerId'>;
+
+// Discriminated Unions - MANDATORY for state management
+type AsyncState<T> = 
+  | { status: 'idle' }
+  | { status: 'loading'; progress?: number }
+  | { status: 'success'; data: T; timestamp: number }
+  | { status: 'error'; error: string; retryable: boolean };
+
+// Validation Schema Pattern
+interface ValidationSchema<T> {
+  validate: (data: unknown) => data is T;
+  transform?: (data: T) => T;
+  sanitize?: (data: T) => T;
 }
 ```
 

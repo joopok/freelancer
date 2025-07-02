@@ -28,6 +28,8 @@ export default function CommunityBoardPage() {
   const [scrollY, setScrollY] = useState(0);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const loader = useRef(null);
   
   // 필터 옵션
@@ -37,6 +39,13 @@ export default function CommunityBoardPage() {
     { id: 'latest', name: '최신글' },
     { id: 'notice', name: '공지사항' }
   ];
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
   
   // 스크롤 위치 추적
   useEffect(() => {

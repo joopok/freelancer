@@ -29,24 +29,22 @@ export default function FreelancerPage() {
   const loadSkills = async () => {
     try {
       setSkillsLoading(true);
-      const response = await fetch('/api/freelancers/skills');
+      const result = await freelancerService.getSkills();
       
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.data) {
-          setAllSkills(data.data);
-        } else {
-          console.warn('Skills API returned no data, using default skills');
-          // 기본 스킬 목록 사용
-          setAllSkills([
-            'React', 'Node.js', 'Python', 'Java', 'TypeScript',
-            'React Native', 'Flutter', 'AWS', 'Docker', 'Spring',
-            'Django', 'PHP', 'JavaScript', 'Vue.js', 'Angular',
-            'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'GraphQL'
-          ]);
+      if (result.success && result.data) {
+        setAllSkills(result.data);
+        if (result.error) {
+          console.warn(result.error);
         }
       } else {
-        throw new Error('Failed to fetch skills');
+        console.warn('Skills API returned no data, using default skills');
+        // 기본 스킬 목록 사용 (이미 서비스에서 처리됨)
+        setAllSkills([
+          'React', 'Node.js', 'Python', 'Java', 'TypeScript',
+          'React Native', 'Flutter', 'AWS', 'Docker', 'Spring',
+          'Django', 'PHP', 'JavaScript', 'Vue.js', 'Angular',
+          'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'GraphQL'
+        ]);
       }
     } catch (error) {
       console.error('Error loading skills:', error);

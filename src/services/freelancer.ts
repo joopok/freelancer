@@ -148,6 +148,32 @@ class FreelancerService {
       };
     }
   }
+
+  /**
+   * Get available skills for freelancers
+   */
+  async getSkills(): Promise<{ success: boolean; data?: string[]; error?: string }> {
+    try {
+      const response = await api.get('/freelancers/skills');
+      return response.data;
+    } catch (error: any) {
+      console.error('Failed to fetch skills:', error);
+      
+      // 에러 시 기본 스킬 목록 반환
+      const defaultSkills = [
+        'React', 'Node.js', 'Python', 'Java', 'TypeScript',
+        'React Native', 'Flutter', 'AWS', 'Docker', 'Spring',
+        'Django', 'PHP', 'JavaScript', 'Vue.js', 'Angular',
+        'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'GraphQL'
+      ];
+      
+      return {
+        success: true,
+        data: defaultSkills,
+        error: 'API 연결 실패로 기본 스킬 목록을 사용합니다.'
+      };
+    }
+  }
 }
 
 export const freelancerService = new FreelancerService();
