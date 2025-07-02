@@ -977,7 +977,7 @@ export default function RemoteProjectPage() {
                         </div>
 
                                                 <Link
-                          href={`/project/${project.id}`}
+                          href={`/athome/${project.id}`}
                           className="block w-full text-center bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/50 dark:to-indigo-900/50 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-800/50 dark:hover:to-indigo-800/50 text-blue-700 dark:text-blue-300 font-medium py-3 rounded-xl transition-all mt-4 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-indigo-600 dark:group-hover:from-indigo-500 dark:group-hover:to-purple-500 group-hover:text-white border border-blue-100 dark:border-blue-700 group-hover:border-transparent"
                         >
                       상세보기

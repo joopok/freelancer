@@ -13,7 +13,8 @@
     "find-unused-files": "npx next-unused",
     "test:db": "node test-database.js",
     "db:schema": "mysql -u root -p ~Asy10131227 < database/schema.sql",
-    "db:update": "node scripts/update-database.js"
+    "db:update": "node scripts/update-database.js",
+    "db:categories": "node scripts/apply-categories-table.js"
   },
   "dependencies": {
     "axios": "^1.8.3",
@@ -25,6 +26,7 @@
     "lucide-react": "^0.525.0",
     "mariadb": "^3.4.2",
     "mariadb-mcp-server": "^0.0.1",
+    "mysql2": "^3.14.1",
     "next": "^14.1.0",
     "next-bundle-analyzer": "^0.6.8",
     "react": "^18.2.0",

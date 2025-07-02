@@ -189,32 +189,61 @@ export default function Home() {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn); // 로그인 상태 관리
   const router = useRouter();
 
-  // 스크롤 애니메이션 훅들
-  const statsAnimation = useScrollAnimation();
-  const categoriesAnimation = useStaggeredAnimation(categories.length, 150);
-  const projectsAnimation = useStaggeredAnimation(featuredProjects.length, 200);
-  const freelancersAnimation = useStaggeredAnimation(featuredFreelancers.length, 100);
+  // 스크롤 애니메이션 훅들 - 성능 최적화를 위해 주석 처리
+  // const statsAnimation = useScrollAnimation();
+  // const categoriesAnimation = useStaggeredAnimation(categories.length, 150);
+  // const projectsAnimation = useStaggeredAnimation(featuredProjects.length, 200);
+  // const freelancersAnimation = useStaggeredAnimation(featuredFreelancers.length, 100);
 
-  // 스크롤 위치에 따라 애니메이션 활성화
+  // 스크롤 위치에 따라 애니메이션 활성화 - throttle 적용
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      if (scrollY > 100) {
-        setIsVisible(true);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+          if (scrollY > 100 && !isVisible) {
+            setIsVisible(true);
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isVisible]);
 
-  // 캐러셀 자동 회전
+  // 캐러셀 자동 회전 - 부드러운 전환 (페이지가 보이는 동안만)
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveCardIndex((prevIndex) => (prevIndex + 1) % heroProjects.length);
-    }, 5000);
+    let interval: NodeJS.Timeout | null = null;
     
-    return () => clearInterval(interval);
+    // 페이지가 보이는 상태일 때만 자동 회전
+    if (!document.hidden) {
+      interval = setInterval(() => {
+        setActiveCardIndex((prevIndex) => (prevIndex + 1) % heroProjects.length);
+      }, 4000); // 4초마다 전환
+    }
+    
+    // 페이지 가시성 변경 감지
+    const handleVisibilityChange = () => {
+      if (document.hidden && interval) {
+        clearInterval(interval);
+        interval = null;
+      } else if (!document.hidden && !interval) {
+        interval = setInterval(() => {
+          setActiveCardIndex((prevIndex) => (prevIndex + 1) % heroProjects.length);
+        }, 4000);
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      if (interval) clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
   
   // 이전 카드로 이동
@@ -273,18 +302,19 @@ export default function Home() {
               backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
               backgroundSize: '60px 60px'
             }}></div>
-            {/* 빛나는 원형 요소 */}
-            <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-purple-500 opacity-20 blur-3xl"></div>
-            <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-500 opacity-20 blur-3xl"></div>
+            {/* 빛나는 원형 요소 - 애니메이션 추가 */}
+            {/* 정적인 배경 효과로 변경 - CPU 사용량 감소 */}
+            <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-purple-500 opacity-25 blur-3xl" />
+            <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-500 opacity-25 blur-3xl" />
           </div>
           
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-30 relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-30 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
               <motion.div
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="relative z-10"
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="relative z-10 lg:col-span-2"
               >
                 {/* 서브헤딩 */}
                 <div className="flex items-center mb-5">
@@ -349,15 +379,15 @@ export default function Home() {
               </motion.div>
               
               <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="hidden lg:block relative"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+                className="hidden lg:block relative lg:col-span-3"
               >
                 {/* 3D 회전 캐러셀 */}
-                <div className="relative h-[550px] w-full perspective-1000">
+                <div className="relative h-[500px] w-full">
                   {/* 5개의 카드 */}
-                  <div className="relative h-[450px] w-full">
+                  <div className="relative h-[400px] w-full">
                     {heroProjects.map((project, index) => {
                       // 각 카드의 위치와 회전을 계산
                       const isActive = index === activeCardIndex;
@@ -376,33 +406,33 @@ export default function Home() {
                       let opacity = 0;
                       
                       if (isActive) {
-                        position = 'top-0 right-[calc(50%-225px)]';
-                        transform = 'rotateY(0deg) scale(1)';
+                        position = 'top-5 left-[20%]';
+                        transform = 'translateX(-50%) rotateY(0deg) scale(1)';
                         zIndex = 50;
                         opacity = 1;
                       } else if (isPrev) {
-                        position = 'top-10 right-[calc(75%-225px)]';
-                        transform = 'rotateY(25deg) scale(0.9)';
+                        position = 'top-9 left-[-5%]';
+                        transform = 'translateX(-50%) rotateY(20deg) scale(0.85)';
                         zIndex = 40;
-                        opacity = 0.7;
+                        opacity = 0.8;
                       } else if (isNext) {
-                        position = 'top-10 right-[calc(25%-225px)]';
-                        transform = 'rotateY(-25deg) scale(0.9)';
+                        position = 'top-9 left-[45%]';
+                        transform = 'translateX(-50%) rotateY(-20deg) scale(0.85)';
                         zIndex = 40;
-                        opacity = 0.7;
+                        opacity = 0.8;
                       } else if (isFarPrev) {
-                        position = 'top-20 right-[calc(90%-225px)]';
-                        transform = 'rotateY(45deg) scale(0.8)';
+                        position = 'top-[3.25rem] left-[-25%]';
+                        transform = 'translateX(-50%) rotateY(30deg) scale(0.75)';
                         zIndex = 30;
-                        opacity = 0.4;
+                        opacity = 0.5;
                       } else if (isFarNext) {
-                        position = 'top-20 right-[calc(10%-225px)]';
-                        transform = 'rotateY(-45deg) scale(0.8)';
+                        position = 'top-[3.25rem] left-[65%]';
+                        transform = 'translateX(-50%) rotateY(-30deg) scale(0.75)';
                         zIndex = 30;
-                        opacity = 0.4;
+                        opacity = 0.5;
                       } else {
-                        position = 'top-0 right-[calc(50%-225px)]';
-                        transform = 'rotateY(0deg) scale(0.7)';
+                        position = 'top-[4.25rem] left-[20%]';
+                        transform = 'translateX(-50%) rotateY(0deg) scale(0.6)';
                         zIndex = 10;
                         opacity = 0;
                       }
@@ -416,17 +446,17 @@ export default function Home() {
                             opacity: opacity,
                           }}
                           transition={{
-                            duration: 0.7,
+                            duration: 0.6,
                             ease: "easeInOut"
                           }}
                           onClick={() => navigateTo(`/project/${project.id}`)}
-                          className={`absolute ${position} w-[450px] h-[450px] rounded-3xl shadow-2xl overflow-hidden preserve-3d cursor-pointer group`}
+                          className={`absolute ${position} w-[400px] h-[380px] rounded-2xl shadow-2xl overflow-hidden cursor-pointer group`}
                           style={{
                             transform: transform,
-                            transformStyle: 'preserve-3d',
                             zIndex: zIndex,
                             opacity: opacity,
-                            transition: 'all 0.7s ease-in-out',
+                            transition: 'all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)',
+                            transformOrigin: 'center center',
                           }}
                         >
                           <div className={`absolute inset-0 bg-gradient-to-br ${project.bgColor} p-8 flex flex-col justify-end group-hover:brightness-110 transition-all duration-300`}>
@@ -476,7 +506,7 @@ export default function Home() {
               </div>
 
                   {/* 캐러셀 컨트롤 */}
-                  <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-4 mt-8">
+                  <div className="absolute bottom-0 left-[-5%] right-[5%] flex justify-center gap-4 mt-8">
                     <button 
                       onClick={prevCard}
                       className="bg-white/20 backdrop-blur-md p-3 rounded-full text-white hover:bg-white/30 transition-colors focus:outline-none"
@@ -513,49 +543,25 @@ export default function Home() {
                     </button>
                   </div>
                   
-                  {/* 부유하는 3D 오브젝트들 - 클릭 가능 */}
+                  {/* 부유하는 3D 오브젝트들 - 위치 조정 */}
+                  {/* 부유하는 요소들 - 호버 시에만 애니메이션 */}
                   <motion.div
-                    animate={{ 
-                      y: [0, -15, 0],
-                    }}
-                    transition={{ 
-                      repeat: Infinity, 
-                      duration: 4,
-                      ease: "easeInOut" 
-                    }}
-                    whileHover={{ scale: 1.1, rotate: 15 }}
+                    whileHover={{ scale: 1.1, rotate: 20, y: -5 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => navigateTo('/freelancer')}
-                    className="absolute top-[15%] left-[10%] w-16 h-16 rounded-lg bg-gradient-to-r from-pink-500 to-purple-500 rotate-12 shadow-lg z-10 cursor-pointer hover:shadow-xl transition-all duration-300"
+                    className="absolute top-[5%] left-[0%] w-16 h-16 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 shadow-lg z-10 cursor-pointer hover:shadow-xl transition-all duration-300 transform rotate-12"
                   />
                   <motion.div
-                    animate={{ 
-                      y: [0, 15, 0],
-                    }}
-                    transition={{ 
-                      repeat: Infinity, 
-                      duration: 5,
-                      ease: "easeInOut",
-                      delay: 1
-                    }}
-                    whileHover={{ scale: 1.1 }}
+                    whileHover={{ scale: 1.15, y: -5 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => navigateTo('/project')}
-                    className="absolute bottom-[25%] right-[15%] w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg z-10 cursor-pointer hover:shadow-xl transition-all duration-300"
+                    className="absolute bottom-[15%] right-[5%] w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg z-10 cursor-pointer hover:shadow-xl transition-all duration-300"
                   />
                   <motion.div
-                    animate={{ 
-                      rotate: [0, 360],
-                    }}
-                    transition={{ 
-                      repeat: Infinity, 
-                      duration: 20,
-                      ease: "linear"
-                    }}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => navigateTo('/categories')}
-                    className="absolute top-[40%] left-[22%] w-20 h-20 rounded-full border-4 border-dashed border-pink-400/30 z-10 cursor-pointer hover:border-pink-300/50 transition-all duration-300"
+                    className="absolute top-[50%] left-[8%] w-20 h-20 rounded-full border-4 border-dashed border-purple-400/30 z-10 cursor-pointer hover:border-purple-400/50 transition-all duration-300"
                       />
                     </div>
               </motion.div>
@@ -714,84 +720,49 @@ export default function Home() {
         </section>
 
         {/* 통계 섹션 */}
-        <motion.section 
-          ref={statsAnimation.elementRef}
-          className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 py-16 relative overflow-hidden transition-colors duration-300"
-          initial={{ opacity: 0, y: 50 }}
-          animate={statsAnimation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-          transition={{ duration: 0.8 }}
-        >
-          {/* 배경 애니메이션 요소들 */}
+        <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 py-16 relative overflow-hidden transition-colors duration-300">
+          {/* 배경 정적 요소들 */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full animate-float"></div>
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-br from-indigo-400/20 to-pink-400/20 rounded-full animate-float" style={{ animationDelay: '2s' }}></div>
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full"></div>
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-br from-indigo-400/20 to-pink-400/20 rounded-full"></div>
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <motion.div 
-              className="text-center mb-16"
-              initial={{ opacity: 0, y: 30 }}
-              animate={statsAnimation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
+            <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
                 숫자로 보는 잡코리아 빌보드
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                 우리는 신뢰할 수 있는 플랫폼을 통해 최고의 매칭을 제공합니다
               </p>
-            </motion.div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {stats.map((stat, index) => (
-                <motion.div
+                <div
                   key={stat.id}
-                  initial={{ opacity: 0, y: 50, scale: 0.8 }}
-                  animate={statsAnimation.isVisible ? { 
-                    opacity: 1, 
-                    y: 0, 
-                    scale: 1,
-                    transition: { delay: index * 0.1 + 0.3 }
-                  } : { opacity: 0, y: 50, scale: 0.8 }}
-                  whileHover={{ 
-                    scale: 1.05, 
-                    rotateY: 5,
-                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
-                  }}
-                  whileTap={{ scale: 0.95 }}
                   onClick={() => {
                     if (stat.id === 1) navigateTo('/freelancer');
                     else if (stat.id === 2) navigateTo('/project');
                     else if (stat.id === 3) navigateTo('/project');
                     else if (stat.id === 4) navigateTo('/jobs');
                   }}
-                  className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-white/20 group cursor-pointer"
+                  className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/20 group cursor-pointer hover:scale-105"
                 >
                   <div className="flex flex-col items-center text-center">
-                    <motion.div 
-                      className="mb-6 text-4xl group-hover:scale-110 transition-transform duration-300"
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.5 }}
-                    >
+                    <div className="mb-6 text-4xl group-hover:scale-110 transition-transform duration-300">
                       {stat.icon}
-                    </motion.div>
-                    <motion.p 
-                      className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2"
-                      initial={{ scale: 0 }}
-                      animate={statsAnimation.isVisible ? { 
-                        scale: 1,
-                        transition: { delay: index * 0.1 + 0.5, type: "spring", stiffness: 200 }
-                      } : { scale: 0 }}
-                    >
+                    </div>
+                    <p className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
                       {stat.value}
-                    </motion.p>
+                    </p>
                     <p className="text-gray-600 font-medium">{stat.label}</p>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
-        </motion.section>
+        </section>
 
         {/* 추천 프로젝트 섹션 */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 dark:bg-gray-900 transition-colors duration-300">
