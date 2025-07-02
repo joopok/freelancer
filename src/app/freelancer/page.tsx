@@ -19,16 +19,48 @@ export default function FreelancerPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState("전체");
   const [sortBy, setSortBy] = useState<string>(''); // 정렬 기준 상태
+  const [allSkills, setAllSkills] = useState<string[]>([]); // API에서 로드할 기술 스택
+  const [skillsLoading, setSkillsLoading] = useState(false);
 
   const itemsPerPage = 10;
   const tabs = ["전체","PM/PL","PMO", "개발자", "기획자", "퍼블리셔", "디자이너", "기타"];
-  
-  // 모든 기술 스택 목록
-  const allSkills = [
-    'React', 'Node.js', 'Python', 'Java', 'TypeScript',
-    'React Native', 'Flutter', 'AWS', 'Docker', 'Spring',
-    'Django', 'PHP', 'JavaScript', 'Vue.js', 'Angular'
-  ];
+
+  // 기술 스택 목록 로드
+  const loadSkills = async () => {
+    try {
+      setSkillsLoading(true);
+      const response = await fetch('/api/freelancers/skills');
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setAllSkills(data.data);
+        } else {
+          console.warn('Skills API returned no data, using default skills');
+          // 기본 스킬 목록 사용
+          setAllSkills([
+            'React', 'Node.js', 'Python', 'Java', 'TypeScript',
+            'React Native', 'Flutter', 'AWS', 'Docker', 'Spring',
+            'Django', 'PHP', 'JavaScript', 'Vue.js', 'Angular',
+            'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'GraphQL'
+          ]);
+        }
+      } else {
+        throw new Error('Failed to fetch skills');
+      }
+    } catch (error) {
+      console.error('Error loading skills:', error);
+      // 에러 시 기본 스킬 목록 사용
+      setAllSkills([
+        'React', 'Node.js', 'Python', 'Java', 'TypeScript',
+        'React Native', 'Flutter', 'AWS', 'Docker', 'Spring',
+        'Django', 'PHP', 'JavaScript', 'Vue.js', 'Angular',
+        'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'GraphQL'
+      ]);
+    } finally {
+      setSkillsLoading(false);
+    }
+  };
 
   // 프리랜서 데이터 로드
   const loadFreelancers = async () => {
@@ -52,6 +84,10 @@ export default function FreelancerPage() {
       const response = await freelancerService.getFreelancers(searchParams);
       
       if (response.success && response.data) {
+        console.log('Received freelancer data:', response.data.freelancers);
+        if (response.data.freelancers && response.data.freelancers.length > 0) {
+          console.log('Sample freelancer:', response.data.freelancers[0]);
+        }
         setFreelancers(response.data.freelancers);
         setTotalCount(response.data.totalCount);
       } else {
@@ -68,6 +104,11 @@ export default function FreelancerPage() {
       setLocalLoading(false);
     }
   };
+
+  // 컴포넌트 마운트 시 스킬 목록 로드
+  useEffect(() => {
+    loadSkills();
+  }, []);
 
   useEffect(() => {
     loadFreelancers();
@@ -448,20 +489,33 @@ export default function FreelancerPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                 </svg>
                 기술 스택
+                {skillsLoading && (
+                  <div className="ml-2 w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                )}
               </h4>
               <div className="flex flex-wrap gap-2">
-                {allSkills.map(skill => (
-                  <button
-                    key={skill}
-                    onClick={() => toggleSkillFilter(skill)}
-                    className={`text-xs px-3 py-1.5 rounded-full transition-all ${selectedSkills.includes(skill)
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-sm'
-                      : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200'
-                    }`}
-                  >
-                    {skill}
-                  </button>
-                ))}
+                {skillsLoading ? (
+                  <div className="w-full text-center text-gray-500 dark:text-gray-400 text-sm py-4">
+                    기술 스택 로딩 중...
+                  </div>
+                ) : allSkills.length > 0 ? (
+                  allSkills.map(skill => (
+                    <button
+                      key={skill}
+                      onClick={() => toggleSkillFilter(skill)}
+                      className={`text-xs px-3 py-1.5 rounded-full transition-all ${selectedSkills.includes(skill)
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-sm'
+                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200'
+                      }`}
+                    >
+                      {skill}
+                    </button>
+                  ))
+                ) : (
+                  <div className="w-full text-center text-gray-500 dark:text-gray-400 text-sm py-4">
+                    기술 스택을 불러올 수 없습니다.
+                  </div>
+                )}
               </div>
             </div>
 

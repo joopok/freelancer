@@ -4,7 +4,7 @@ import type { Freelancer } from '@/types/freelancer';
 export interface FreelancerListResponse {
   success: boolean;
   data?: {
-    freelancers: any[];
+    freelancers: Freelancer[];
     totalCount: number;
     totalPages: number;
     currentPage: number;
@@ -61,6 +61,26 @@ class FreelancerService {
       
       const response = await api.get<FreelancerListResponse>(url);
       console.log('Freelancer API raw response:', response);
+      
+      // Transform backend data to match frontend expectations
+      if (response.data.success && response.data.data && response.data.data.freelancers) {
+        response.data.data.freelancers = response.data.data.freelancers.map((freelancer: any) => ({
+          ...freelancer,
+          name: freelancer.userFullName || freelancer.name || '이름 없음',
+          experience: freelancer.experienceYears ? `${freelancer.experienceYears}년` : freelancer.experience || '경력 미입력',
+          skills: typeof freelancer.skills === 'string' ? 
+            (() => {
+              try {
+                return JSON.parse(freelancer.skills);
+              } catch (e) {
+                console.warn('Failed to parse skills JSON:', freelancer.skills);
+                return [];
+              }
+            })() : 
+            (Array.isArray(freelancer.skills) ? freelancer.skills : [])
+        }));
+        console.log('Transformed freelancer data:', response.data.data.freelancers[0]);
+      }
       
       return response.data;
     } catch (error: any) {
