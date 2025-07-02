@@ -1,29 +1,10 @@
-# CLAUDE.md
+# GEMINI.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to the Gemini CLI when working with code in this repository.
 
 ## Project Overview
 
-**JobKorea Billboard** is a modern freelancer matching platform that connects freelancers with projects. Built as a Single Page Application (SPA) using Next.js, React, and TypeScript, it provides an intuitive interface with various interactive elements for optimal user experience.
-
-### Core Features
-- **Interactive UI**: Modern design with animations for enhanced user experience
-- **3D Rotating Carousel**: Visually effective display of featured projects in hero section
-- **Glassmorphism Effects**: UI elements reflecting latest design trends
-- **Authentication System**: User login and registration functionality
-- **Search Functionality**: Project and freelancer search capabilities
-- **Category Navigation**: Browse projects by various fields
-- **Loading Animations**: Smooth loading states during page transitions
-- **Internationalization**: Full Korean/English support with dynamic routing
-
-### Technology Stack
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **UI/Styling**: Tailwind CSS
-- **State Management**: Zustand + React Hooks
-- **Animations**: Framer Motion
-- **Authentication**: JWT-based with localStorage persistence
-- **Internationalization**: next-intl
+**JobKorea Billboard** is a modern freelancer matching platform built as a Single Page Application (SPA) using Next.js, React, and TypeScript. It features an interactive UI, authentication, search, multi-category blog, community platform, and dark/light theme support.
 
 ## Essential Commands
 
@@ -35,148 +16,95 @@ npm run start        # Start production server
 npm run lint         # Run ESLint checks
 
 # Code Quality & Analysis
-npm run analyze      # Analyze bundle size (ANALYZE=true next build)
+npm run analyze      # Analyze bundle size
 npm run depcheck     # Check for unused dependencies
-npm run find-unused-files  # Find unused files in the project
+npm run find-unused-files  # Find unused files
 
 # Testing
 # Note: No test framework is currently configured. Consider adding Jest/Vitest for unit tests.
+
+# Database Operations
+npm run test:db      # Test database connection to MariaDB
+npm run db:schema    # Apply database schema
+
+# TypeScript Checks
+npx tsc --noEmit     # Type checking without emitting files
+npx type-coverage --detail --strict --at-least 95  # Check type coverage
 ```
 
 ## High-Level Architecture
 
-### Authentication System
-The authentication flow involves multiple interconnected layers:
-
-1. **JWT Token Management** (`src/utils/jwt.ts`): Custom JWT implementation with manual Base64URL decoding fallback
-2. **Session Layer** (`src/utils/session.ts`): Server-side in-memory session storage with UUID-based IDs and 30-day expiry
-3. **State Management** (`src/store/auth.ts`): Zustand store with localStorage persistence for client-side auth state
-4. **API Service** (`src/services/auth.ts`): Centralized authentication API calls with comprehensive error handling
-5. **Middleware Protection**: Session validation in Next.js middleware
-
-The system handles the "auto-logout bug" through multi-step validation and state synchronization between client and server.
-
-### Internationalization (i18n)
-Uses `next-intl` with locale-based routing:
-
-- **Dynamic Routing**: All routes under `src/app/[locale]/` with automatic locale detection
-- **Supported Languages**: Korean (ko - default) and English (en)
-- **Translation Loading**: Server-side message loading from `/messages/{locale}.json`
-- **Middleware**: Automatic locale prefix injection for unlocalized routes
-- **Component Usage**: `useTranslations` hook with namespaced translations
-
-### State & Provider Architecture
-Provider hierarchy in `src/app/[locale]/layout.tsx`:
-```
-NextIntlClientProvider (i18n context)
-  └── LoadingProvider (global loading states)
-      └── StateProvider (app-wide state management)
-```
-
-### API Layer Pattern
-- All API calls go through `src/services/` layer
-- Axios instance with request/response interceptors for token management
-- Protected routes pattern with automatic token attachment
-- Centralized error handling with user-friendly messages
+- **Authentication System**: JWT-based with localStorage persistence, Zustand store, API service, and Next.js middleware for session validation.
+- **Theme Management System**: Dark/light theme with Zustand store, animated toggle, localStorage persistence, and Tailwind integration.
+- **API Layer Pattern**: All API calls go through `src/services/` using Axios with interceptors for token management and centralized error handling.
 
 ## Critical Development Rules
 
 ### MUST DO:
-1. **Server Components First**: Default to RSC. Only use 'use client' when browser APIs are required
-2. **Use Path Aliases**: Always import with `@/*` (e.g., `import { Button } from '@/components/ui/Button'`)
-3. **Tailwind CSS Only**: Style exclusively with Tailwind utilities and `clsx` for conditionals
-4. **Centralize API Calls**: All external API calls must go through `src/services/`
-5. **Type Everything**: Shared types go in `src/types/`, use TypeScript strictly
+1. **Server Components First**: Default to RSC. Only use 'use client' when browser APIs are required.
+2. **Use Path Aliases**: Always import with `@/*` (e.g., `import { Button } from '@/components/ui/Button'`).
+3. **Tailwind CSS Only**: Style exclusively with Tailwind utilities and `clsx` for conditionals.
+4. **Centralize API Calls**: All external API calls must go through `src/services/`.
+5. **Type Everything**: Shared types go in `src/types/`, use TypeScript strictly.
+6. **Result Types**: Use `Result<T, E>` pattern for all error-prone operations.
+7. **Runtime Validation**: Validate all external data with Zod schemas or type guards.
+8. **Named Exports**: Prefer named exports over default exports for components.
 
 ### MUST NOT DO:
-1. **Never abuse 'use client'**: Don't add it unless you need useState, useEffect, or event handlers
-2. **No custom CSS files**: Never create .css or .module.css files
-3. **No direct API calls in components**: Always use the service layer
-4. **No relative imports**: Never use `../../../` paths
+1. **Never abuse 'use client'**: Don't add it unless you need useState, useEffect, or event handlers.
+2. **No custom CSS files**: Never create .css or .module.css files.
+3. **No direct API calls in components**: Always use the service layer.
+4. **No relative imports**: Never use `../../../` paths.
+5. **No 'any' types**: Zero tolerance for 'any' in production code.
+6. **No uncaught exceptions**: All errors must be handled gracefully.
 
 ## Important Context
 
 ### Recent Project State
-- Major refactoring: Many pages deleted and moved to `[locale]` structure
-- Authentication stabilized after fixing JWT processing and auto-logout bugs
-- i18n infrastructure ready but only Header component has translations
-- Main page simplified after removing complex home components
+- Complete JWT-based authentication with Spring Boot backend integration.
+- Dark/light mode with system detection and localStorage persistence.
+- Dynamic routing for detailed pages (athome/[id], freelancer/[id], project/[id]).
+- Active development on freelancer page improvements and skills API integration.
 
 ### API Configuration
-- Backend API proxy: `http://localhost:8080`
-- CORS handled via Next.js rewrites in `next.config.js`
-- JWT tokens stored in localStorage with 30-day expiry
+- Backend Integration: Spring Boot server at `http://localhost:8080`.
+- Proxy Configuration: Next.js rewrites `/api/*` → `http://localhost:8080/api/*`.
+- Authentication: JWT tokens stored in localStorage with 30-day expiry.
 
-### Performance Considerations
-- Bundle analyzer available for optimization insights
-- Webpack configured for vendor chunk splitting
-- Image optimization enabled with Next.js Image component
-- Memory-efficient session management with 1000 session limit
+### Database Connection
+- Database: MariaDB running on `192.168.0.109:3306`.
+- Schema: `JobKoreaBillboard`.
 
 ### Development Workflow
 When modifying the codebase:
-1. Check if component should be client or server (default to server)
-2. Use existing patterns from similar components
-3. Ensure all API calls go through service layer
-4. Add types to `src/types/` if used in multiple places
-5. Follow Tailwind-only styling with design tokens from `tailwind.config.js`
+1. Check if component should be client or server (default to server).
+2. Use existing patterns from similar components.
+3. Ensure all API calls go through service layer.
+4. Add types to `src/types/` if used in multiple places.
+5. Follow Tailwind-only styling with design tokens from `tailwind.config.js`.
+
+### TypeScript Safety Requirements
+- Type Coverage: Maintain ≥ 95% type coverage.
+- No 'any' Usage: Zero 'any' types allowed.
+- Runtime Validation: Use Zod schemas and type guards for all external data.
+- Error Handling: Use `Result<T, E>` pattern.
+
+### Dark Mode Implementation Protocol
+- CSS Foundation: All components must have dark mode variants using `dark:` prefix.
+- State Synchronization: Theme changes must update both Zustand store AND DOM classList.
 
 ## Project Structure
 
-### Core Application Structure
 ```
 src/
-├── app/
-│   ├── [locale]/              # Internationalized routes
-│   │   ├── about/            # About page
-│   │   ├── blog/             # Blog section with multiple categories
-│   │   │   ├── posts/        # Individual blog posts
-│   │   │   └── [categories]  # Various blog categories
-│   │   ├── community/        # Community features (board, QnA, gallery)
-│   │   ├── jobs/             # Job listings
-│   │   ├── freelancer/       # Freelancer section
-│   │   ├── login/            # Authentication pages
-│   │   └── register/
-│   ├── api/                  # API routes
-│   │   └── auth/            # Authentication endpoints
-│   └── styles/              # Global styles (minimal use)
-├── components/
-│   ├── auth/                # Authentication components
-│   ├── blog/                # Blog-specific components
-│   ├── common/              # Shared components
-│   ├── job/                 # Job-related components
-│   ├── layout/              # Layout components (Header, Footer, etc.)
-│   └── providers/           # Context providers
-├── services/                # API service layer
-│   ├── auth.ts             # Authentication services
-│   └── techNewsService.ts  # Tech news API calls
-├── store/                   # State management
-│   └── auth.ts             # Authentication store (Zustand)
-├── hooks/                   # Custom React hooks
-├── types/                   # TypeScript type definitions
-├── utils/                   # Utility functions
-│   ├── jwt.ts              # JWT token handling
-│   ├── session.ts          # Session management
-│   └── api.ts              # API client configuration
-└── i18n.ts                 # Internationalization config
+├── app/                 # Internationalized routes
+├── components/          # Reusable UI components
+├── services/            # API service layer
+├── store/               # State management (Zustand)
+├── hooks/               # Custom React hooks
+├── types/               # TypeScript type definitions
+└── utils/               # Utility functions
 ```
-
-### Public Assets
-```
-public/
-└── images/
-    ├── blog/               # Blog-related images
-    │   └── categories/     # Category thumbnails
-    ├── icons/              # SVG icons
-    └── [social-icons]      # Social media icons
-```
-
-### Key Feature Areas
-1. **Blog System**: Multi-category blog with posts, AI columns, tech news, and Silicon Valley insights
-2. **Community Platform**: Discussion boards, Q&A, project reviews, study groups
-3. **Career Services**: Job listings, freelancer marketplace, resume builder
-4. **Authentication**: Complete auth flow with JWT tokens and session management
-5. **Internationalization**: Full Korean/English support with dynamic routing
 
 ## Installation and Setup
 
@@ -194,61 +122,35 @@ npm install
 npm run dev
 ```
 
-Development server runs on http://localhost:3000 by default.
-
-### Environment Configuration
-Add to `.env.local`:
-```
-NEXT_PUBLIC_USE_MOCK_API=true
-```
-
 ## Key Implementation Patterns
 
-### Authentication State Management
-```typescript
-// Simple authentication state check using localStorage
-useEffect(() => {
-  const token = localStorage.getItem('auth_token');
-  setIsLoggedIn(!!token);
-}, []);
-```
+- **Authentication State Management**: Simple check using localStorage.
+- **3D Rotating Carousel**: Logic for calculating position and rotation.
+- **Page Navigation with Loading States**: Setting loading state during navigation.
 
-### 3D Rotating Carousel Implementation
-```typescript
-// Calculate position and rotation for each card in 3D space
-const isActive = index === activeCardIndex;
-const isPrev = index === (activeCardIndex === 0 ? heroProjects.length - 1 : activeCardIndex - 1);
-// ... position and transform calculation logic ...
-```
+## Pre-commit Checklist
 
-### Page Navigation with Loading States
-```typescript
-const navigateTo = (href: string) => {
-  setLoading(true);
-  window.location.href = href;
-  
-  setTimeout(() => {
-    setLoading(false);
-  }, 1000);
-};
-```
+Before committing code, ensure:
+1. **Build passes**: `npm run build` (zero errors)
+2. **Lint passes**: `npm run lint` (zero warnings)
+3. **Type check passes**: `npx tsc --noEmit`
+4. **Type coverage**: `npx type-coverage --detail --strict --at-least 95`
+5. **Dark mode implemented**: All new components have dark variants.
+6. **Accessibility**: All interactive elements have proper ARIA labels.
+7. **Runtime validation**: All API endpoints have proper validation.
+8. **Error handling**: All async operations use `Result<T, E>` pattern.
 
-## Recent Feature Updates
+## Backend Integration Guide
 
-### Hero Section Improvements
-- Implemented 3D rotating carousel with 5 project cards
-- Added rotation effects, depth perception, and gradient effects
-- Automatic rotation with user control functionality
+- **Spring Boot Connection**: Integrates with a Java Spring Boot backend.
+- **API Proxy Configuration**: Next.js rewrites `/api/*` to `http://localhost:8080/api/*`.
+- **Authentication Flow**: Standard login, session check, and logout endpoints.
+- **Database Schema Synchronization**: Frontend and backend field mappings should match.
+- **CORS Requirements**: Spring Boot `WebConfig.java` should allow `http://localhost:3000`.
 
-### Category Section Enhancements
-- Modern design with interactive elements
-- Added glassmorphism effects
-- 3D effects and animations on hover
-- Category-specific icons
-- "View All" button functionality
+## Component Development Standards
 
-### Authentication & Page Transitions
-- Conditional rendering based on login status
-- LocalStorage-based simple authentication state management
-- Loading state management during page transitions
-- Loading component activation on menu link clicks
+- **Mandatory Component Props**: All interactive components must include `className`, `aria-label`, `disabled`, and `loading` props.
+- **Advanced Type Patterns (Required)**: Use `Result<T, E>` for error handling, branded types for domain identifiers, and discriminated unions for state management.
+- **State Management Pattern**: Use discriminated unions for component states.
+- **Performance Requirements**: Use virtualization for large lists, dynamic imports for large bundles, and memoize expensive computations.

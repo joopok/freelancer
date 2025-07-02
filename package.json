@@ -12,7 +12,8 @@
     "depcheck": "depcheck",
     "find-unused-files": "npx next-unused",
     "test:db": "node test-database.js",
-    "db:schema": "mysql -u root -p ~Asy10131227 < database/schema.sql"
+    "db:schema": "mysql -u root -p ~Asy10131227 < database/schema.sql",
+    "db:update": "node scripts/update-database.js"
   },
   "dependencies": {
     "axios": "^1.8.3",

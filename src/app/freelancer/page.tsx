@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import MultiSearchInput from '@/components/common/MultiSearchInput';
 import { freelancerService, type FreelancerSearchParams } from '@/services/freelancer';
@@ -10,6 +10,8 @@ export default function FreelancerPage() {
   // 상태 관리
   const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
   const [localLoading, setLocalLoading] = useState(true);
+  const [isFiltering, setIsFiltering] = useState(false); // 필터링 중 상태 (깜박임 방지)
+  const [isLoadingMore, setIsLoadingMore] = useState(false); // 더보기 로딩 상태
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [searchTerms, setSearchTerms] = useState<string[]>([]);
@@ -21,8 +23,28 @@ export default function FreelancerPage() {
   const [sortBy, setSortBy] = useState<string>(''); // 정렬 기준 상태
   const [allSkills, setAllSkills] = useState<string[]>([]); // API에서 로드할 기술 스택
   const [skillsLoading, setSkillsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true); // 더 로드할 데이터가 있는지
+  
+  // 디바운싱용 ref
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastRequestRef = useRef<number>(0);
+  const apiCallCountRef = useRef<number>(0);
 
   const itemsPerPage = 10;
+  
+  // 추가 디버깅 로그
+  useEffect(() => {
+    console.log(`📋 Frontend pagination: currentPage=${currentPage}, itemsPerPage=${itemsPerPage}, totalCount=${totalCount}, totalPages=${Math.ceil(totalCount / itemsPerPage)}`);
+  }, [currentPage, totalCount]);
+  
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, []);
   const tabs = ["전체","PM/PL","PMO", "개발자", "기획자", "퍼블리셔", "디자이너", "기타"];
 
   // 기술 스택 목록 로드
@@ -61,13 +83,51 @@ export default function FreelancerPage() {
   };
 
   // 프리랜서 데이터 로드
-  const loadFreelancers = async () => {
+  const loadFreelancers = useCallback(async (isInitialLoad = false, isLoadMore = false) => {
+    const requestId = Date.now();
+    lastRequestRef.current = requestId;
+    
     try {
-      setLocalLoading(true);
+      // 로딩 상태 설정
+      if (isInitialLoad) {
+        console.log('🚀 Initial load - setting page to 1');
+        setLocalLoading(true);
+        setCurrentPage(1);
+      } else if (isLoadMore) {
+        console.log('➕ Load more - incrementing page');
+        setIsLoadingMore(true);
+      } else {
+        console.log('🔄 Filter change - resetting to page 1');
+        setIsFiltering(true);
+        setCurrentPage(1); // 필터 변경 시 첫 페이지로 리셋
+        // 로딩 타임아웃 설정 (300ms 후 로딩 표시)
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current);
+        }
+        loadingTimeoutRef.current = setTimeout(() => {
+          if (lastRequestRef.current === requestId) {
+            setLocalLoading(true);
+          }
+        }, 300);
+      }
+      
       setError(null);
 
+      // 페이지 계산을 명확하게
+      let pageToLoad = 1;
+      if (isLoadMore) {
+        pageToLoad = currentPage + 1;
+      } else if (isInitialLoad) {
+        pageToLoad = 1;
+      } else {
+        // 필터 변경
+        pageToLoad = 1;
+      }
+      
+      console.log(`🔢 Page calculation: currentPage=${currentPage}, pageToLoad=${pageToLoad}, isLoadMore=${isLoadMore}, isInitialLoad=${isInitialLoad}`);
+      
       const searchParams: FreelancerSearchParams = {
-        page: currentPage,
+        page: pageToLoad,
         pageSize: itemsPerPage,
         category: activeTab === "전체" ? undefined : activeTab,
         type: selectedType || undefined,
@@ -79,15 +139,48 @@ export default function FreelancerPage() {
       };
 
       console.log('Loading freelancers with params:', searchParams);
+      console.log(`🔄 Requesting page ${pageToLoad} with ${itemsPerPage} items per page (isLoadMore: ${isLoadMore})`);
       const response = await freelancerService.getFreelancers(searchParams);
       
+      // 최신 요청이 아니면 무시 (race condition 방지)
+      if (lastRequestRef.current !== requestId) {
+        console.log('⏭️ Ignoring outdated request');
+        return;
+      }
+      
       if (response.success && response.data) {
-        console.log('Received freelancer data:', response.data.freelancers);
+        console.log(`📈 Received ${response.data.freelancers?.length || 0} freelancers out of ${response.data.totalCount} total`);
+        console.log('API Response:', {
+          freelancersCount: response.data.freelancers?.length,
+          totalCount: response.data.totalCount,
+          currentPage: response.data.currentPage,
+          totalPages: response.data.totalPages
+        });
+        
         if (response.data.freelancers && response.data.freelancers.length > 0) {
           console.log('Sample freelancer:', response.data.freelancers[0]);
         }
-        setFreelancers(response.data.freelancers);
-        setTotalCount(response.data.totalCount);
+        
+        const newFreelancers = response.data.freelancers || [];
+        const newTotalCount = response.data.totalCount || 0;
+        
+        if (isLoadMore) {
+          // 더보기의 경우 기존 데이터에 추가
+          console.log(`➕ Appending ${newFreelancers.length} freelancers to existing ${freelancers.length}`);
+          setFreelancers(prev => [...prev, ...newFreelancers]);
+          setCurrentPage(pageToLoad);
+        } else {
+          // 초기 로드나 필터 변경의 경우 새로 설정
+          console.log(`🔄 Setting ${newFreelancers.length} freelancers (replacing existing)`);
+          setFreelancers(newFreelancers);
+          setCurrentPage(1);
+        }
+        
+        setTotalCount(newTotalCount);
+        
+        // 더 로드할 데이터가 있는지 확인
+        const totalLoaded = isLoadMore ? freelancers.length + newFreelancers.length : newFreelancers.length;
+        setHasMore(totalLoaded < newTotalCount);
       } else {
         setError(response.error || 'Failed to load freelancers');
         setFreelancers([]);
@@ -99,71 +192,118 @@ export default function FreelancerPage() {
       setFreelancers([]);
       setTotalCount(0);
     } finally {
-      setLocalLoading(false);
+      // 최신 요청인 경우에만 로딩 상태 해제
+      if (lastRequestRef.current === requestId) {
+        setLocalLoading(false);
+        setIsFiltering(false);
+        setIsLoadingMore(false);
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current);
+          loadingTimeoutRef.current = null;
+        }
+      }
     }
-  };
+  }, [currentPage, itemsPerPage, activeTab, selectedType, selectedExperience, selectedSkills, searchTerms, sortBy, freelancers.length]);
 
   // 컴포넌트 마운트 시 스킬 목록 로드
   useEffect(() => {
     loadSkills();
   }, []);
 
+  // 초기 로드 (한 번만)
   useEffect(() => {
-    loadFreelancers();
-  }, [currentPage, activeTab, selectedType, selectedExperience, selectedSkills, searchTerms, sortBy]);
+    console.log('🎬 Initial useEffect triggered - loading freelancers');
+    loadFreelancers(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
+  // 필터/정렬 변경 시 로드 (디바운싱 적용)
+  useEffect(() => {
+    // 초기 렌더링에서는 실행하지 않음 (빈 배열 상태에서는 스킬)
+    const isInitialRender = selectedSkills.length === 0 && 
+                           searchTerms.length === 0 && 
+                           selectedExperience === '' && 
+                           selectedType === '' && 
+                           sortBy === '' && 
+                           activeTab === '전체';
+    
+    if (isInitialRender) {
+      console.log('⏭️ Skipping filter effect on initial render');
+      return;
+    }
+    
+    console.log('🔄 Filter/Sort change detected:', {
+      activeTab,
+      selectedType,
+      selectedExperience,
+      selectedSkills: selectedSkills.length,
+      searchTerms: searchTerms.length,
+      sortBy
+    });
+    
+    const timeoutId = setTimeout(() => {
+      loadFreelancers(false, false); // 필터 변경 시 첫 페이지부터 새로 로드
+    }, 150); // 150ms 디바운싱
+    
+    return () => clearTimeout(timeoutId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, selectedType, selectedExperience, selectedSkills, searchTerms, sortBy]);
 
   // 총 페이지 수 계산
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   // 이벤트 핸들러
-  const handlePageChange = (pageNumber: number) => {
-    if (pageNumber === currentPage) return;
-    setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !isLoadingMore) {
+      loadFreelancers(false, true);
+    }
+  }, [hasMore, isLoadingMore, loadFreelancers]);
 
-  const handleSearchTermsChange = (terms: string[]) => {
+  const handleSearchTermsChange = useCallback((terms: string[]) => {
     setSearchTerms(terms);
-    setCurrentPage(1); // 검색어 변경 시 첫 페이지로
-  };
+  }, []);
 
-  const toggleSkillFilter = (skill: string) => {
-    setSelectedSkills(prev =>
-      prev.includes(skill)
+  const toggleSkillFilter = useCallback((skill: string) => {
+    setSelectedSkills(prev => {
+      const newSkills = prev.includes(skill)
         ? prev.filter(s => s !== skill)
-        : [...prev, skill]
-    );
-    setCurrentPage(1); // 필터 변경 시 첫 페이지로
-  };
+        : [...prev, skill];
+      return newSkills;
+    });
+  }, []);
 
-  const handleExperienceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleExperienceChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log('🔧 Experience filter changed:', e.target.value);
     setSelectedExperience(e.target.value);
-    setCurrentPage(1);
-  };
+  }, []);
 
-  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleTypeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log('🔧 Type filter changed:', e.target.value);
     setSelectedType(e.target.value);
-    setCurrentPage(1);
-  };
+  }, []);
+
+  const handleSortChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log('🔧 Sort filter changed:', e.target.value);
+    setSortBy(e.target.value);
+  }, []);
 
   // 필터 초기화 함수
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
+    console.log('🔄 Resetting all filters');
     setSelectedSkills([]);
     setSelectedExperience('');
     setSelectedType('');
     setSearchTerms([]);
     setSortBy('');
-    setCurrentPage(1);
     setActiveTab("전체");
-  };
+  }, []);
 
   // 탭 변경 핸들러
-  const handleTabChange = (tab: string) => {
+  const handleTabChange = useCallback((tab: string) => {
     if (tab !== activeTab) {
       setActiveTab(tab);
-      setCurrentPage(1);
     }
-  };
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
@@ -501,7 +641,8 @@ export default function FreelancerPage() {
                     <button
                       key={skill}
                       onClick={() => toggleSkillFilter(skill)}
-                      className={`text-xs px-3 py-1.5 rounded-full transition-all ${selectedSkills.includes(skill)
+                      disabled={isFiltering}
+                      className={`text-xs px-3 py-1.5 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed ${selectedSkills.includes(skill)
                         ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-sm'
                         : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200'
                       }`}
@@ -526,10 +667,11 @@ export default function FreelancerPage() {
                 경력
               </h4>
               <select
-                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
                 value={selectedExperience}
                 onChange={handleExperienceChange}
+                disabled={isFiltering}
               >
                 <option value=""> 전체 </option>
                 <option value="3"> 3년 이하 </option>
@@ -548,10 +690,11 @@ export default function FreelancerPage() {
                 타입
               </h4>
               <select
-                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
                 value={selectedType}
                 onChange={handleTypeChange}
+                disabled={isFiltering}
               >
                 <option value=""> 전체 </option>
                 <option value="개인"> 개인 </option>
@@ -569,13 +712,11 @@ export default function FreelancerPage() {
                 정렬
               </h4>
               <select
-                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
                 value={sortBy}
-                onChange={(e) => {
-                  setSortBy(e.target.value);
-                  setCurrentPage(1);
-                }}
+                onChange={handleSortChange}
+                disabled={isFiltering}
               >
                 <option value="">기본 정렬</option>
                 <option value="rating">평점 높은순</option>
@@ -604,15 +745,22 @@ export default function FreelancerPage() {
                   <span className="bg-gradient-to-r from-blue-600 to-blue-700 text-transparent bg-clip-text"> 프리랜서 </span>
                   <span className="ml-2 text-sm font-normal bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full"> NEW </span>
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300"> 총 <span className="font-semibold text-blue-600 dark:text-blue-400">{totalCount}</span>명의 프리랜서가 있습니다</p>
+                <p className="text-gray-600 dark:text-gray-300"> 
+                  총 <span className="font-semibold text-blue-600 dark:text-blue-400">{totalCount.toLocaleString()}</span>명의 프리랜서가 있습니다 
+                  {freelancers.length > 0 && freelancers.length < totalCount && (
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      (현재 {freelancers.length}명 표시)
+                    </span>
+                  )}
+                </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button 
                   onClick={() => {
                     setSortBy('rating');
-                    setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm ${
+                  disabled={isFiltering}
+                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm disabled:opacity-50 ${
                     sortBy === 'rating' 
                       ? 'bg-blue-500 text-white border-blue-500' 
                       : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -626,9 +774,9 @@ export default function FreelancerPage() {
                 <button 
                   onClick={() => {
                     setSortBy('experience');
-                    setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm ${
+                  disabled={isFiltering}
+                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm disabled:opacity-50 ${
                     sortBy === 'experience' 
                       ? 'bg-blue-500 text-white border-blue-500' 
                       : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -642,9 +790,9 @@ export default function FreelancerPage() {
                 <button 
                   onClick={() => {
                     setSortBy('viewCount');
-                    setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm ${
+                  disabled={isFiltering}
+                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm disabled:opacity-50 ${
                     sortBy === 'viewCount' 
                       ? 'bg-blue-500 text-white border-blue-500' 
                       : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -680,7 +828,9 @@ export default function FreelancerPage() {
               </div>
             ) : (
               freelancers.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 transition-opacity duration-200 ${
+                  isFiltering ? 'opacity-60 pointer-events-none' : 'opacity-100'
+                }`}>
                   {freelancers.map((freelancer) => (
               <div
                 key={freelancer.id}
@@ -774,62 +924,42 @@ export default function FreelancerPage() {
               )
         )}
 
-          {/* 페이지네이션 */}
-            {freelancers.length > 0 && (
-        <div className="flex justify-center mt-12">
-                <nav className="flex items-center space-x-3">
+          {/* 더보기 버튼 */}
+          {freelancers.length > 0 && hasMore && (
+            <div className="flex justify-center mt-12">
               <button
-                    className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-blue-300 hover:text-blue-600 dark:hover:text-blue-400"
-                    onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center gap-3"
               >
+                {isLoadingMore ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    로딩 중...
+                  </>
+                ) : (
+                  <>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                이전
+                    더보기 ({freelancers.length}/{totalCount})
+                  </>
+                )}
               </button>
+            </div>
+          )}
 
-                  <div className="flex items-center space-x-2">
-                    {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
-                      let pageNumber: number;
-              if (totalPages <= 5) {
-                        pageNumber = index + 1;
-              } else if (currentPage <= 3) {
-                        pageNumber = index + 1;
-              } else if (currentPage >= totalPages - 2) {
-                        pageNumber = totalPages - 4 + index;
-              } else {
-                        pageNumber = currentPage - 2 + index;
-              }
-              
-              return (
-                  <button
-                          key={pageNumber}
-                          onClick={() => handlePageChange(pageNumber)}
-                          className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${currentPage === pageNumber
-                            ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md'
-                            : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:border-blue-300 hover:text-blue-600 dark:hover:text-blue-400'
-                          }`}
-                        >
-                          {pageNumber}
-                  </button>
-              );
-            })}
-                  </div>
-
-              <button
-                    className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-blue-300 hover:text-blue-600 dark:hover:text-blue-400"
-                    onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                다음
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-              </button>
-          </nav>
+          {/* 모든 데이터 로드 완료 메시지 */}
+          {freelancers.length > 0 && !hasMore && (
+            <div className="flex justify-center mt-12">
+              <div className="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center gap-2">
+                <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                모든 프리랜서를 확인했습니다 ({freelancers.length}명)
               </div>
-            )}
+            </div>
+          )}
           </div>
         </div>
       </div>
