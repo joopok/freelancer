@@ -25,8 +25,6 @@
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.525.0",
     "mariadb": "^3.4.2",
-    "mariadb-mcp-server": "^0.0.1",
-    "mysql2": "^3.14.1",
     "next": "^14.1.0",
     "next-bundle-analyzer": "^0.6.8",
     "react": "^18.2.0",
@@ -50,6 +48,7 @@
     "postcss": "^8.4.24",
     "tailwindcss": "^3.3.2",
     "typescript": "5.3.3",
+    "unimported": "^1.31.0",
     "webpack-bundle-analyzer": "^4.10.2"
   }
 }

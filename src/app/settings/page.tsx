@@ -26,7 +26,7 @@ interface UserSettings {
 
 export default function SettingsPage() {
   const { user, isLoggedIn } = useAuthStore();
-  const { theme, setTheme } = useThemeStore();
+  const { isDarkMode, setTheme } = useThemeStore();
   const router = useRouter();
   
   const [settings, setSettings] = useState<UserSettings>({
@@ -292,30 +292,24 @@ export default function SettingsPage() {
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">테마 설정</h2>
                     <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                          테마 선택
-                        </label>
-                        <div className="space-y-2">
-                          {[
-                            { value: 'light', label: '라이트 모드', icon: '☀️' },
-                            { value: 'dark', label: '다크 모드', icon: '🌙' },
-                            { value: 'system', label: '시스템 설정 따르기', icon: '⚙️' },
-                          ].map((option) => (
-                            <label key={option.value} className="flex items-center cursor-pointer">
-                              <input
-                                type="radio"
-                                name="theme"
-                                value={option.value}
-                                checked={theme === option.value}
-                                onChange={(e) => setTheme(e.target.value as any)}
-                                className="mr-3 text-blue-600"
-                              />
-                              <span className="mr-2">{option.icon}</span>
-                              <span className="text-gray-700 dark:text-gray-300">{option.label}</span>
-                            </label>
-                          ))}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            다크 모드
+                          </label>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            어두운 테마로 변경합니다
+                          </p>
                         </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            className="sr-only peer" 
+                            checked={isDarkMode}
+                            onChange={() => setTheme(!isDarkMode)}
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                        </label>
                       </div>
                     </div>
                   </div>

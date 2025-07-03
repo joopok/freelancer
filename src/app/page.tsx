@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useInView } from 'framer-motion';
@@ -25,12 +25,12 @@ const stats = [
 
 // 카테고리 목록
 const categories = [
-  { id: 1, name: '웹 개발', imageUrl: '/images/category-web.jpg', count: 254 },
-  { id: 2, name: '앱 개발', imageUrl: '/images/category-app.jpg', count: 189 },
-  { id: 3, name: '디자인', imageUrl: '/images/category-design.jpg', count: 176 },
-  { id: 4, name: '마케팅', imageUrl: '/images/category-marketing.jpg', count: 143 },
-  { id: 5, name: '콘텐츠 제작', imageUrl: '/images/category-content.jpg', count: 128 },
-  { id: 6, name: '기획/PM', imageUrl: '/images/category-planning.jpg', count: 97 },
+  { id: 1, name: '웹 개발', imageUrl: '/images/category-web.jpg', count: 254, tab: '개발자', bgGradient: 'from-blue-500 to-indigo-700 dark:from-blue-700 dark:to-indigo-900' },
+  { id: 2, name: '앱 개발', imageUrl: '/images/category-app.jpg', count: 189, tab: '개발자', bgGradient: 'from-indigo-500 to-purple-700 dark:from-indigo-700 dark:to-purple-900' },
+  { id: 3, name: '디자인', imageUrl: '/images/category-design.jpg', count: 176, tab: '디자이너', bgGradient: 'from-purple-500 to-pink-700 dark:from-purple-700 dark:to-pink-900' },
+  { id: 4, name: '마케팅', imageUrl: '/images/category-marketing.jpg', count: 143, tab: '기타', bgGradient: 'from-pink-500 to-red-700 dark:from-pink-700 dark:to-red-900' },
+  { id: 5, name: '콘텐츠 제작', imageUrl: '/images/category-content.jpg', count: 128, tab: '기타', bgGradient: 'from-orange-500 to-yellow-700 dark:from-orange-700 dark:to-amber-900' },
+  { id: 6, name: '기획/PM', imageUrl: '/images/category-planning.jpg', count: 97, tab: 'PM/PL', bgGradient: 'from-green-500 to-teal-700 dark:from-green-700 dark:to-teal-900' },
 ];
 
 // 추천 프로젝트
@@ -223,7 +223,7 @@ export default function Home() {
     if (!document.hidden) {
       interval = setInterval(() => {
         setActiveCardIndex((prevIndex) => (prevIndex + 1) % heroProjects.length);
-      }, 4000); // 4초마다 전환
+      }, 4500); // 4.5초마다 전환 - 더 여유있는 회전
     }
     
     // 페이지 가시성 변경 감지
@@ -234,7 +234,7 @@ export default function Home() {
       } else if (!document.hidden && !interval) {
         interval = setInterval(() => {
           setActiveCardIndex((prevIndex) => (prevIndex + 1) % heroProjects.length);
-        }, 4000);
+        }, 4500);
       }
     };
     
@@ -261,31 +261,25 @@ export default function Home() {
   };
 
   // 검색 핸들러
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     
     if (searchQuery.trim()) {
-      setLoading(true);
-      // 검색 페이지로 이동
+      // 로딩 화면 없이 바로 이동
       router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-      
-      // 로딩 상태 1초 후 해제 (페이지 전환 효과를 위해)
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
     }
-  };
+  }, [searchQuery, router]);
 
-  // 페이지 이동 함수
-  const navigateTo = (href: string) => {
-    setLoading(true);
+  // 페이지 이동 함수 - 깜빡임 방지
+  const navigateTo = useCallback((href: string) => {
+    // 로딩 화면 없이 바로 이동
     router.push(href);
-    
-    // 로딩 상태 1초 후 해제 (페이지 전환 효과를 위해)
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  };
+  }, [router]);
+
+  // freelancer 페이지 prefetch
+  useEffect(() => {
+    router.prefetch('/freelancer');
+  }, [router]);
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-300">
@@ -385,9 +379,9 @@ export default function Home() {
                 className="hidden lg:block relative lg:col-span-3"
               >
                 {/* 3D 회전 캐러셀 */}
-                <div className="relative h-[500px] w-full">
+                <div className="relative h-[550px] w-full overflow-visible" style={{ perspective: '1500px', transformStyle: 'preserve-3d' }}>
                   {/* 5개의 카드 */}
-                  <div className="relative h-[400px] w-full">
+                  <div className="relative h-[450px] w-full overflow-visible" style={{ transformStyle: 'preserve-3d' }}>
                     {heroProjects.map((project, index) => {
                       // 각 카드의 위치와 회전을 계산
                       const isActive = index === activeCardIndex;
@@ -406,34 +400,28 @@ export default function Home() {
                       let opacity = 0;
                       
                       if (isActive) {
-                        position = 'top-5 left-[20%]';
-                        transform = 'translateX(-50%) rotateY(0deg) scale(1)';
-                        zIndex = 50;
+                        position = 'top-0 left-[40%]';
+                        zIndex = 100;
                         opacity = 1;
                       } else if (isPrev) {
-                        position = 'top-9 left-[-5%]';
-                        transform = 'translateX(-50%) rotateY(20deg) scale(0.85)';
-                        zIndex = 40;
+                        position = 'top-20 left-[0%]';
+                        zIndex = 80;
                         opacity = 0.8;
                       } else if (isNext) {
-                        position = 'top-9 left-[45%]';
-                        transform = 'translateX(-50%) rotateY(-20deg) scale(0.85)';
-                        zIndex = 40;
+                        position = 'top-20 left-[80%]';
+                        zIndex = 80;
                         opacity = 0.8;
                       } else if (isFarPrev) {
-                        position = 'top-[3.25rem] left-[-25%]';
-                        transform = 'translateX(-50%) rotateY(30deg) scale(0.75)';
-                        zIndex = 30;
-                        opacity = 0.5;
+                        position = 'top-32 left-[-15%]';
+                        zIndex = 60;
+                        opacity = 0.4;
                       } else if (isFarNext) {
-                        position = 'top-[3.25rem] left-[65%]';
-                        transform = 'translateX(-50%) rotateY(-30deg) scale(0.75)';
-                        zIndex = 30;
-                        opacity = 0.5;
+                        position = 'top-32 left-[95%]';
+                        zIndex = 60;
+                        opacity = 0.4;
                       } else {
-                        position = 'top-[4.25rem] left-[20%]';
-                        transform = 'translateX(-50%) rotateY(0deg) scale(0.6)';
-                        zIndex = 10;
+                        position = 'top-40 left-[40%]';
+                        zIndex = 40;
                         opacity = 0;
                       }
                       
@@ -442,24 +430,33 @@ export default function Home() {
                           key={project.id}
                           initial={false}
                           animate={{
-                            x: 0,
                             opacity: opacity,
+                            scale: isActive ? 1.05 : isPrev || isNext ? 0.85 : isFarPrev || isFarNext ? 0.7 : 0.5,
+                            rotateY: isActive ? 0 : isPrev ? 15 : isNext ? -15 : isFarPrev ? 25 : isFarNext ? -25 : 0,
+                            x: 0,
+                            y: isActive ? -10 : 0,
+                            z: isActive ? 30 : isPrev || isNext ? -50 : -100,
                           }}
                           transition={{
-                            duration: 0.6,
-                            ease: "easeInOut"
+                            opacity: { duration: 0.4 },
+                            scale: { type: "spring", stiffness: 100, damping: 30 },
+                            rotateY: { type: "spring", stiffness: 60, damping: 20 },
+                            y: { type: "spring", stiffness: 100, damping: 25 },
+                            z: { duration: 0.4 },
                           }}
                           onClick={() => navigateTo(`/project/${project.id}`)}
-                          className={`absolute ${position} w-[400px] h-[380px] rounded-2xl shadow-2xl overflow-hidden cursor-pointer group`}
+                          className={`absolute ${position} w-[400px] h-[380px] rounded-2xl shadow-2xl overflow-hidden cursor-pointer group will-change-transform`}
                           style={{
-                            transform: transform,
-                            zIndex: zIndex,
-                            opacity: opacity,
-                            transition: 'all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)',
+                            transformStyle: 'preserve-3d',
                             transformOrigin: 'center center',
+                            backfaceVisibility: 'hidden',
+                            perspective: 1200,
+                            zIndex: zIndex,
                           }}
                         >
-                          <div className={`absolute inset-0 bg-gradient-to-br ${project.bgColor} p-8 flex flex-col justify-end group-hover:brightness-110 transition-all duration-300`}>
+                          <div className={`absolute inset-0 bg-gradient-to-br ${project.bgColor} p-8 flex flex-col justify-end group-hover:brightness-110 transition-all duration-500 ease-out`}>
+                            {/* 카드 광택 효과 */}
+                            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-50 group-hover:opacity-70 transition-opacity duration-700"></div>
                             <div className="flex justify-between items-center mb-6">
                               <div className="bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-white text-sm">프리미엄 프로젝트</div>
                               <div className="bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-white text-sm">D-{10 + index}</div>
@@ -506,7 +503,7 @@ export default function Home() {
               </div>
 
                   {/* 캐러셀 컨트롤 */}
-                  <div className="absolute bottom-0 left-[-5%] right-[5%] flex justify-center gap-4 mt-8">
+                  <div className="absolute bottom-20 left-[35%] right-[5%] flex justify-center gap-4 z-[110]">
                     <button 
                       onClick={prevCard}
                       className="bg-white/20 backdrop-blur-md p-3 rounded-full text-white hover:bg-white/30 transition-colors focus:outline-none"
@@ -548,20 +545,23 @@ export default function Home() {
                   <motion.div
                     whileHover={{ scale: 1.1, rotate: 20, y: -5 }}
                     whileTap={{ scale: 0.9 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
                     onClick={() => navigateTo('/freelancer')}
-                    className="absolute top-[5%] left-[0%] w-16 h-16 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 shadow-lg z-10 cursor-pointer hover:shadow-xl transition-all duration-300 transform rotate-12"
+                    className="absolute top-[5%] left-[0%] w-16 h-16 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 shadow-lg z-10 cursor-pointer hover:shadow-xl transition-all duration-300 transform rotate-12 will-change-transform"
                   />
                   <motion.div
                     whileHover={{ scale: 1.15, y: -5 }}
                     whileTap={{ scale: 0.9 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
                     onClick={() => navigateTo('/project')}
-                    className="absolute bottom-[15%] right-[5%] w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg z-10 cursor-pointer hover:shadow-xl transition-all duration-300"
+                    className="absolute bottom-[15%] right-[5%] w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg z-10 cursor-pointer hover:shadow-xl transition-all duration-300 will-change-transform"
                   />
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
                     onClick={() => navigateTo('/categories')}
-                    className="absolute top-[50%] left-[8%] w-20 h-20 rounded-full border-4 border-dashed border-purple-400/30 z-10 cursor-pointer hover:border-purple-400/50 transition-all duration-300"
+                    className="absolute top-[50%] left-[8%] w-20 h-20 rounded-full border-4 border-dashed border-purple-400/30 z-10 cursor-pointer hover:border-purple-400/50 transition-all duration-300 will-change-transform"
                       />
                     </div>
               </motion.div>
@@ -579,15 +579,16 @@ export default function Home() {
         {/* 검색 섹션 */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-10 relative z-10">
           <motion.div 
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 transition-colors duration-300"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 transition-colors duration-300 will-change-transform"
             whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.2 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
           >
             <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative">
                 <motion.span 
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl cursor-pointer"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl cursor-pointer will-change-transform"
                   whileHover={{ scale: 1.1, rotate: 15 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   onClick={() => navigateTo('/project')}
                 >
                   🔍
@@ -604,7 +605,8 @@ export default function Home() {
                 type="submit"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white py-4 px-8 rounded-lg font-bold text-lg transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 text-white py-4 px-8 rounded-lg font-bold text-lg transition-colors will-change-transform"
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 검색하기
               </motion.button>
@@ -643,15 +645,19 @@ export default function Home() {
                   whileHover={{ 
                     y: -10,
                     scale: 1.03,
-                    transition: { duration: 0.3 } 
+                    transition: { 
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 20
+                    } 
                   }}
-                  className="relative group overflow-hidden rounded-2xl shadow-lg cursor-pointer h-80"
-                  onClick={() => navigateTo(`/category/${category.id}`)}
+                  className="relative group overflow-hidden rounded-2xl shadow-lg cursor-pointer h-80 will-change-transform"
+                  onClick={() => navigateTo(`/freelancer?tab=${encodeURIComponent(category.tab)}`)}
                 >
                   {/* 배경 효과 */}
-                  <div className="absolute inset-0 bg-gray-900/60 dark:bg-gray-900/40 group-hover:bg-gray-900/50 dark:group-hover:bg-gray-900/30 transition-all duration-300 z-10"></div>
+                  <div className="absolute inset-0 bg-black/20 dark:bg-black/40 group-hover:bg-black/10 dark:group-hover:bg-black/30 transition-all duration-300 z-10"></div>
                   <div className="absolute inset-0">
-                    <div className={`w-full h-full bg-gradient-to-br from-${category.id % 2 === 0 ? 'blue' : 'indigo'}-500 to-${category.id % 3 === 0 ? 'purple' : category.id % 2 === 0 ? 'indigo' : 'blue'}-700 dark:from-${category.id % 2 === 0 ? 'blue' : 'indigo'}-400 dark:to-${category.id % 3 === 0 ? 'purple' : category.id % 2 === 0 ? 'indigo' : 'blue'}-600 group-hover:scale-110 transition-all duration-700`}></div>
+                    <div className={`w-full h-full bg-gradient-to-br ${category.bgGradient} group-hover:scale-110 transition-all duration-700`}></div>
                     {/* 패턴 오버레이 효과 */}
                     <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzR2LTRoLTJ2NGgtNHYyaDR2NGgydi00aDR2LTJoLTR6bTAtMzBWMGgtMnY0aC00djJoNHY0aDJWNmg0VjRoLTR6TTYgMzR2LTRINHY0SDB2Mmg0djRoMnYtNGg0di0ySDZ6TTYgNFYwSDR2NEgwdjJoNHY0aDJWNmg0VjRINnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20 dark:opacity-10 mix-blend-overlay"></div>
             </div>
@@ -662,13 +668,15 @@ export default function Home() {
                   {/* 3D hover 효과를 위한 요소들 */}
                   <motion.div 
                     whileHover={{ rotateY: 5, rotateX: -5 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
                     className="absolute inset-0 z-30 preserve-3d"
+                    style={{ transformStyle: 'preserve-3d', backfaceVisibility: 'hidden' }}
                   >
                     <div className="absolute inset-0 flex flex-col justify-end p-8 z-30">
                       {/* 카테고리 아이콘 */}
                       <div className="flex items-center justify-center mb-6">
-                        <div className="w-16 h-16 bg-white/20 dark:bg-white/30 backdrop-blur-xl rounded-xl flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-all duration-300 border border-white/20 dark:border-white/40">
-                          <span className="text-white text-3xl drop-shadow-lg">
+                        <div className="w-16 h-16 bg-white/25 dark:bg-gray-800/50 backdrop-blur-lg rounded-xl flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-all duration-300 border border-white/20 dark:border-gray-700">
+                          <span className="text-3xl drop-shadow-md">
                             {category.id === 1 && '💻'}
                             {category.id === 2 && '📱'}
                             {category.id === 3 && '🎨'}
@@ -686,10 +694,10 @@ export default function Home() {
                     </motion.h3>
                     
                     <div className="flex justify-between items-center">
-                      <div className="bg-white/20 dark:bg-white/30 backdrop-blur-md px-4 py-2 rounded-full text-white text-sm font-medium border border-white/20 dark:border-white/40 shadow-lg">
+                      <div className="bg-white/25 dark:bg-gray-800/50 backdrop-blur-md px-4 py-2 rounded-full text-white dark:text-gray-200 text-sm font-medium border border-white/20 dark:border-gray-700 shadow-md">
                         {category.count}+ 프로젝트
                       </div>
-                      <div className="w-10 h-10 bg-white/20 dark:bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center transform translate-x-0 group-hover:translate-x-2 transition-all duration-300 border border-white/20 dark:border-white/40 shadow-lg">
+                      <div className="w-10 h-10 bg-white/25 dark:bg-gray-800/50 backdrop-blur-md rounded-full flex items-center justify-center transform translate-x-0 group-hover:translate-x-2 transition-all duration-300 border border-white/20 dark:border-gray-700 shadow-md">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
@@ -706,8 +714,9 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => navigateTo('/categories')}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white px-6 py-3 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-indigo-500/30 dark:hover:shadow-indigo-400/30 hover:shadow-xl group"
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                onClick={() => navigateTo('/freelancer')}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white px-6 py-3 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-indigo-500/30 dark:hover:shadow-indigo-400/30 hover:shadow-xl group will-change-transform"
               >
                 모든 카테고리 보기
                 <span className="transform group-hover:translate-x-1 transition-transform">
@@ -739,7 +748,7 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {stats.map((stat, index) => (
-                <div
+                <motion.div
                   key={stat.id}
                   onClick={() => {
                     if (stat.id === 1) navigateTo('/freelancer');
@@ -747,7 +756,9 @@ export default function Home() {
                     else if (stat.id === 3) navigateTo('/project');
                     else if (stat.id === 4) navigateTo('/jobs');
                   }}
-                  className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/20 group cursor-pointer hover:scale-105"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/20 group cursor-pointer will-change-transform"
                 >
                   <div className="flex flex-col items-center text-center">
                     <div className="mb-6 text-4xl group-hover:scale-110 transition-transform duration-300">
@@ -758,7 +769,7 @@ export default function Home() {
                     </p>
                     <p className="text-gray-600 font-medium">{stat.label}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -786,7 +797,8 @@ export default function Home() {
               <motion.div
                   key={project.id}
                 whileHover={{ y: -5 }}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700 transition-all duration-300"
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700 transition-all duration-300 will-change-transform"
                 onClick={() => navigateTo(`/project/${project.id}`)}
               >
                 <div className="p-6">
@@ -863,7 +875,8 @@ export default function Home() {
                 <motion.div
                   key={freelancer.id}
                   whileHover={{ y: -5 }}
-                  className="bg-white dark:bg-gray-700 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-600 transition-all duration-300"
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="bg-white dark:bg-gray-700 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-600 transition-all duration-300 will-change-transform"
                   onClick={() => navigateTo(`/freelancer/${freelancer.id}`)}
                 >
                   <div className="relative h-48 bg-blue-50 dark:bg-blue-900/30 transition-colors duration-300">
@@ -930,9 +943,10 @@ export default function Home() {
                 className="text-center cursor-pointer group"
               >
                 <motion.div 
-                  className="bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300"
+                  className="bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300 will-change-transform"
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
                   <span className="text-blue-600 text-3xl">👥</span>
                 </motion.div>
@@ -952,9 +966,10 @@ export default function Home() {
                 className="text-center cursor-pointer group"
               >
                 <motion.div 
-                  className="bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300"
+                  className="bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300 will-change-transform"
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
                   <span className="text-blue-600 text-3xl">💼</span>
                 </motion.div>
@@ -976,9 +991,10 @@ export default function Home() {
                 className="text-center cursor-pointer group"
               >
                 <motion.div 
-                  className="bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300"
+                  className="bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300 will-change-transform"
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
                   <span className="text-blue-600 text-3xl">🏠</span>
                 </motion.div>
@@ -988,6 +1004,98 @@ export default function Home() {
                   상위 1% 를 위한 특별한 프리미엄 프로젝트를 만나보세요.
                 </p>
               </motion.div>
+            </div>
+          </section>
+
+          {/* 성공사례 섹션 */}
+          <section className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 py-20 transition-colors duration-300">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-16">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
+                    잡코리아 빌보드와 함께 성공적으로<br />
+                    프로젝트를 완료해 보세요.
+                  </h2>
+                  <p className="text-xl text-gray-700 dark:text-gray-300 mt-4 font-semibold">
+                    성공사례
+                  </p>
+                  <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
+                    잡코리아 빌보드와 함께 성공한 기업들의 이야기
+                  </p>
+                </motion.div>
+              </div>
+
+              {/* 성공사례 카드 그리드 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                {[
+                  {
+                    company: 'KT DS',
+                    role: '개발센터장 김성우',
+                    testimonial: '검증된 프리랜서 개발자를\n빠르게 구했어요.',
+                    logo: '📡'
+                  },
+                  {
+                    company: 'CJ ENM',
+                    role: '사내 벤처 TF 김윤주',
+                    testimonial: '웹 리뉴얼 외주로 진행하고\n비용 절감했어요.',
+                    logo: '🎬'
+                  },
+                  {
+                    company: 'LG CNS',
+                    role: '금융플랫폼 PM 김성규',
+                    testimonial: '프론트엔드부터 AA까지\n한 번에 구했어요.',
+                    logo: '💻'
+                  },
+                  {
+                    company: '롯데제과',
+                    role: '사내 벤처 프로그램',
+                    testimonial: '관련 경험이 많은 전문가를\n빠르게 만났어요.',
+                    logo: '🍬'
+                  },
+                  {
+                    company: '신세계 아이앤씨',
+                    role: '내부 운영 인력',
+                    testimonial: '빠른 시간 안에 원하는\n여러 개발사를 찾았어요.',
+                    logo: '🏢'
+                  },
+                  {
+                    company: '종근당',
+                    role: '내부 운영 인력',
+                    testimonial: '내부 개발자 없이 빠르게\n프로젝트를 진행했어요.',
+                    logo: '💊'
+                  }
+                ].map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    whileHover={{ y: -8 }}
+                    className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 will-change-transform"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <div className="text-3xl mb-3">{item.logo}</div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                          {item.company}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {item.role}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">
+                      {item.testimonial}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -1008,9 +1116,15 @@ export default function Home() {
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
                     whileHover={{ y: -5, scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    transition={{ 
+                      duration: 0.6, 
+                      delay: index * 0.1,
+                      type: "spring", 
+                      stiffness: 300, 
+                      damping: 20 
+                    }}
                     onClick={() => {
                       if (testimonial.id === 1) navigateTo('/freelancer');
                       else if (testimonial.id === 2) navigateTo('/project');
@@ -1021,7 +1135,7 @@ export default function Home() {
                     {/* 별점 */}
                     <div className="flex items-center mb-6">
                       {[...Array(5)].map((_, i) => (
-                        <span key={i} className="text-yellow-400 text-lg">★</span>
+                        <span key={i} className="text-yellow-400 text-2xl">★</span>
                       ))}
                     </div>
                     
@@ -1061,18 +1175,24 @@ export default function Home() {
                   이미 프리랜스 프로와 함께하고 있습니다
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <button
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     onClick={() => navigateTo('/register')}
-                    className="bg-white dark:bg-gray-200 text-purple-700 dark:text-gray-800 hover:bg-purple-50 dark:hover:bg-gray-100 px-10 py-5 rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                    className="bg-white dark:bg-gray-200 text-purple-700 dark:text-gray-800 hover:bg-purple-50 dark:hover:bg-gray-100 px-10 py-5 rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl will-change-transform"
                   >
                     회원가입
-                  </button>
-                  <button 
+                  </motion.button>
+                  <motion.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     onClick={() => navigateTo('/login')}
-                    className="bg-transparent border-2 border-white dark:border-gray-300 text-white dark:text-gray-300 hover:bg-white dark:hover:bg-gray-300 hover:text-purple-700 dark:hover:text-gray-800 px-10 py-5 rounded-lg font-bold text-lg transition-all transform hover:scale-105"
+                    className="bg-transparent border-2 border-white dark:border-gray-300 text-white dark:text-gray-300 hover:bg-white dark:hover:bg-gray-300 hover:text-purple-700 dark:hover:text-gray-800 px-10 py-5 rounded-lg font-bold text-lg transition-all will-change-transform"
                   >
                     로그인
-                </button>
+                </motion.button>
               </div>
         </div>
           </section>

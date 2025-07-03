@@ -1,5 +1,6 @@
 import {
   RemoteWorkDetail,
+  RemoteEnvironment,
   RemoteCompanyInfo,
   WorkStage,
   ContactPerson,

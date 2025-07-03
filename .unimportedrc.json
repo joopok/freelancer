@@ -1,0 +1,42 @@
+{
+  "entry": [
+    "src/app/**/page.tsx",
+    "src/app/**/layout.tsx",
+    "src/app/**/error.tsx",
+    "src/app/**/global-error.tsx",
+    "src/app/**/not-found.tsx",
+    "src/app/api/**/route.ts",
+    "src/middleware.ts",
+    "next.config.js",
+    "postcss.config.js",
+    "tailwind.config.js",
+    "eslint.config.mjs"
+  ],
+  "ignoreUnused": [
+    "next-bundle-analyzer",
+    "webpack-bundle-analyzer",
+    "next-unused",
+    "depcheck"
+  ],
+  "ignoreUnimported": [
+    "public/**",
+    "database/**",
+    ".next/**",
+    "scripts/**",
+    "src/types/**",
+    "src/app/api/cors.ts",
+    "src/app/resume/create/page.tsx",
+    "src/components/auth/AutoLogoutProvider.tsx",
+    "src/components/common/FileUpload.tsx",
+    "src/components/common/SettingsDropdown.tsx",
+    "src/components/job/JobList.tsx",
+    "src/components/job/JobSearchBar.tsx",
+    "src/components/layout/StateProvider.tsx",
+    "src/components/resume/CareerSection.tsx",
+    "src/components/resume/ResumeForm.tsx",
+    "src/hooks/useApiExample.tsx",
+    "src/services/database.ts",
+    "src/utils/database.ts",
+    "src/utils/session.ts"
+  ]
+}

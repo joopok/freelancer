@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import { useThemeStore } from '@/store/theme';
-import { Settings, User, BookOpen, LogOut, Bell, Shield, HelpCircle, Moon, Sun, Building2, UserCheck, Crown } from 'lucide-react';
+import { Settings, User, BookOpen, LogOut, Bell, Shield, HelpCircle, Moon, Sun, Building2, UserCheck, Crown, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { useLoading } from './Loading';
@@ -432,6 +432,15 @@ export default function Header() {
                             도움말
                           </Link>
                           
+                          <Link
+                            href="/support"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            onClick={() => setIsSettingsOpen(false)}
+                          >
+                            <Phone className="h-4 w-4 mr-3" />
+                            고객센터
+                          </Link>
+                          
                           <button
                             onClick={() => {
                               setIsSettingsOpen(false);
@@ -484,6 +493,15 @@ export default function Header() {
                           >
                             <HelpCircle className="h-4 w-4 mr-3" />
                             도움말
+                          </Link>
+                          
+                          <Link
+                            href="/support"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            onClick={() => setIsSettingsOpen(false)}
+                          >
+                            <Phone className="h-4 w-4 mr-3" />
+                            고객센터
                           </Link>
                         </div>
                       </div>

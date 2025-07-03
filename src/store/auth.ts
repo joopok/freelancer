@@ -5,6 +5,30 @@ import { AUTH_TOKEN_NAME } from '@/utils/env';
 import { decodeToken, verifyToken, isTokenExpired, JwtPayload } from '@/utils/jwt';
 import { jwtDecode } from 'jwt-decode';
 
+// 커스텀 JWT payload 타입
+interface CustomJwtPayload {
+  iss?: string;
+  sub?: string;
+  aud?: string | string[];
+  exp?: number;
+  nbf?: number;
+  iat?: number;
+  jti?: string;
+  id?: string;
+  username?: string;
+  name?: string;
+  email?: string;
+  password?: string;
+  fullName?: string;
+  full_name?: string;
+  role?: string;
+  createdAt?: string;
+  created_at?: string;
+  updatedAt?: string;
+  updated_at?: string;
+  type?: string;
+}
+
 // User 타입을 SessionUser 타입으로 변환하는 유틸리티 함수
 export const convertToSessionUser = (user: User): SessionUser => {
   return {
@@ -167,7 +191,7 @@ export const useAuthStore = create<AuthState>()(
           }
           
           // 토큰 디코딩 (수동 파싱 또는 라이브러리 사용)
-          let payload: JwtPayload | null = null;
+          let payload: CustomJwtPayload | null = null;
           
           // 이미 수동으로 디코딩한 페이로드가 있으면 사용
           if (manualPayload && manualPayload.id) {
@@ -192,7 +216,7 @@ export const useAuthStore = create<AuthState>()(
             role: payload?.role || '',
             createdAt: payload?.createdAt || payload?.created_at || '',
             updatedAt: payload?.updatedAt || payload?.updated_at || '',
-            type: payload?.type || 'individual',
+            type: (payload?.type as 'company' | 'individual') || 'individual',
           };
           
           // ID가 비어있으면 유효하지 않은 사용자로 간주

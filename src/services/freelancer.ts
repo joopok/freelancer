@@ -64,6 +64,13 @@ class FreelancerService {
       
       // Transform backend data to match frontend expectations
       if (response.data.success && response.data.data && response.data.data.freelancers) {
+        // 원본 데이터 확인을 위한 로그
+        if (response.data.data.freelancers.length > 0) {
+          console.log('Raw freelancer data from backend:', response.data.data.freelancers[0]);
+          console.log('viewCount in raw data:', response.data.data.freelancers[0].viewCount);
+          console.log('projectCount in raw data:', response.data.data.freelancers[0].projectCount);
+        }
+        
         response.data.data.freelancers = response.data.data.freelancers.map((freelancer: any) => ({
           ...freelancer,
           name: freelancer.userFullName || freelancer.name || '이름 없음',
@@ -77,7 +84,10 @@ class FreelancerService {
                 return [];
               }
             })() : 
-            (Array.isArray(freelancer.skills) ? freelancer.skills : [])
+            (Array.isArray(freelancer.skills) ? freelancer.skills : []),
+          // viewCount와 projectCount 필드 확실히 포함
+          viewCount: freelancer.viewCount || 0,
+          projectCount: freelancer.projectCount || 0
         }));
         console.log('Transformed freelancer data:', response.data.data.freelancers[0]);
       }

@@ -2,11 +2,17 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import MultiSearchInput from '@/components/common/MultiSearchInput';
 import { freelancerService, type FreelancerSearchParams } from '@/services/freelancer';
 import type { Freelancer } from '@/types/freelancer';
 
 export default function FreelancerPage() {
+  const searchParams = useSearchParams();
+  
+  // URL 파라미터에서 탭 가져오기
+  const tabFromUrl = searchParams.get('tab');
+  
   // 상태 관리
   const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
   const [localLoading, setLocalLoading] = useState(true);
@@ -19,7 +25,7 @@ export default function FreelancerPage() {
   const [selectedExperience, setSelectedExperience] = useState<string>('');
   const [selectedType, setSelectedType] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState("전체");
+  const [activeTab, setActiveTab] = useState(tabFromUrl || "전체");
   const [sortBy, setSortBy] = useState<string>(''); // 정렬 기준 상태
   const [allSkills, setAllSkills] = useState<string[]>([]); // API에서 로드할 기술 스택
   const [skillsLoading, setSkillsLoading] = useState(false);
@@ -88,7 +94,7 @@ export default function FreelancerPage() {
     lastRequestRef.current = requestId;
     
     try {
-      // 로딩 상태 설정
+      // 로딩 상태 설정 - 더 명확하게 처리
       if (isInitialLoad) {
         console.log('🚀 Initial load - setting page to 1');
         setLocalLoading(true);
@@ -98,17 +104,11 @@ export default function FreelancerPage() {
         setIsLoadingMore(true);
       } else {
         console.log('🔄 Filter change - resetting to page 1');
-        setIsFiltering(true);
         setCurrentPage(1); // 필터 변경 시 첫 페이지로 리셋
-        // 로딩 타임아웃 설정 (300ms 후 로딩 표시)
-        if (loadingTimeoutRef.current) {
-          clearTimeout(loadingTimeoutRef.current);
-        }
-        loadingTimeoutRef.current = setTimeout(() => {
-          if (lastRequestRef.current === requestId) {
-            setLocalLoading(true);
-          }
-        }, 300);
+        
+        // 즉시 로딩 상태 표시 (필터링 중 표시 대신 로딩 표시)
+        setLocalLoading(true);
+        setIsFiltering(false);
       }
       
       setError(null);
@@ -197,10 +197,6 @@ export default function FreelancerPage() {
         setLocalLoading(false);
         setIsFiltering(false);
         setIsLoadingMore(false);
-        if (loadingTimeoutRef.current) {
-          clearTimeout(loadingTimeoutRef.current);
-          loadingTimeoutRef.current = null;
-        }
       }
     }
   }, [currentPage, itemsPerPage, activeTab, selectedType, selectedExperience, selectedSkills, searchTerms, sortBy, freelancers.length]);
@@ -209,6 +205,13 @@ export default function FreelancerPage() {
   useEffect(() => {
     loadSkills();
   }, []);
+
+  // URL 파라미터 변경 감지
+  useEffect(() => {
+    if (tabFromUrl && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]);
 
   // 초기 로드 (한 번만)
   useEffect(() => {
@@ -809,8 +812,9 @@ export default function FreelancerPage() {
 
             {/* 로딩 인디케이터 */}
             {localLoading ? (
-              <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 dark:border-blue-400"></div>
+              <div className="flex flex-col justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 dark:border-blue-400 mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-400 font-medium">프리랜서 목록을 불러오는 중...</p>
               </div>
             ) : error ? (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
@@ -820,7 +824,7 @@ export default function FreelancerPage() {
                 <h3 className="text-lg font-medium text-red-800 dark:text-red-200 mb-2">데이터 로드 실패</h3>
                 <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
                 <button
-                  onClick={loadFreelancers}
+                  onClick={() => loadFreelancers()}
                   className="px-4 py-2 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-800/50 transition-colors"
                 >
                   다시 시도
@@ -828,9 +832,7 @@ export default function FreelancerPage() {
               </div>
             ) : (
               freelancers.length > 0 ? (
-                <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 transition-opacity duration-200 ${
-                  isFiltering ? 'opacity-60 pointer-events-none' : 'opacity-100'
-                }`}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {freelancers.map((freelancer) => (
               <div
                 key={freelancer.id}
