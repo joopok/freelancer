@@ -272,12 +272,43 @@ export const useProjects = (params: ProjectSearchParams = {}) => {
         
         // skills 파싱 및 병합
         const allSkills: string[] = [];
+        
+        // requiredSkills 파싱 (JSON 문자열인 경우)
         if (processedProject.requiredSkills) {
-          allSkills.push(...processedProject.requiredSkills);
+          if (typeof processedProject.requiredSkills === 'string') {
+            try {
+              const parsed = JSON.parse(processedProject.requiredSkills);
+              if (Array.isArray(parsed)) {
+                allSkills.push(...parsed);
+                processedProject.requiredSkills = parsed;
+              }
+            } catch (e) {
+              console.warn('Failed to parse requiredSkills:', e);
+              processedProject.requiredSkills = [];
+            }
+          } else if (Array.isArray(processedProject.requiredSkills)) {
+            allSkills.push(...processedProject.requiredSkills);
+          }
         }
+        
+        // preferredSkills 파싱 (JSON 문자열인 경우)
         if (processedProject.preferredSkills) {
-          allSkills.push(...processedProject.preferredSkills);
+          if (typeof processedProject.preferredSkills === 'string') {
+            try {
+              const parsed = JSON.parse(processedProject.preferredSkills);
+              if (Array.isArray(parsed)) {
+                allSkills.push(...parsed);
+                processedProject.preferredSkills = parsed;
+              }
+            } catch (e) {
+              console.warn('Failed to parse preferredSkills:', e);
+              processedProject.preferredSkills = [];
+            }
+          } else if (Array.isArray(processedProject.preferredSkills)) {
+            allSkills.push(...processedProject.preferredSkills);
+          }
         }
+        
         processedProject.skills = Array.from(new Set(allSkills)); // 중복 제거
         
         // company 객체 생성 (ProjectCard 컴포넌트 호환성을 위해)

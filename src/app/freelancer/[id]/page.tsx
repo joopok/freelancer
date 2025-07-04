@@ -62,6 +62,8 @@ import {
   Check
 } from 'lucide-react';
 import { FreelancerDetail, Portfolio, Review, SimilarFreelancer } from '@/types/freelancer';
+import AvailabilityCalendar from '@/components/freelancer/AvailabilityCalendar';
+import RatingTrendChart from '@/components/freelancer/RatingTrendChart';
 
 // 실시간 통계 업데이트를 위한 인터페이스
 interface RealtimeStats {
@@ -147,20 +149,49 @@ export default function FreelancerDetailPage() {
 
   // 스킬 매칭 점수 계산
   useEffect(() => {
-    const calculateMatchingScore = () => {
-      // 모의 매칭 알고리즘
-      const baseScore = 75;
-      const randomVariation = Math.random() * 20 - 10;
-      const newScore = Math.round(Math.max(0, Math.min(100, baseScore + randomVariation)));
-      setMatchingScore(newScore);
-      
-      const skillScore = Math.round(85 + Math.random() * 15);
-      setSkillMatchingScore(skillScore);
-    };
-
-    const timer = setTimeout(calculateMatchingScore, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+    // 사용자가 보고 있는 프로젝트에서 요구하는 스킬 (예시)
+    const projectRequiredSkills = ['React', 'TypeScript', 'Node.js', 'AWS', 'GraphQL'];
+    const projectBudget = { min: 5000000, max: 10000000 };
+    const projectDuration = 3; // 개월
+    
+    // 스킬 매칭 계산
+    const matchedSkills = freelancer?.skills.filter(skill => 
+      projectRequiredSkills.some(reqSkill => 
+        skill.toLowerCase().includes(reqSkill.toLowerCase()) || 
+        reqSkill.toLowerCase().includes(skill.toLowerCase())
+      )
+    ) || [];
+    
+    const skillScore = Math.round((matchedSkills.length / projectRequiredSkills.length) * 100);
+    setSkillMatchingScore(skillScore);
+    
+    // 종합 매칭 점수 계산
+    let totalScore = skillScore * 0.4; // 스킬 40%
+    
+    // 경험 점수 (30%)
+    const experience = parseInt(freelancer?.experience || '0');
+    const experienceScore = Math.min(experience * 10, 100);
+    totalScore += experienceScore * 0.3;
+    
+    // 평점 점수 (20%)
+    const ratingScore = (freelancer?.rating || 0) * 20;
+    totalScore += ratingScore * 0.2;
+    
+    // 예산 매칭 (10%)
+    let hourlyRateValue = 0;
+    if (freelancer?.hourlyRate) {
+      if (typeof freelancer.hourlyRate === 'string') {
+        hourlyRateValue = parseInt(freelancer.hourlyRate.replace(/[^0-9]/g, '') || '0');
+      } else if (typeof freelancer.hourlyRate === 'number') {
+        hourlyRateValue = freelancer.hourlyRate;
+      }
+    }
+    const projectHourlyBudget = projectBudget.max / (projectDuration * 160); // 월 160시간 기준
+    const budgetScore = hourlyRateValue <= projectHourlyBudget ? 100 : Math.max(0, 100 - ((hourlyRateValue - projectHourlyBudget) / projectHourlyBudget * 100));
+    totalScore += budgetScore * 0.1;
+    
+    setMatchingScore(Math.round(totalScore));
+  }, [freelancer]);
 
   // 프리랜서 상세 데이터 로드
   useEffect(() => {
@@ -193,7 +224,7 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
           proposalCount: 23,
           category: '개발자',
           profileImage: '/images/profile-placeholder.jpg',
-          hourlyRate: 45000,
+          hourlyRate: 45000,  // 숫자 타입으로 정의
           location: '서울, 한국',
           languages: ['한국어', '영어', '일본어'],
           availableFrom: '즉시 가능',
@@ -461,7 +492,12 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
               lastUsed: '현재',
               projects: 45,
               certified: true,
-              endorsements: 23
+              endorsements: 23,
+              verified: true,
+              hasTest: true,
+              testScore: 95,
+              hasCertificate: true,
+              certificateName: 'React Professional'
             },
             {
               name: 'TypeScript',
@@ -471,7 +507,10 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
               lastUsed: '현재',
               projects: 38,
               certified: false,
-              endorsements: 19
+              endorsements: 19,
+              verified: true,
+              hasTest: true,
+              testScore: 88
             },
             {
               name: 'Node.js',
@@ -481,7 +520,37 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
               lastUsed: '현재',
               projects: 42,
               certified: true,
-              endorsements: 21
+              endorsements: 21,
+              verified: true,
+              hasTest: true,
+              testScore: 90,
+              hasCertificate: true,
+              certificateName: 'Node.js Certified Developer'
+            },
+            {
+              name: 'AWS',
+              category: 'Cloud',
+              level: 'Advanced',
+              yearsOfExperience: 4,
+              lastUsed: '1개월 전',
+              projects: 25,
+              certified: false,
+              endorsements: 15,
+              verified: false,
+              hasTest: false
+            },
+            {
+              name: 'GraphQL',
+              category: 'Backend',
+              level: 'Advanced',
+              yearsOfExperience: 3,
+              lastUsed: '현재',
+              projects: 18,
+              certified: false,
+              endorsements: 12,
+              verified: true,
+              hasTest: true,
+              testScore: 85
             }
           ],
           
@@ -976,24 +1045,70 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
                 {/* 매칭 점수 및 실시간 통계 */}
                 <div className="lg:w-80">
                   <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">매칭 분석</h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">프로젝트 매칭 분석</h3>
+                      <div className="flex items-center gap-1">
+                        <Target className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{matchingScore}%</span>
+                      </div>
+                    </div>
+                    
+                    {/* 가상의 프로젝트 정보 */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-4 border border-gray-200 dark:border-gray-700">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">현재 보고 계신 프로젝트와의 매칭도</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">이커머스 플랫폼 개발</p>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">React</span>
+                        <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">TypeScript</span>
+                        <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">Node.js</span>
+                      </div>
+                    </div>
                     
                     <div className="space-y-4">
-                      <ProgressBar 
-                        value={matchingScore} 
-                        label="프로젝트 매칭도" 
-                        color={matchingScore >= 80 ? 'green' : matchingScore >= 60 ? 'yellow' : 'red'}
-                      />
-                      <ProgressBar 
-                        value={skillMatchingScore} 
-                        label="스킬 매칭도" 
-                        color={skillMatchingScore >= 80 ? 'green' : skillMatchingScore >= 60 ? 'yellow' : 'red'}
-                      />
-                      <ProgressBar 
-                        value={freelancer.completionRate || 0} 
-                        label="프로젝트 완료율" 
-                        color="blue"
-                      />
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">스킬 매칭도</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">{skillMatchingScore}%</span>
+                        </div>
+                        <ProgressBar 
+                          value={skillMatchingScore} 
+                          color={skillMatchingScore >= 80 ? 'green' : skillMatchingScore >= 60 ? 'yellow' : 'red'}
+                          showValue={false}
+                        />
+                      </div>
+                      
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">경험 수준</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">{parseInt(freelancer.experience || '0')}년+</span>
+                        </div>
+                        <ProgressBar 
+                          value={Math.min(parseInt(freelancer.experience || '0') * 10, 100)} 
+                          color="blue"
+                          showValue={false}
+                        />
+                      </div>
+                      
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">프로젝트 성공률</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">{freelancer.completionRate || 0}%</span>
+                        </div>
+                        <ProgressBar 
+                          value={freelancer.completionRate || 0} 
+                          color="purple"
+                          showValue={false}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="inline-flex items-center gap-1">
+                          <Zap className="w-3 h-3" />
+                          이 프리랜서는 유사 프로젝트 {freelancer.portfolios.filter(p => p.category === '웹 개발').length}개 완료
+                        </span>
+                      </p>
                     </div>
                   </div>
 
@@ -1533,6 +1648,56 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
                       })}
                     </div>
                   </div>
+                  
+                  {/* 평가 상세 분석 */}
+                  <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 mb-6">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3">평가 분석</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">추천률</span>
+                          <span className="text-lg font-semibold text-green-600 dark:text-green-400">
+                            {Math.round((freelancer.reviews.filter(r => r.wouldRecommend).length / freelancer.reviews.length) * 100)}%
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {freelancer.reviews.filter(r => r.wouldRecommend).length}명이 추천
+                        </p>
+                      </div>
+                      
+                      <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">재고용률</span>
+                          <span className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                            {freelancer.repeatClientRate}%
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          평균보다 {freelancer.repeatClientRate - 30 > 0 ? '+' : ''}{freelancer.repeatClientRate - 30}%
+                        </p>
+                      </div>
+                      
+                      <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">응답률</span>
+                          <span className="text-lg font-semibold text-purple-600 dark:text-purple-400">
+                            {freelancer.responseRate}%
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          평균 {freelancer.responseTime} 이내
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* 시기별 평점 추이 */}
+                    <div className="mt-4">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">월별 평점 추이</h4>
+                      <div className="h-32 bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                        <RatingTrendChart reviews={freelancer.reviews} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* 리뷰 목록 */}
@@ -1648,7 +1813,28 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
                       <div key={skill.name} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div className="flex items-start justify-between mb-3">
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{skill.name}</h3>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center flex-wrap gap-2">
+                              {skill.name}
+                              {/* 스킬 검증 배지 */}
+                              {skill.verified && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-xs">
+                                  <CheckCircle className="w-3 h-3" />
+                                  검증됨
+                                </span>
+                              )}
+                              {skill.hasTest && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-xs">
+                                  <Award className="w-3 h-3" />
+                                  테스트 {skill.testScore}점
+                                </span>
+                              )}
+                              {skill.hasCertificate && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full text-xs">
+                                  <Shield className="w-3 h-3" />
+                                  {skill.certificateName}
+                                </span>
+                              )}
+                            </h3>
                             <span className="text-blue-600 dark:text-blue-400 text-sm">{skill.category}</span>
                           </div>
                           <div className="text-right">
@@ -1785,9 +1971,24 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
                   </div>
                 </div>
 
-                {/* 가용성 정보 */}
+                {/* 가용성 정보 및 캘린더 */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">가용성 정보</h2>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">가용성 정보</h2>
+                    <button
+                      onClick={() => setShowScheduleModal(true)}
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 text-sm"
+                    >
+                      <CalendarIcon className="w-4 h-4" />
+                      전체 일정 보기
+                    </button>
+                  </div>
+                  
+                  {/* 가용성 캘린더 */}
+                  <div className="mb-6">
+                    <AvailabilityCalendar freelancerId={freelancer.id} />
+                  </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <h3 className="font-semibold text-gray-900 dark:text-white mb-3">현재 상태</h3>
@@ -1843,6 +2044,108 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
                             ))}
                           </div>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 작업 스타일 정보 */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">작업 스타일</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* 커뮤니케이션 스타일 */}
+                    <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        <h3 className="font-semibold text-gray-900 dark:text-white">커뮤니케이션</h3>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
+                          <span className="text-gray-600 dark:text-gray-300">응답 시간: {freelancer.communication.responseTime}</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
+                          <span className="text-gray-600 dark:text-gray-300">미팅 빈도: {freelancer.communication.meetingFrequency}</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
+                          <span className="text-gray-600 dark:text-gray-300">보고 스타일: {freelancer.communication.reportingStyle}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* 작업 환경 */}
+                    <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Settings className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                        <h3 className="font-semibold text-gray-900 dark:text-white">작업 환경</h3>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-start gap-2">
+                          <Clock className="w-4 h-4 text-gray-500 mt-0.5" />
+                          <span className="text-gray-600 dark:text-gray-300">근무 시간: {freelancer.availability.workingHours.start} - {freelancer.availability.workingHours.end}</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <Globe className="w-4 h-4 text-gray-500 mt-0.5" />
+                          <span className="text-gray-600 dark:text-gray-300">시간대: {freelancer.availability.timezone}</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          {freelancer.projectPreferences.remoteOnly ? (
+                            <Video className="w-4 h-4 text-gray-500 mt-0.5" />
+                          ) : (
+                            <MapPin className="w-4 h-4 text-gray-500 mt-0.5" />
+                          )}
+                          <span className="text-gray-600 dark:text-gray-300">
+                            {freelancer.projectPreferences.remoteOnly ? '원격 근무 선호' : '상주/원격 모두 가능'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* 프로젝트 선호도 */}
+                    <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Target className="w-5 h-5 text-green-600 dark:text-green-400" />
+                        <h3 className="font-semibold text-gray-900 dark:text-white">프로젝트 선호</h3>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div>
+                          <span className="text-gray-500">기간:</span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {freelancer.projectPreferences.durationPreference.map((duration, idx) => (
+                              <span key={idx} className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded text-xs text-gray-600 dark:text-gray-400">
+                                {duration}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">규모:</span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {freelancer.projectPreferences.projectSize.map((size, idx) => (
+                              <span key={idx} className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded text-xs text-gray-600 dark:text-gray-400">
+                                {size}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* 추가 작업 스타일 정보 */}
+                  <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-start gap-3">
+                      <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white mb-2">협업 특징</h4>
+                        <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
+                          <li>• 체계적인 프로젝트 관리와 문서화</li>
+                          <li>• 깔끔하고 유지보수가 쉬운 코드 작성</li>
+                          <li>• 클라이언트의 비즈니스 목표 우선 고려</li>
+                          <li>• 적극적인 피드백 및 개선사항 제안</li>
+                        </ul>
                       </div>
                     </div>
                   </div>
@@ -1999,27 +2302,46 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
                 </div>
               </div>
 
-              {/* Q&A 섹션 */}
+              {/* FAQ 섹션 */}
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">자주 묻는 질문</h3>
-                <div className="space-y-4">
-                  {freelancer.qaSection.map(qa => (
-                    <div key={qa.id} className="border-b border-gray-200 dark:border-gray-700 last:border-0 pb-4 last:pb-0">
-                      <h4 className="font-medium text-gray-900 dark:text-white text-sm mb-2">
-                        Q. {qa.question}
-                      </h4>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm">
-                        A. {qa.answer}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                        <ThumbsUp className="w-3 h-3" />
-                        <span>{qa.upvotes}</span>
-                        <span>•</span>
-                        <span>{qa.answeredAt}</span>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">자주 묻는 질문</h3>
+                  <button className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium">
+                    질문하기
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {freelancer.qaSection.map((qa, index) => (
+                    <details key={qa.id} className="group">
+                      <summary className="cursor-pointer list-none">
+                        <div className="flex items-start justify-between p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                          <div className="flex items-start gap-3 flex-1">
+                            <span className="text-blue-600 dark:text-blue-400 font-medium">Q{index + 1}.</span>
+                            <span className="text-gray-900 dark:text-white font-medium flex-1">{qa.question}</span>
+                          </div>
+                          <ChevronDown className="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" />
+                        </div>
+                      </summary>
+                      <div className="px-4 pb-4">
+                        <div className="pl-8 pt-2">
+                          <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{qa.answer}</p>
+                          <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                            <button className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                              <ThumbsUp className="w-3 h-3" />
+                              <span>도움이 되었어요 ({qa.upvotes})</span>
+                            </button>
+                            <span>{qa.answeredAt}</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    </details>
                   ))}
                 </div>
+                {freelancer.qaSection.length > 3 && (
+                  <button className="w-full mt-4 py-2 text-center text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                    모든 질문 보기 ({freelancer.qaSection.length}개)
+                  </button>
+                )}
               </div>
 
               {/* 보안 배지 */}

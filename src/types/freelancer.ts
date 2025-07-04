@@ -119,6 +119,11 @@ export interface SkillDetail {
   projects: number;
   certified: boolean;
   endorsements: number;
+  verified?: boolean;
+  hasTest?: boolean;
+  testScore?: number;
+  hasCertificate?: boolean;
+  certificateName?: string;
 }
 
 // 가용성 정보 타입

@@ -21,8 +21,46 @@ const BannerAnimation = memo(() => (
           <stop offset="50%" stopColor="#4338ca" stopOpacity="0.6" />
           <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.8" />
         </linearGradient>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
       </defs>
       <rect width="100%" height="100%" fill="url(#bannerGradient)" />
+      
+      {/* 애니메이션 요소들 */}
+      <g filter="url(#glow)">
+        <circle cx="75" cy="25" r="5" fill="white" opacity="0.3">
+          <animate attributeName="r" values="5;7;5" dur="4s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.3;0.6;0.3" dur="4s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="25" cy="70" r="3" fill="white" opacity="0.2">
+          <animate attributeName="r" values="3;5;3" dur="3s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" repeatCount="indefinite" />
+        </circle>
+      </g>
+      
+      {/* 움직이는 그라데이션 원형 */}
+      <circle cx="0" cy="0" r="20" fill="url(#radialGradient)">
+        <animateMotion path="M 50 50 L 90 30 L 50 70 L 10 50 Z" dur="15s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="0" cy="0" r="15" fill="url(#radialGradient)">
+        <animateMotion path="M 50 50 L 10 30 L 50 10 L 90 50 Z" dur="12s" repeatCount="indefinite" />
+      </circle>
+      
+      {/* 웨이브 애니메이션 */}
+      <path d="M0,0 L100,0 L100,100 L0,100 Z" fill="url(#bannerGradient)" opacity="0.5">
+        <animate attributeName="d" 
+          values="M0,0 L100,0 L100,100 L0,100 Z; 
+                  M0,0 L100,0 L90,100 L0,90 Z; 
+                  M0,0 L100,0 L100,100 L0,100 Z" 
+          dur="20s" 
+          repeatCount="indefinite" />
+      </path>
+      
+      {/* 추가 조명 효과 */}
+      <ellipse cx="20" cy="20" rx="30" ry="10" fill="white" opacity="0.03" />
+      <ellipse cx="80" cy="80" rx="20" ry="30" fill="white" opacity="0.04" />
     </svg>
   </div>
 ));
@@ -140,6 +178,91 @@ const ProjectBanner = memo(({ searchTerm, onSearchChange }: ProjectBannerProps) 
           <ProjectCard />
         </div>
       </div>
+
+      {/* 인터랙티브 애니메이션 요소 */}
+      <div className="absolute bottom-0 left-0 w-full overflow-hidden">
+        <div className="relative h-16">
+          {/* 웨이브 애니메이션 */}
+          <div className="absolute bottom-0 left-0 w-full">
+            <svg className="w-full h-12" viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path
+                d="M0,0 C150,90 350,0 500,80 C650,160 750,40 900,100 C1050,160 1150,60 1200,80 L1200,120 L0,120 Z"
+                className="fill-white opacity-70"
+              >
+                <animate
+                  attributeName="d"
+                  dur="10s"
+                  repeatCount="indefinite"
+                  values="
+                  M0, 0 C150, 90 350, 0 500, 80 C650, 160 750, 40 900, 100 C1050, 160 1150, 60 1200, 80 L1200, 120 L0, 120 Z;
+                  M0, 0 C150, 40 350, 80 500, 20 C650, 60 750, 120 900, 40 C1050, 20 1150, 80 1200, 60 L1200, 120 L0, 120 Z;
+                  M0, 0 C150, 90 350, 0 500, 80 C650, 160 750, 40 900, 100 C1050, 160 1150, 60 1200, 80 L1200, 120 L0, 120 Z"
+                />
+              </path>
+            </svg>
+          </div>
+
+          {/* 부유하는 아이콘들 */}
+          <div className="absolute bottom-4 left-1/4 animate-bounce-slow opacity-80">
+            <div className="bg-white p-2 rounded-full shadow-lg">
+              <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </div>
+
+          <div className="absolute bottom-8 left-1/2 animate-float opacity-80">
+            <div className="bg-white p-2 rounded-full shadow-lg">
+              <svg className="w-6 h-6 text-indigo-700" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </div>
+
+          <div className="absolute bottom-6 left-3/4 animate-pulse opacity-80">
+            <div className="bg-white p-2 rounded-full shadow-lg">
+              <svg className="w-6 h-6 text-purple-800" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 애니메이션 스타일 */}
+      <style jsx>{`
+        @keyframes bounce-slow {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+        
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0) translateX(0);
+          }
+          25% {
+            transform: translateY(-8px) translateX(5px);
+          }
+          50% {
+            transform: translateY(0) translateX(10px);
+          }
+          75% {
+            transform: translateY(8px) translateX(5px);
+          }
+        }
+        
+        .animate-bounce-slow {
+          animation: bounce-slow 3s infinite;
+        }
+        
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 });

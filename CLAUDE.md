@@ -10,10 +10,12 @@ JobKorea Billboard (잡코리아 빌보드) - A modern freelancer matching platf
 ### Development & Build
 ```bash
 npm run dev          # Start development server (http://localhost:3000)
+npm run dev:api      # Start with real API (NEXT_PUBLIC_USE_MOCK_API=false)
+npm run dev:mock     # Start with mock data (NEXT_PUBLIC_USE_MOCK_API=true)
 npm run build        # Build for production
 npm run start        # Start production server
 npm run lint         # Run ESLint checks
-npm run analyze      # Bundle size analyzer (opens in browser)
+npm run analyze      # Bundle size analyzer (ANALYZE=true npm run build)
 ```
 
 ### Code Quality & Testing
@@ -53,7 +55,7 @@ src/
 ├── components/       # Reusable UI components
 │   ├── common/      # Generic UI components
 │   ├── layout/      # Layout components (Header, Footer)
-│   ├── home/        # Homepage-specific components
+│   ├── athome/      # Homepage-specific components
 │   ├── freelancer/  # Freelancer-related components
 │   └── project/     # Project-related components
 ├── services/        # API service layer
@@ -101,11 +103,12 @@ src/
 - **MCP Server**: MariaDB MCP server in `mariadb-mcp-server/`
 
 ## Environment Variables
-Required in `.env.local`:
+Required in `.env` or `.env.local`:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8080
 NEXT_PUBLIC_USE_MOCK_API=false
 NEXT_PUBLIC_API_TIMEOUT=30000
+NEXT_PUBLIC_AUTH_TOKEN_NAME=auth_token
 ```
 
 ## Authentication Flow
@@ -154,12 +157,69 @@ interface ApiResponse<T> {
 }
 ```
 
-## Active Development Areas
-1. **Skills API** - `/api/freelancers/skills/` integration
-2. **Multi-search** - Tag-based filtering enhancement
-3. **Dynamic routing** - Detail pages for freelancers/projects
-4. **Settings page** - User preference management
-5. **Test framework** - Jest/Vitest implementation needed
+## 🚨 CRITICAL: Project Loading Issues Prevention Guide
+
+### Problem: "No matching projects found" displays immediately on page load
+
+### Root Cause Analysis
+1. **Mock API Mode Active** - When `NEXT_PUBLIC_USE_MOCK_API=true`, the app uses mock data instead of real backend
+2. **Environment Variable Caching** - Next.js caches environment variables; changes require server restart
+3. **Loading State Timing** - Brief moment between component mount and data fetch shows empty state
+
+### Systematic Debugging Approach
+When experiencing data loading issues, follow this proven checklist:
+
+1. **Check Environment Variables FIRST**
+   ```bash
+   cat .env | grep NEXT_PUBLIC_USE_MOCK_API
+   # Expected: NEXT_PUBLIC_USE_MOCK_API=false
+   ```
+
+2. **Verify Backend Status**
+   ```bash
+   curl http://localhost:8080/api/projects?page=1&limit=10
+   # Should return JSON with projects data
+   ```
+
+3. **Check Browser Console**
+   - Look for: `🔍 useProjects - Mock API 사용: false`
+   - Look for: `✅ Projects fetched:` with count > 0
+   - Any error messages starting with `❌`
+
+### Quick Resolution Steps
+```bash
+# When you see "No projects found" unexpectedly:
+1. pkill -f next     # Stop all Next.js processes
+2. npm run dev:api   # Restart with real API mode
+3. Hard refresh browser (Cmd+Shift+R)
+```
+
+## 🎭 Tone and Manner Standards (from .cursor/rules/)
+
+### Core Principles (MANDATORY)
+1. **Respect First**: Acknowledge user effort, never assume knowledge level
+2. **Clarity Above All**: Use active voice, specific words, logical structure
+3. **Solution-Oriented**: Lead with what users CAN do, provide clear next steps
+
+### User-Facing Text Rules
+- **Error Messages Formula**: [Acknowledgment] + [Clear explanation] + [Specific action] + [Support offer]
+- **Success Messages**: Celebrate achievement + Emphasize benefit + Suggest next step
+- **Loading States**: Context-specific engaging messages (NOT generic "Loading...")
+- **Empty States**: Helpful guidance with specific actions (NOT "No results found")
+
+### Prohibited Patterns ❌
+- Cold/technical language: "Operation failed", "Invalid input"
+- Blaming users: "You entered invalid data", "Wrong input"
+- Vague messages: "Something went wrong", "Error occurred"
+- Generic buttons: "Submit", "OK", "Cancel"
+
+### Tone Validation Commands
+```bash
+npm run tone:check     # Check for harsh language
+npm run tone:errors    # Validate error messages
+npm run tone:naming    # Check function naming
+npm run tone:validate  # Full tone compliance check
+```
 
 ## Common Issues & Solutions
 
@@ -178,167 +238,15 @@ interface ApiResponse<T> {
 - Check environment variables exist
 - Verify no relative imports used
 
-## 🚨 CRITICAL: Project Loading Issues Prevention Guide
-
-### Problem: "No matching projects found" displays immediately on page load
-
-We've identified this recurring issue and created a systematic solution. Here's how to resolve it quickly and prevent future occurrences:
-
-### Root Cause Analysis
-1. **Mock API Mode Active** - When `NEXT_PUBLIC_USE_MOCK_API=true`, the app uses mock data instead of real backend
-2. **Environment Variable Caching** - Next.js caches environment variables; changes require server restart
-3. **Loading State Timing** - Brief moment between component mount and data fetch shows empty state
-
-### Systematic Debugging Approach
-When experiencing data loading issues, follow this proven checklist:
-
-1. **Check Environment Variables FIRST**
-   ```bash
-   # Check current .env settings
-   cat .env | grep NEXT_PUBLIC_USE_MOCK_API
-   # Expected: NEXT_PUBLIC_USE_MOCK_API=false
-   ```
-
-2. **Verify Backend Status**
-   ```bash
-   # Test backend directly
-   curl http://localhost:8080/api/projects?page=1&limit=10
-   # Should return JSON with projects data
-   ```
-
-3. **Check Browser Console**
-   - Look for: `🔍 useProjects - Mock API 사용: false`
-   - Look for: `✅ Projects fetched:` with count > 0
-   - Any error messages starting with `❌`
-
-4. **Check Network Tab**
-   - Filter by "XHR" or "Fetch"
-   - Look for `/api/projects` request
-   - Verify response status is 200
-   - Check response contains actual data
-
-### Essential Steps When Changing Environment Variables
-
-**To ensure changes take effect, follow these steps when modifying .env:**
-
-1. **Save .env file**
-2. **Kill ALL Next.js processes**
-   ```bash
-   # Find processes
-   ps aux | grep "next" | grep -v grep
-   # Kill them (replace PID with actual process IDs)
-   kill -9 [PID1] [PID2]
-   ```
-3. **Clear Next.js cache**
-   ```bash
-   rm -rf .next
-   ```
-4. **Restart server**
-   ```bash
-   npm run dev
-   ```
-5. **Verify in browser console** that environment variables are updated
-
-### Environment Variable Best Practices
-
-1. **Development Scripts**
-   ```json
-   // Add to package.json
-   "scripts": {
-     "dev:mock": "NEXT_PUBLIC_USE_MOCK_API=true npm run dev",
-     "dev:api": "NEXT_PUBLIC_USE_MOCK_API=false npm run dev"
-   }
-   ```
-
-2. **Visual Indicators**
-   - ALWAYS check console logs for API mode
-   - Consider adding visual indicator component for dev mode
-
-3. **Pre-commit Verification**
-   - NEVER commit with `NEXT_PUBLIC_USE_MOCK_API=true`
-   - Add to pre-commit checklist
-
-### Quick Resolution Steps
-```bash
-# When you see "No projects found" unexpectedly, try these steps:
-1. pkill -f next     # Stop all Next.js processes
-2. npm run dev:api   # Restart with real API mode
-3. Hard refresh browser (Cmd+Shift+R)
-```
-
-### Prevention Measures
-1. **Always use `dev:api` script for development**
-2. **Check console logs immediately after page load**
-3. **Verify backend is running BEFORE starting frontend**
-4. **Document any environment changes in commit messages**
-
-## 🎭 Tone and Manner Standards (from .cursor/rules/)
-
-### Core Principles (MANDATORY)
-1. **Respect First**: Acknowledge user effort, never assume knowledge level
-2. **Clarity Above All**: Use active voice, specific words, logical structure
-3. **Solution-Oriented**: Lead with what users CAN do, provide clear next steps
-
-### User-Facing Text Rules
-- **Error Messages Formula**: [Acknowledgment] + [Clear explanation] + [Specific action] + [Support offer]
-- **Success Messages**: Celebrate achievement + Emphasize benefit + Suggest next step
-- **Loading States**: Context-specific engaging messages (NOT generic "Loading...")
-- **Empty States**: Helpful guidance with specific actions (NOT "No results found")
-
-### Code Standards
-- **Function Names**: Self-documenting, intention-revealing (e.g., `fetchAvailableFreelancers`, NOT `getData`)
-- **Comments**: Explain WHY, not WHAT (Korean comments for complex logic)
-- **Variable Names**: Clear and descriptive, no abbreviations
-
-### Prohibited Patterns ❌
-- Cold/technical language: "Operation failed", "HTTP 500", "Invalid input"
-- Blaming users: "You entered invalid data", "Wrong input"
-- Vague messages: "Something went wrong", "Error occurred", "Please wait"
-- Generic buttons: "Submit", "OK", "Cancel"
-
-### Tone Validation Commands
-```bash
-# Check for harsh language in UI components
-npm run tone:check
-
-# Validate error messages follow supportive formula
-npm run tone:errors
-
-# Check function naming clarity
-npm run tone:naming
-
-# Full tone compliance check
-npm run tone:validate
-```
-
-### Example Implementations
-```typescript
-// ✅ CORRECT Error Message
-const ERROR_MESSAGE = "We couldn't save your changes. Please check your internet connection and try again. Need help? Contact support@jobkorea.com";
-
-// ❌ INCORRECT
-const BAD_ERROR = "Save failed. Error 500.";
-
-// ✅ CORRECT Loading Message
-const LOADING_MESSAGE = "Finding perfect projects for your skills...";
-
-// ❌ INCORRECT
-const BAD_LOADING = "Loading...";
-```
-
 ## Pre-commit Checklist
 1. ✅ `npm run lint` - All errors fixed
 2. ✅ `npx tsc --noEmit` - No type errors
 3. ✅ `npm run tone:validate` - All tone checks passed
 4. ✅ Dark mode appearance tested
 5. ✅ API calls use service layer
-6. ✅ Error handling follows supportive formula
-7. ✅ Responsive on mobile/tablet/desktop
-8. ✅ No console.log statements
-9. ✅ All imports use @/* paths
-10. ✅ Constants used (no hardcoded strings)
-11. ✅ Component has TypeScript types
-12. ✅ User-facing text is supportive and clear
+6. ✅ No console.log statements
+7. ✅ All imports use @/* paths
+8. ✅ User-facing text is supportive and clear
 
 ## Backend Integration Notes
 - Spring Boot backend must be running on port 8080
@@ -346,36 +254,12 @@ const BAD_LOADING = "Loading...";
 - Run backend with: `./gradlew bootRun`
 - Backend CORS configured for localhost:3000
 
-## 🎯 Priority Debugging Protocol
-
-**When encountering empty or error states, follow this proven approach:**
-1. **PAUSE** - Avoid modifying code immediately
-2. **VERIFY** - Check environment variables in .env file
-3. **TEST** - Confirm backend is running (use curl test)
-4. **REFRESH** - Restart Next.js if environment variables changed
-5. **INVESTIGATE** - Then examine code-related issues
-
-**This systematic approach has successfully resolved all reported data loading issues.**
-
-## Automated Tone Validation Scripts
-
-The following npm scripts are available for validating tone and manner compliance:
-
-```bash
-# Check for harsh/blaming language in UI components
-npm run tone:check
-
-# Validate error messages follow supportive formula
-npm run tone:errors
-
-# Check function naming clarity
-npm run tone:naming
-
-# Run full tone compliance validation
-npm run tone:validate
-```
-
-These scripts will help ensure all user-facing text follows our tone and manner guidelines before committing code.
+## Active Development Areas
+1. **Skills API** - `/api/freelancers/skills/` integration
+2. **Multi-search** - Tag-based filtering enhancement
+3. **Dynamic routing** - Detail pages for freelancers/projects
+4. **Settings page** - User preference management
+5. **Test framework** - Jest/Vitest implementation needed
 
 ## Cursor Rules Integration
 The project includes comprehensive tone and manner protocols in `.cursor/rules/`:
