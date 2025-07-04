@@ -1,0 +1,291 @@
+---
+alwaysApply: true
+---
+## 🔍 **AUTOMATED VALIDATION RULES**
+
+### **RULE E4: ESLINT INTEGRATION**
+**IMPLEMENTATION**: Add custom ESLint rules for tone compliance
+
+```javascript
+// .eslintrc.js 추가 규칙
+module.exports = {
+  rules: {
+    // 사용자 대면 텍스트에서 금지 단어 체크
+    'no-harsh-language': ['error', {
+      forbidden: ['failed', 'error', 'invalid', 'wrong', 'bad'],
+      context: 'user-facing-text'
+    }],
+    
+    // 함수명 명확성 체크
+    'descriptive-function-names': ['error', {
+      minLength: 5,
+      requireActionVerb: true
+    }],
+    
+    // 주석 품질 체크
+    'meaningful-comments': ['warn', {
+      requireWhyComments: true,
+      blockObviousComments: true
+    }]
+  }
+};
+```
+
+### **RULE E5: PRE-COMMIT HOOK AUTOMATION**
+**IMPLEMENTATION**: Git pre-commit hook for automatic validation
+
+```bash
+#!/bin/bash
+# .git/hooks/pre-commit
+
+echo "🔍 Checking tone and manner compliance..."
+
+# 1. Check for prohibited patterns in user-facing text
+HARSH_PATTERNS=$(grep -r "Error\|Failed\|Invalid\|Wrong" src/components/ src/app/ --include="*.tsx" | grep -v "// OK:" || true)
+if [ ! -z "$HARSH_PATTERNS" ]; then
+  echo "❌ TONE VIOLATION: Harsh language detected in user-facing components:"
+  echo "$HARSH_PATTERNS"
+  echo "Please use supportive language instead. See tone guidelines."
+  exit 1
+fi
+
+# 2. Check for vague function names
+VAGUE_FUNCTIONS=$(grep -r "function handle\|const handle\|function get\|const get" src/ --include="*.ts" --include="*.tsx" | grep -E "(handle|get|set|check)$" || true)
+if [ ! -z "$VAGUE_FUNCTIONS" ]; then
+  echo "❌ NAMING VIOLATION: Vague function names detected:"
+  echo "$VAGUE_FUNCTIONS"
+  echo "Please use specific, intention-revealing names."
+  exit 1
+fi
+
+# 3. Check for missing Korean comments on complex logic
+COMPLEX_CODE_WITHOUT_COMMENTS=$(grep -r "useEffect\|useMemo\|useCallback" src/ --include="*.tsx" -A 3 | grep -B 3 -v "// " | head -20 || true)
+if [ ! -z "$COMPLEX_CODE_WITHOUT_COMMENTS" ]; then
+  echo "⚠️  WARNING: Complex code found without explanatory comments"
+  echo "Consider adding Korean comments explaining WHY this code exists"
+fi
+
+echo "✅ Tone and manner validation passed!"
+```
+
+---
+
+## 📋 **COMPONENT-SPECIFIC ENFORCEMENT**
+
+### **RULE E6: FORM COMPONENTS**
+**MANDATORY PATTERNS FOR**: All forms and input components
+
+```typescript
+interface FormComponentChecklist {
+  // ✅ REQUIRED ELEMENTS
+  labels: "Clear instruction with context";
+  placeholders: "Specific guidance or example";
+  validation_messages: "Supportive explanation + next steps";
+  submit_buttons: "Specific action verb + object";
+  help_text: "Available when needed, not overwhelming";
+  
+  // ❌ PROHIBITED ELEMENTS
+  generic_labels: "Title", "Name", "Description";
+  vague_placeholders: "Enter text", "Type here";
+  harsh_validation: "Invalid input", "Error";
+  generic_buttons: "Submit", "OK", "Cancel";
+}
+
+// ✅ CORRECT IMPLEMENTATION EXAMPLE:
+const ProjectCreateForm = () => {
+  return (
+    <form>
+      <label htmlFor="title">
+        Project title (this will be the first thing freelancers see)
+      </label>
+      <input
+        id="title"
+        placeholder="e.g., React Developer for E-commerce Platform"
+        aria-describedby="title-help"
+      />
+      <small id="title-help">
+        A clear, specific title helps attract the right talent
+      </small>
+      
+      {error && (
+        <div className="error" role="alert">
+          We need a project title to help freelancers understand your needs. 
+          Please add a descriptive title above and try again.
+          <a href="/help">Need help writing a good title?</a>
+        </div>
+      )}
+      
+      <button type="submit">
+        Create Project and Find Freelancers
+      </button>
+    </form>
+  );
+};
+```
+
+### **RULE E7: ERROR BOUNDARY COMPONENTS**
+**MANDATORY FOR**: All error boundary and error state components
+
+```typescript
+// ✅ REQUIRED ERROR MESSAGE STRUCTURE:
+interface ErrorMessageStructure {
+  acknowledgment: "We apologize for the inconvenience";
+  explanation: "Clear description of what went wrong";
+  user_action: "Specific steps the user can take";
+  support_option: "How to get help if needed";
+  reassurance: "This doesn't affect other parts of their work";
+}
+
+// ✅ CORRECT IMPLEMENTATION:
+const ErrorBoundary = ({ error }: { error: Error }) => {
+  return (
+    <div className="error-boundary">
+      <h2>We apologize for the interruption</h2>
+      <p>
+        Something unexpected happened while loading this page. 
+        This is on our end, not yours.
+      </p>
+      <div className="actions">
+        <button onClick={() => window.location.reload()}>
+          Try Again
+        </button>
+        <a href="mailto:support@aiproject02.com">
+          Contact Support
+        </a>
+      </div>
+      <p className="reassurance">
+        Your other projects and data are safe and unaffected.
+      </p>
+    </div>
+  );
+};
+```
+
+### **RULE E8: LOADING AND EMPTY STATES**
+**MANDATORY FOR**: All loading indicators and empty state components
+
+```typescript
+// ✅ ENGAGING LOADING MESSAGES BY CONTEXT:
+const LOADING_MESSAGES = {
+  projects: "Finding projects that match your skills...",
+  freelancers: "Discovering talented freelancers for you...",
+  profile: "Loading your profile...",
+  applications: "Checking your application status...",
+  messages: "Loading your conversations...",
+  
+  // ❌ NEVER USE GENERIC:
+  // "Loading...", "Please wait...", "Processing..."
+};
+
+// ✅ HELPFUL EMPTY STATES:
+const EMPTY_STATE_MESSAGES = {
+  no_projects: {
+    title: "No projects match your search yet",
+    description: "Try different keywords or explore all categories to find opportunities",
+    action: "Browse All Projects"
+  },
+  no_applications: {
+    title: "You haven't applied to any projects yet",
+    description: "Start browsing projects to find opportunities that match your skills",
+    action: "Find Projects"
+  },
+  
+  // ❌ NEVER USE UNHELPFUL:
+  // "No results found", "Empty", "Nothing here"
+};
+```
+
+---
+
+## 🎯 **SPECIFIC VIOLATION DETECTION**
+
+### **RULE E9: AUTOMATED TONE SCANNING**
+**SCAN FOR THESE PATTERNS**:
+
+```bash
+# 1. Harsh/Blaming Language Detection
+grep -r "fail\|error\|invalid\|wrong\|bad\|broken" src/ --include="*.tsx" \
+  | grep -E "(className|aria-label|title|placeholder)" \
+  | grep -v "// TONE: OK"
+
+# 2. Generic/Vague Text Detection
+grep -r "click here\|more info\|submit\|cancel\|ok\|loading\|please wait" src/ --include="*.tsx" \
+  | grep -E "(>.*<|placeholder|aria-label)"
+
+# 3. Technical Jargon in User-Facing Text
+grep -r "HTTP\|API\|JSON\|SQL\|CRUD\|UUID\|regex" src/components/ --include="*.tsx" \
+  | grep -E "(>.*<|placeholder|aria-label|title)"
+
+# 4. Missing Context in Labels
+grep -r "<label" src/ --include="*.tsx" -A 1 \
+  | grep -E "^[^:]*>[A-Z][a-z]+</label>" \
+  | grep -v "for\|context\|help"
+```
+
+### **RULE E10: SUCCESS METRICS TRACKING**
+**MEASURE COMPLIANCE**:
+
+```typescript
+// 매주 실행할 검증 스크립트
+interface ToneComplianceMetrics {
+  user_facing_text_score: number;      // 0-100, 높을수록 좋음
+  error_message_helpfulness: number;   // 평균 도움 점수
+  function_name_clarity: number;       // 이름 명확성 점수
+  comment_coverage: number;            // 복잡한 로직 대비 주석 비율
+  user_satisfaction_correlation: number; // 톤과 사용자 만족도 상관관계
+}
+
+// 목표 점수
+const TARGET_SCORES = {
+  user_facing_text_score: 90,
+  error_message_helpfulness: 85,
+  function_name_clarity: 95,
+  comment_coverage: 80,
+  user_satisfaction_correlation: 0.7
+};
+```
+
+---
+
+## 🔧 **IMMEDIATE ACTION PROTOCOL**
+
+### **WHEN TONE VIOLATIONS ARE DETECTED**:
+
+**PRIORITY 1 (Critical - User-Facing)**:
+1. 🚨 **STOP DEPLOYMENT** if violations are in production-bound code
+2. 📝 **FIX IMMEDIATELY** - rewrite following tone guidelines
+3. ✅ **RE-VALIDATE** using checklist
+4. 🚀 **DEPLOY FIX** as hotfix if already in production
+
+**PRIORITY 2 (High - Developer-Facing)**:
+1. 📅 **SCHEDULE FIX** within 48 hours
+2. 🔄 **REFACTOR** following naming and comment guidelines
+3. 📚 **UPDATE DOCUMENTATION** if needed
+4. ✅ **TEAM REVIEW** for consistency
+
+**PRIORITY 3 (Medium - Internal)**:
+1. 📝 **CREATE TICKET** for improvement
+2. 🗓️ **PLAN REFACTOR** in next sprint
+3. 📊 **TRACK METRICS** for improvement trends
+
+---
+
+## 📊 **ENFORCEMENT SUCCESS CRITERIA**
+
+### **WEEKLY METRICS**:
+- ✅ **Zero** harsh language in user-facing text
+- ✅ **90%+** of error messages follow supportive formula
+- ✅ **95%+** of functions have clear, descriptive names
+- ✅ **80%+** of complex logic has explanatory Korean comments
+
+### **MONTHLY GOALS**:
+- 📈 **Increase** user task completion rates
+- 📉 **Decrease** support tickets about confusing UI text
+- 📊 **Improve** user satisfaction scores related to clarity
+- 🚀 **Accelerate** developer onboarding through clear documentation
+
+---
+
+**FINAL ENFORCEMENT RULE**: If you're unsure whether text follows our tone and manner guidelines, **default to being more supportive, more specific, and more helpful**. When in doubt, ask: "Would this make a frustrated user feel better or worse?"
+
+**ZERO TOLERANCE**: No exceptions for "quick fixes" or "temporary text". Every user interaction shapes their perception of our platform. 

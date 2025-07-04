@@ -476,3 +476,152 @@ export const mockRealtimeStats = {
   averageResponseTime: '2시간',
   successfulHires: 23
 };
+
+import { AthomeProject } from '@/types/athome';
+
+export const athomeProjectsData: AthomeProject[] = [
+  {
+    id: "1",
+    title: "AI 기반 추천 시스템 개발",
+    company: "(주)테크인사이트",
+    skills: ["Python", "TensorFlow", "AWS"],
+    duration: "4개월",
+    budget: "4,500만원",
+    deadline: "D-3",
+    type: "재택",
+    description: "사용자 행동 패턴 분석을 통한 맞춤형 상품 추천 시스템 개발 프로젝트입니다.",
+    level: "중급"
+  },
+  {
+    id: "3",
+    title: "블록체인 기반 결제 시스템 구축",
+    company: "(주)블록테크",
+    skills: ["Solidity", "Web3.js", "Node.js"],
+    duration: "6개월",
+    budget: "7,000만원",
+    deadline: "D-7",
+    type: "재택",
+    description: "블록체인 기술을 활용한 안전한 결제 시스템 개발 프로젝트입니다.",
+    level: "고급"
+  },
+  {
+    id: "6",
+    title: "IoT 디바이스 모니터링 앱 개발",
+    company: "(주)스마트테크",
+    skills: ["Flutter", "Firebase", "MQTT"],
+    duration: "4개월",
+    budget: "4,000만원",
+    deadline: "D-6",
+    type: "재택",
+    description: "다양한 IoT 디바이스 상태를 실시간으로 모니터링하는 모바일 앱 개발 프로젝트입니다.",
+    level: "중급"
+  },
+  {
+    id: "8",
+    title: "SNS 플랫폼 API 개발",
+    company: "(주)소셜미디어",
+    skills: ["Node.js", "GraphQL", "MongoDB"],
+    duration: "4개월",
+    budget: "4,200만원",
+    deadline: "D-2",
+    type: "재택",
+    description: "소셜 미디어 플랫폼의 효율적인 데이터 처리를 위한 API 개발 프로젝트입니다.",
+    level: "중급"
+  },
+  {
+    id: "10",
+    title: "메타버스 플랫폼 개발",
+    company: "(주)메타랩스",
+    skills: ["Unity", "WebGL", "Three.js"],
+    duration: "6개월",
+    budget: "8,000만원",
+    deadline: "D-1",
+    type: "재택",
+    description: "가상 현실 기반의 메타버스 플랫폼 프론트엔드 개발 프로젝트입니다.",
+    level: "고급"
+  },
+  {
+    id: "11",
+    title: "AI 챗봇 시스템 개발",
+    company: "(주)인텔리봇",
+    skills: ["NLP", "Python", "TensorFlow"],
+    duration: "5개월",
+    budget: "5,800만원",
+    deadline: "D-2",
+    type: "재택",
+    description: "자연어 처리 기술을 활용한 고객 응대용 AI 챗봇 시스템 개발 프로젝트입니다.",
+    level: "중급"
+  },
+  {
+    id: "13",
+    title: "보안 시스템 강화 프로젝트",
+    company: "(주)시큐리티솔루션",
+    skills: ["Java", "Spring Security", "Penetration Testing"],
+    duration: "3개월",
+    budget: "4,200만원",
+    deadline: "D-6",
+    type: "재택",
+    description: "기업 보안 시스템 취약점 분석 및 보안 강화 솔루션 개발 프로젝트입니다.",
+    level: "고급"
+  },
+  {
+    id: "15",
+    title: "CRM 시스템 개발",
+    company: "(주)고객관리시스템",
+    skills: ["React", "GraphQL", "PostgreSQL"],
+    duration: "5개월",
+    budget: "6,000만원",
+    deadline: "D-5",
+    type: "재택",
+    description: "기업 고객 관리를 위한 대시보드 및 관리 시스템 개발 프로젝트입니다.",
+    level: "중급"
+  },
+  {
+    id: "21",
+    title: "온라인 교육 플랫폼 개발",
+    company: "(주)에듀테크",
+    skills: ["React", "Node.js", "MongoDB"],
+    duration: "4개월",
+    budget: "5,000만원",
+    deadline: "D-8",
+    type: "재택",
+    description: "실시간 강의 및 학습 관리 기능을 제공하는 온라인 교육 플랫폼 개발 프로젝트입니다.",
+    level: "중급"
+  },
+  {
+    id: "22",
+    title: "디지털 헬스케어 앱 개발",
+    company: "(주)헬스케어솔루션",
+    skills: ["React Native", "Firebase", "Node.js"],
+    duration: "5개월",
+    budget: "6,500만원",
+    deadline: "D-4",
+    type: "재택",
+    description: "사용자 건강 데이터 분석 및 맞춤형 건강 관리 서비스를 제공하는 모바일 앱 개발 프로젝트입니다.",
+    level: "중급"
+  },
+  {
+    id: "23",
+    title: "실시간 협업 툴 개발",
+    company: "(주)팀워크솔루션",
+    skills: ["Vue.js", "WebSocket", "Node.js"],
+    duration: "6개월",
+    budget: "7,200만원",
+    deadline: "D-3",
+    type: "재택",
+    description: "실시간 문서 공유 및 협업 기능을 제공하는 웹 애플리케이션 개발 프로젝트입니다.",
+    level: "중급"
+  },
+  {
+    id: "24",
+    title: "AI 이미지 처리 서비스 개발",
+    company: "(주)비전테크",
+    skills: ["Python", "TensorFlow", "OpenCV"],
+    duration: "5개월",
+    budget: "6,800만원",
+    deadline: "D-9",
+    type: "재택",
+    description: "인공지능 기술을 활용한 이미지 분석 및 처리 서비스 개발 프로젝트입니다.",
+    level: "고급"
+  }
+];

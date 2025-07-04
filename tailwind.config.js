@@ -14,6 +14,7 @@ module.exports = {
         'gradient-xy': 'gradient-xy 15s ease infinite',
         'float': 'float 6s ease-in-out infinite',
         'glow': 'glow 2s ease-in-out infinite alternate',
+        'fadeIn': 'fadeIn 0.3s ease-in-out',
       },
       keyframes: {
         'gradient-y': {
@@ -53,6 +54,10 @@ module.exports = {
         'glow': {
           'from': { 'box-shadow': '0 0 20px #ff00ff' },
           'to': { 'box-shadow': '0 0 30px #00ffff, 0 0 40px #00ffff' }
+        },
+        'fadeIn': {
+          'from': { opacity: '0' },
+          'to': { opacity: '1' }
         }
       }
     },

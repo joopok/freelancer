@@ -244,3 +244,17 @@ export interface SimilarRemoteWork {
   remoteScore: number;
   benefits: string[];
 } 
+
+// 재택 프로젝트 페이지용 프로젝트 타입
+export interface AthomeProject {
+  id: string;
+  title: string;
+  company: string;
+  skills: string[];
+  duration: string;
+  budget: string;
+  deadline: string;
+  type: '재택' | '외주';
+  description?: string;
+  level?: string;
+} 

@@ -10,12 +10,27 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: {
-    domains: [
-      'play-lh.googleusercontent.com',
-      't1.kakaocdn.net',
-      'www.google.com',
-      'images.unsplash.com',
-      'randomuser.me'
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'play-lh.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 't1.kakaocdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.google.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'randomuser.me',
+      },
     ],
     // 이미지 최적화 설정
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],

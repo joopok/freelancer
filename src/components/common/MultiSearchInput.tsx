@@ -96,7 +96,7 @@ export default function MultiSearchInput({
 
       {/* 도움말 텍스트 */}
       {searchTerms.length === 0 && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 flex items-center gap-1">
+        <p className="text-xs text-gray-300 dark:text-gray-100 mt-2 flex items-center gap-1">
           <span>💡</span>
           여러 검색어를 입력하려면 각 검색어 후 Enter를 누르세요
         </p>

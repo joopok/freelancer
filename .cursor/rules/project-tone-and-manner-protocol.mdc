@@ -1,0 +1,300 @@
+---
+alwaysApply: true
+---
+## 🎭 **MANNER STANDARDS**
+
+### **CORE MANNER PRINCIPLES**
+
+**RESPECT FIRST**:
+- Acknowledge user effort and time investment
+- Never assume user knowledge level
+- Provide context for technical decisions
+- Offer alternatives when possible
+
+**CLARITY ABOVE ALL**:
+- Use active voice over passive voice
+- Choose specific words over generic terms
+- Structure information logically
+- Provide examples for complex concepts
+
+**SOLUTION-ORIENTED APPROACH**:
+- Lead with what users can do, not what they can't
+- Provide clear next steps
+- Anticipate user needs and questions
+- Offer progressive disclosure of information
+
+---
+
+## 📝 **APPLICATION RULES BY CONTEXT**
+
+### **RULE T1: USER INTERFACE MESSAGING**
+
+**MANDATORY PATTERNS**:
+
+```typescript
+// ✅ CORRECT - Clear, action-oriented, supportive
+const UI_MESSAGES = {
+  buttons: {
+    primary: "Get Started", // Not "Click Here"
+    secondary: "Learn More", // Not "More Info"
+    destructive: "Delete Project" // Not "Delete"
+  },
+  
+  placeholders: {
+    search: "Search projects by skills or keywords...", // Specific guidance
+    email: "Enter your email address", // Clear instruction
+    password: "Create a secure password (8+ characters)" // Helpful constraint
+  },
+  
+  empty_states: {
+    projects: "No projects match your search. Try different keywords or explore all categories.",
+    // Not: "No results found"
+  },
+  
+  loading_states: {
+    projects: "Finding perfect projects for you...", // Engaging
+    profile: "Loading your profile...", // Personal
+    // Not: "Loading..." or "Please wait"
+  }
+};
+```
+
+### **RULE T2: ERROR AND SUCCESS MESSAGING**
+
+**ERROR MESSAGE FORMULA**:
+```
+[Acknowledgment] + [Clear explanation] + [Specific action] + [Support offer]
+```
+
+**EXAMPLES**:
+```typescript
+const ERROR_MESSAGES = {
+  // ✅ CORRECT - Follows formula
+  form_validation: "We noticed some information is missing. Please check the highlighted fields below and try again. Need help? Contact our support team.",
+  
+  network_error: "Connection issue detected. Please check your internet connection and try again. If the problem persists, we're here to help.",
+  
+  auth_failure: "We couldn't log you in with those credentials. Please double-check your email and password, or reset your password if needed.",
+  
+  // ❌ INCORRECT - Too technical or unhelpful
+  bad_examples: {
+    generic: "Error occurred", // No context or solution
+    technical: "HTTP 500 Internal Server Error", // Too technical
+    blame: "Invalid input provided" // Sounds accusatory
+  }
+};
+
+const SUCCESS_MESSAGES = {
+  // ✅ CORRECT - Celebrating + Forward momentum
+  project_created: "Project created successfully! You can now start receiving applications from talented freelancers.",
+  
+  profile_updated: "Profile updated! Your enhanced profile will help you stand out to potential clients.",
+  
+  application_sent: "Application submitted! The client will review your proposal and respond within 24-48 hours."
+};
+```
+
+### **RULE T3: TECHNICAL COMMUNICATION**
+
+**CODE COMMENTS STANDARDS**:
+```typescript
+// ✅ CORRECT - Explains WHY, not just WHAT
+// 사용자 경험을 위해 로딩 상태를 0.5초 지연시킴 (너무 빠른 깜빡임 방지)
+const [isLoading, setIsLoading] = useState(false);
+
+// 프리랜서 필터링 시 성능 최적화를 위한 디바운스 적용
+const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+// ❌ INCORRECT - States obvious facts
+// Set loading to false
+setIsLoading(false);
+```
+
+**FUNCTION AND VARIABLE NAMING**:
+```typescript
+// ✅ CORRECT - Self-documenting, intention-revealing
+const fetchAvailableFreelancers = async () => {};
+const isUserProfileComplete = (user: User) => boolean;
+const handleProjectApplicationSubmit = () => {};
+
+// ❌ INCORRECT - Vague or abbreviated
+const getData = () => {}; // What data?
+const chkUsr = () => {}; // Unclear abbreviation
+const handler = () => {}; // Too generic
+```
+
+### **RULE T4: DOCUMENTATION STANDARDS**
+
+**README AND GUIDE STRUCTURE**:
+```markdown
+# [Clear, Benefit-Focused Title]
+
+## What This Does
+[One sentence describing the primary benefit to the user]
+
+## Quick Start
+[Minimal steps to achieve first success]
+
+## Core Features
+[3-5 key capabilities with brief explanations]
+
+## Common Use Cases
+[Real-world scenarios with examples]
+
+## Troubleshooting
+[Anticipated issues with clear solutions]
+```
+
+**API DOCUMENTATION TONE**:
+```typescript
+// ✅ CORRECT - Helpful and complete
+/**
+ * 프로젝트 목록을 페이지네이션과 함께 조회합니다.
+ * 
+ * @param filters - 검색 및 필터링 조건
+ * @param page - 페이지 번호 (1부터 시작)
+ * @param limit - 페이지당 항목 수 (기본값: 10, 최대: 50)
+ * @returns Promise<ProjectListResponse> - 프로젝트 목록과 페이지네이션 정보
+ * 
+ * @example
+ * const projects = await fetchProjects({ skills: ['React'] }, 1, 10);
+ * console.log(`Found ${projects.total} projects`);
+ */
+```
+
+### **RULE T5: COMMIT AND PR COMMUNICATION**
+
+**COMMIT MESSAGE STANDARDS**:
+```bash
+# ✅ CORRECT - Clear action and context
+feat: add advanced project filtering with skill tags
+fix: resolve freelancer profile image upload issue
+docs: update API integration guide with examples
+refactor: optimize project search performance
+
+# ❌ INCORRECT - Vague or unhelpful
+update files
+fix bug
+misc changes
+```
+
+**PULL REQUEST TEMPLATE**:
+```markdown
+## Summary
+[Brief description of what this PR accomplishes for users]
+
+## Changes Made
+- [Specific change 1 with user impact]
+- [Specific change 2 with user impact]
+
+## Testing Done
+- [How this was verified to work]
+
+## Screenshots/Demos
+[If UI changes, show before/after]
+
+## Considerations
+[Any important notes for reviewers]
+```
+
+---
+
+## ✅ **MANDATORY COMPLIANCE CHECKLIST**
+
+### **BEFORE ANY USER-FACING TEXT**:
+- [ ] **Clarity Check**: Can a non-technical user understand this?
+- [ ] **Action Orientation**: Does this guide the user toward a specific action?
+- [ ] **Tone Consistency**: Does this match our professional-yet-approachable voice?
+- [ ] **Value Focus**: Does this emphasize user benefit over system function?
+- [ ] **Inclusive Language**: Is this welcoming to users of all backgrounds?
+
+### **BEFORE ANY ERROR MESSAGE**:
+- [ ] **Apologetic Tone**: Does this acknowledge the inconvenience?
+- [ ] **Clear Explanation**: Do we explain what went wrong in user terms?
+- [ ] **Specific Action**: Do we tell the user exactly what to do next?
+- [ ] **Support Offer**: Do we provide a way to get help?
+- [ ] **No Technical Jargon**: Are we avoiding internal system terminology?
+
+### **BEFORE ANY SUCCESS MESSAGE**:
+- [ ] **Celebration**: Do we acknowledge the user's achievement?
+- [ ] **Benefit Emphasis**: Do we highlight what the user gained?
+- [ ] **Forward Momentum**: Do we suggest a logical next step?
+- [ ] **Personal Touch**: Does this feel personal, not robotic?
+
+### **BEFORE ANY DOCUMENTATION**:
+- [ ] **User Perspective**: Is this written from the user's point of view?
+- [ ] **Progressive Disclosure**: Do we start simple and add complexity gradually?
+- [ ] **Real Examples**: Do we provide concrete, relevant examples?
+- [ ] **Troubleshooting**: Do we anticipate and address common issues?
+
+---
+
+## 🚫 **PROHIBITED PATTERNS**
+
+### **TONE VIOLATIONS**:
+```typescript
+// ❌ NEVER USE - Cold, technical, or blame-focused
+const PROHIBITED_PATTERNS = {
+  cold: "Operation failed. Check your input.",
+  technical: "HTTP 422 Unprocessable Entity",
+  blame: "You entered invalid data",
+  robotic: "Please note that...",
+  vague: "Something went wrong",
+  demanding: "You must...",
+  assumptive: "Obviously, you should..."
+};
+```
+
+### **MANNER VIOLATIONS**:
+- **Never blame the user** for system limitations
+- **Never use technical jargon** in user-facing messages
+- **Never provide solutions without context**
+- **Never make assumptions** about user knowledge level
+- **Never leave users hanging** without next steps
+
+---
+
+## 📊 **QUALITY ASSURANCE METRICS**
+
+### **USER FEEDBACK INDICATORS**:
+- Support ticket reduction (clearer messaging = fewer questions)
+- User task completion rates (better guidance = higher success)
+- User satisfaction scores (appropriate tone = happier users)
+- Feature adoption rates (clear value proposition = more usage)
+
+### **INTERNAL QUALITY METRICS**:
+- Consistency score across all user-facing text
+- Accessibility compliance (clear language aids all users)
+- Localization readiness (simple language translates better)
+- Developer onboarding speed (clear docs = faster productivity)
+
+---
+
+## 🔄 **CONTINUOUS IMPROVEMENT PROTOCOL**
+
+### **MONTHLY REVIEW CHECKLIST**:
+- [ ] **User Feedback Analysis**: What messaging is causing confusion?
+- [ ] **Support Ticket Themes**: Which areas need clearer communication?
+- [ ] **A/B Test Results**: Which tone variations perform better?
+- [ ] **Team Feedback**: Are developers following the guidelines consistently?
+
+### **IMMEDIATE ACTION TRIGGERS**:
+- User reports confusion about any message
+- Support tickets asking for clarification on UI text
+- Developer uncertainty about how to phrase something
+- Any user-facing text that doesn't pass the checklist
+
+---
+
+## 🎯 **SUCCESS CRITERIA**
+
+**TONE SUCCESS**: Users feel welcomed, guided, and empowered throughout their journey
+**MANNER SUCCESS**: Every interaction builds trust and confidence in the platform
+**CONSISTENCY SUCCESS**: All team members can apply these guidelines confidently
+**BUSINESS SUCCESS**: Clear communication drives user engagement and retention
+
+---
+
+**FINAL MANDATE**: This tone and manner protocol is not optional. Every user-facing element, from button labels to error messages, must reflect these standards. When in doubt, prioritize user clarity and supportiveness over technical precision.
+
+**ENFORCEMENT**: All PRs with user-facing changes must pass tone and manner review before merge. 

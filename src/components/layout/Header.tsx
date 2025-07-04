@@ -169,7 +169,7 @@ export default function Header() {
   // 메뉴 아이템 정의 (블로그에 서브메뉴 추가)
   const menuItems: MenuItem[] = [
     { label: '프리랜서', href: '/freelancer' },
-    { label: '상주 프로젝트', href: '/project' },
+    { label: '상주 프로젝트', href: '/project?page=1' },
     { label: '재택 프로젝트', href: '/athome' },
     { 
       label: '블로그', 
@@ -234,9 +234,21 @@ export default function Header() {
                 >
                   <Link
                     href={item.href}
-                    className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-lg font-medium transition-colors duration-200"
+                    className={clsx(
+                      "px-3 py-2 text-lg font-medium transition-all duration-200 relative",
+                      pathname === item.href || (item.subMenus && item.subMenus.some(sub => pathname === sub.href))
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                    )}
                   >
                     {item.label}
+                    {(pathname === item.href || (item.subMenus && item.subMenus.some(sub => pathname === sub.href))) && (
+                      <motion.div
+                        layoutId="activeMenu"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
                   </Link>
                 
                   {/* 서브메뉴 */}
@@ -253,7 +265,12 @@ export default function Header() {
                           <Link
                             key={subItem.href}
                             href={subItem.href}
-                            className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 first:rounded-t-md last:rounded-b-md transition-colors duration-200"
+                            className={clsx(
+                              "flex items-center px-4 py-2 text-sm first:rounded-t-md last:rounded-b-md transition-colors duration-200",
+                              pathname === subItem.href
+                                ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400"
+                            )}
                           >
                             {subItem.icon}
                             {subItem.label}
@@ -556,7 +573,12 @@ export default function Header() {
               <div key={item.href}>
                 <Link
                   href={item.href}
-                  className="block px-3 py-2 text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                  className={clsx(
+                    "block px-3 py-2 text-lg font-medium transition-colors duration-200",
+                    pathname === item.href || (item.subMenus && item.subMenus.some(sub => pathname === sub.href))
+                      ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                      : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  )}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
@@ -568,7 +590,12 @@ export default function Header() {
                       <Link
                         key={subItem.href}
                         href={subItem.href}
-                        className="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                        className={clsx(
+                          "block px-3 py-2 text-sm transition-colors duration-200",
+                          pathname === subItem.href
+                            ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                            : "text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        )}
                         onClick={() => setIsMenuOpen(false)}
                       >
                         {subItem.label}

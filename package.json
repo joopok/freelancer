@@ -5,6 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
+    "dev:api": "NEXT_PUBLIC_USE_MOCK_API=false next dev",
+    "dev:mock": "NEXT_PUBLIC_USE_MOCK_API=true next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -14,7 +16,11 @@
     "test:db": "node test-database.js",
     "db:schema": "mysql -u root -p ~Asy10131227 < database/schema.sql",
     "db:update": "node scripts/update-database.js",
-    "db:categories": "node scripts/apply-categories-table.js"
+    "db:categories": "node scripts/apply-categories-table.js",
+    "tone:check": "grep -r 'fail\\|error\\|invalid\\|wrong\\|bad\\|broken' src/components/ src/app/ --include='*.tsx' | grep -E '(className|aria-label|title|placeholder)' | grep -v '// TONE: OK' || echo '✅ No harsh language found'",
+    "tone:errors": "grep -r 'Error\\|Failed\\|Invalid\\|Wrong' src/components/ src/app/ --include='*.tsx' | grep -v '// OK:' || echo '✅ Error messages look supportive'",
+    "tone:naming": "grep -r 'function handle\\|const handle\\|function get\\|const get' src/ --include='*.ts' --include='*.tsx' | grep -E '(handle|get|set|check)$' || echo '✅ Function names are descriptive'",
+    "tone:validate": "npm run tone:check && npm run tone:errors && npm run tone:naming"
   },
   "dependencies": {
     "axios": "^1.8.3",

@@ -151,10 +151,10 @@ export default function FreelancerDetailPage() {
       // 모의 매칭 알고리즘
       const baseScore = 75;
       const randomVariation = Math.random() * 20 - 10;
-      const newScore = Math.max(0, Math.min(100, baseScore + randomVariation));
+      const newScore = Math.round(Math.max(0, Math.min(100, baseScore + randomVariation)));
       setMatchingScore(newScore);
       
-      const skillScore = 85 + Math.random() * 15;
+      const skillScore = Math.round(85 + Math.random() * 15);
       setSkillMatchingScore(skillScore);
     };
 
@@ -292,6 +292,49 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
                 '평균 투자 수익률 15% 개선',
                 '시스템 응답 시간 50% 단축'
               ]
+            },
+            {
+              id: '3',
+              title: '모바일 헬스케어 앱 개발',
+              description: 'Flutter를 활용한 크로스플랫폼 헬스케어 애플리케이션. 실시간 건강 데이터 모니터링, AI 기반 건강 분석, 의료진과의 원격 상담 기능 구현.',
+              imageUrl: '/images/blog/default-thumbnail.jpg',
+              category: '모바일 개발',
+              duration: '4개월',
+              teamSize: 4,
+              role: '모바일 앱 개발자',
+              technologies: ['Flutter', 'Dart', 'Firebase', 'Node.js', 'MongoDB', 'WebRTC', 'TensorFlow Lite'],
+              projectDate: '2023-07',
+              projectUrl: 'https://example-healthcare.com',
+              githubUrl: 'https://github.com/example/healthcare',
+              highlights: [
+                'iOS/Android 동시 출시로 개발 기간 50% 단축',
+                '실시간 생체 신호 모니터링 구현',
+                'HIPAA 규정 준수 보안 시스템',
+                '사용자 10만명 돌파'
+              ],
+              challenges: [
+                '크로스플랫폼에서 네이티브 성능 확보',
+                '의료 데이터 보안 및 프라이버시',
+                '배터리 효율적인 백그라운드 처리'
+              ],
+              solutions: [
+                'Flutter 플랫폼 채널을 통한 네이티브 기능 활용',
+                'End-to-End 암호화 및 생체 인증',
+                'WorkManager와 iOS Background Modes 최적화',
+                'TensorFlow Lite를 활용한 온디바이스 AI'
+              ],
+              results: [
+                '앱스토어 평점 4.8/5.0 달성',
+                'MAU 5만명 돌파',
+                '의료진 만족도 90% 이상',
+                '원격 상담 이용률 200% 증가'
+              ],
+              testimonial: {
+                text: '김민수님은 복잡한 의료 요구사항을 완벽하게 이해하고 사용자 친화적인 앱으로 구현해주셨습니다. 덕분에 환자들의 건강 관리가 획기적으로 개선되었습니다.',
+                clientName: '이정호',
+                clientPosition: 'CEO',
+                clientCompany: '디지털헬스케어'
+              }
             }
           ],
           
@@ -888,6 +931,46 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
                       </button>
                     )}
                   </div>
+
+                  {/* 프로젝트 스크린샷 */}
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">최근 프로젝트</h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      {freelancer.portfolios.slice(0, 3).map((portfolio, index) => (
+                        <div 
+                          key={portfolio.id}
+                          className="relative group cursor-pointer"
+                          onClick={() => {
+                            setSelectedPortfolio(portfolio);
+                            setShowPortfolioModal(true);
+                          }}
+                        >
+                          <div className="aspect-video relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                            <Image
+                              src={portfolio.imageUrl || '/images/blog/default-thumbnail.jpg'}
+                              alt={portfolio.title}
+                              fill
+                              className="object-cover group-hover:scale-110 transition-transform duration-300"
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <ExternalLink className="h-6 w-6 text-white" />
+                              </div>
+                            </div>
+                          </div>
+                          <p className="mt-2 text-xs text-gray-600 dark:text-gray-400 truncate">{portfolio.title}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {freelancer.portfolios.length > 3 && (
+                      <button
+                        onClick={() => setActiveTab('portfolio')}
+                        className="mt-3 w-full text-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                      >
+                        모든 프로젝트 보기 ({freelancer.portfolios.length}개)
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* 매칭 점수 및 실시간 통계 */}
@@ -1062,25 +1145,25 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">주요 성과</h2>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                        {freelancer.stats.totalEarnings.toLocaleString()}원
+                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2 whitespace-nowrap">
+                        {(freelancer.stats.totalEarnings / 100000000).toFixed(1)}억원
                       </div>
                       <div className="text-sm text-gray-500">총 수익</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
+                      <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
                         {freelancer.stats.clientSatisfaction}
                       </div>
                       <div className="text-sm text-gray-500">고객 만족도</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+                      <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
                         {freelancer.stats.repeatClientRate}%
                       </div>
                       <div className="text-sm text-gray-500">재의뢰율</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+                      <div className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">
                         {freelancer.stats.onTimeDelivery}%
                       </div>
                       <div className="text-sm text-gray-500">정시 납품률</div>

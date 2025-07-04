@@ -1,13 +1,21 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import MultiSearchInput from '@/components/common/MultiSearchInput';
 import { freelancerService, type FreelancerSearchParams } from '@/services/freelancer';
 import type { Freelancer } from '@/types/freelancer';
 
-export default function FreelancerPage() {
+export default function FreelancerPageWrapper() {
+  return (
+    <Suspense fallback={<div>로딩 중...</div>}>
+      <FreelancerPage />
+    </Suspense>
+  );
+}
+
+function FreelancerPage() {
   const searchParams = useSearchParams();
   
   // URL 파라미터에서 탭 가져오기
@@ -215,8 +223,17 @@ export default function FreelancerPage() {
 
   // 초기 로드 (한 번만)
   useEffect(() => {
-    console.log('🎬 Initial useEffect triggered - loading freelancers');
-    loadFreelancers(true);
+    console.log('🎬 Initial useEffect triggered - setting initial loading state');
+    setLocalLoading(true); // Set loading to true immediately
+
+    const timer = setTimeout(() => {
+      console.log('⏳ 4-second delay finished, loading freelancers now');
+      loadFreelancers(true); // Fetch data after delay
+    }, 2000); // 2 seconds delay
+
+    return () => {
+      clearTimeout(timer); // Clear timeout if component unmounts
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
@@ -864,9 +881,11 @@ export default function FreelancerPage() {
                     </span>
                 </div>
                 
-                        <p className="text-gray-700 dark:text-gray-300 mb-4 text-sm line-clamp-2 bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
-                    {freelancer.description}
-                  </p>
+                  <div className="bg-gray-50 dark:bg-gray-700 px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-600 mb-4">
+                    <p className="text-gray-700 dark:text-gray-300 text-sm line-clamp-2 overflow-hidden text-ellipsis">
+                      {freelancer.description}
+                    </p>
+                  </div>
                 
                   <div className="mb-4">
                           <div className="flex flex-wrap gap-2 mb-4">
@@ -932,7 +951,7 @@ export default function FreelancerPage() {
               <button
                 onClick={handleLoadMore}
                 disabled={isLoadingMore}
-                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center gap-3"
+                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 hover:from-blue-700 hover:to-blue-800 dark:hover:from-blue-800 dark:hover:to-blue-900 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center gap-3"
               >
                 {isLoadingMore ? (
                   <>

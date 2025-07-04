@@ -43,7 +43,7 @@ class FreelancerService {
       
       if (params) {
         if (params.page) queryParams.append('page', params.page.toString());
-        if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString());
+        if (params.pageSize) queryParams.append('limit', params.pageSize.toString());
         if (params.search) queryParams.append('search', params.search);
         if (params.category) queryParams.append('category', params.category);
         if (params.type) queryParams.append('type', params.type);
@@ -55,7 +55,7 @@ class FreelancerService {
         if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
       }
 
-      const url = `/freelancers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const url = `/api/freelancers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       console.log('Requesting freelancers from:', url);
       console.log('Full API URL will be:', `${api.defaults.baseURL}${url}`);
       
@@ -132,7 +132,7 @@ class FreelancerService {
    */
   async getFreelancerById(id: string): Promise<FreelancerDetailResponse> {
     try {
-      const response = await api.get<FreelancerDetailResponse>(`/freelancers/${id}`);
+      const response = await api.get<FreelancerDetailResponse>(`/api/freelancers/${id}`);
       return response.data;
     } catch (error: any) {
       console.error(`Failed to fetch freelancer ${id}:`, error);
@@ -148,7 +148,7 @@ class FreelancerService {
    */
   async incrementViewCount(id: string): Promise<{ success: boolean; error?: string }> {
     try {
-      const response = await api.post(`/freelancers/${id}/view`);
+      const response = await api.post(`/api/freelancers/${id}/view`);
       return response.data;
     } catch (error: any) {
       console.error(`Failed to increment view count for freelancer ${id}:`, error);
@@ -164,7 +164,7 @@ class FreelancerService {
    */
   async getSkills(): Promise<{ success: boolean; data?: string[]; error?: string }> {
     try {
-      const response = await api.get('/freelancers/skills');
+      const response = await api.get('/api/freelancers/skills');
       return response.data;
     } catch (error: any) {
       console.error('Failed to fetch skills:', error);
