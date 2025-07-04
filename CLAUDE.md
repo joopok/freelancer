@@ -55,7 +55,7 @@ src/
 ├── components/       # Reusable UI components
 │   ├── common/      # Generic UI components
 │   ├── layout/      # Layout components (Header, Footer)
-│   ├── athome/      # Homepage-specific components
+│   ├── home/        # Homepage-specific components
 │   ├── freelancer/  # Freelancer-related components
 │   └── project/     # Project-related components
 ├── services/        # API service layer
@@ -91,7 +91,7 @@ src/
 ### Code Quality
 1. **Run lint before commit**: `npm run lint`
 2. **Check types**: `npx tsc --noEmit`
-3. **No console.log** in production code
+3. **No console.log** in production code (except for debugging with clear prefixes like 🔍, ✅, ❌)
 4. **Use constants** for all hardcoded strings
 
 ## Database Configuration
@@ -223,6 +223,37 @@ npm run tone:validate  # Full tone compliance check
 
 ## Common Issues & Solutions
 
+### JSON String Parsing in API Responses
+When skills come as JSON strings from API:
+```typescript
+// In useProjects hook
+if (typeof processedProject.requiredSkills === 'string') {
+  try {
+    const parsed = JSON.parse(processedProject.requiredSkills);
+    if (Array.isArray(parsed)) {
+      processedProject.requiredSkills = parsed;
+    }
+  } catch (e) {
+    console.warn('Failed to parse requiredSkills:', e);
+    processedProject.requiredSkills = [];
+  }
+}
+```
+
+### Type Compatibility Issues
+Handle both string and number types for numeric fields:
+```typescript
+// Example: hourlyRate handling
+let hourlyRateValue = 0;
+if (freelancer?.hourlyRate) {
+  if (typeof freelancer.hourlyRate === 'string') {
+    hourlyRateValue = parseInt(freelancer.hourlyRate.replace(/[^0-9]/g, '') || '0');
+  } else if (typeof freelancer.hourlyRate === 'number') {
+    hourlyRateValue = freelancer.hourlyRate;
+  }
+}
+```
+
 ### CORS Errors
 - Check Spring Boot is running on :8080
 - Verify Next.js rewrites in `next.config.js`
@@ -244,7 +275,7 @@ npm run tone:validate  # Full tone compliance check
 3. ✅ `npm run tone:validate` - All tone checks passed
 4. ✅ Dark mode appearance tested
 5. ✅ API calls use service layer
-6. ✅ No console.log statements
+6. ✅ No console.log statements (except debugging)
 7. ✅ All imports use @/* paths
 8. ✅ User-facing text is supportive and clear
 
@@ -260,6 +291,69 @@ npm run tone:validate  # Full tone compliance check
 3. **Dynamic routing** - Detail pages for freelancers/projects
 4. **Settings page** - User preference management
 5. **Test framework** - Jest/Vitest implementation needed
+
+## Recent Feature Implementations
+
+### Project Detail Page Enhancements
+- **Real-time Statistics**: View counts, applicant numbers, and bookmarks updated every 5 seconds
+- **Project Progress Stages**: Visual timeline showing project phases (planning → development → testing → deployment)
+- **Q&A/Review System**: 
+  - Questions enabled only before project start
+  - Reviews enabled only after project completion
+  - Tab-based interface for easy switching
+- **Related Projects**: Carousel showing similar projects based on skills and category
+- **FAQ Section**: Collapsible frequently asked questions
+- **Sticky Action Buttons**: Apply/Bookmark buttons remain visible while scrolling
+
+### Freelancer Detail Page Enhancements
+- **Skill Verification System**: Visual badges for verified skills with test scores and certificates
+- **Project Matching Score**: Algorithm-based compatibility percentage with current project
+- **Availability Calendar**: Interactive monthly calendar showing freelancer's schedule
+- **Rating Trend Chart**: Visual representation of rating changes over 6 months
+- **Work Style Information**: Communication preferences, work hours, and response times
+- **Enhanced FAQ Section**: Categorized FAQs with expand/collapse functionality
+
+### Component Library Additions
+- **AvailabilityCalendar**: Full-featured calendar component with status indicators
+- **RatingTrendChart**: Simple bar chart component for rating visualization
+- **ApplicationModal**: Reusable modal for project applications
+- **Multi-state Cards**: Cards that adapt based on project/freelancer status
+
+## UI/UX Patterns
+
+### Card Styling
+Project and freelancer cards use consistent gradient button styling:
+```tsx
+<Link className="block w-full text-center bg-gradient-to-r from-blue-50 to-blue-100 
+  dark:from-blue-900/50 dark:to-blue-800/50 hover:from-blue-100 hover:to-blue-200 
+  dark:hover:from-blue-800/50 dark:hover:to-blue-700/50 text-blue-700 
+  dark:text-blue-300 font-medium py-3 rounded-xl transition-all">
+  상세보기
+</Link>
+```
+
+### Modal Patterns
+All modals follow consistent structure with backdrop, animation, and keyboard navigation:
+```tsx
+{showModal && (
+  <>
+    <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setShowModal(false)} />
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+      {/* Modal content */}
+    </div>
+  </>
+)}
+```
+
+### Loading States
+Use contextual loading messages, not generic ones:
+```typescript
+const loadingMessages = {
+  projects: "Finding perfect projects for you...",
+  freelancers: "Discovering talented professionals...",
+  profile: "Loading your profile..."
+};
+```
 
 ## Cursor Rules Integration
 The project includes comprehensive tone and manner protocols in `.cursor/rules/`:
@@ -290,5 +384,38 @@ if (useMockApi) {
 - Pagination with "Load More" pattern
 - Memoized expensive computations
 - Optimistic UI updates for better UX
+- Real-time updates using setInterval with cleanup
+
+### Text Truncation
+Use Tailwind's line-clamp utility for consistent text truncation:
+```tsx
+<p className="text-gray-700 dark:text-gray-300 text-sm mb-4 line-clamp-2 overflow-hidden">
+  {project.description}
+</p>
+```
+
+## Development Workflow
+
+### Adding New Features
+1. Create feature branch from main
+2. Implement with TypeScript interfaces first
+3. Follow existing component patterns
+4. Test in both light/dark modes
+5. Run all validation commands
+6. Create PR with clear description
+
+### Debugging Tips
+- Use browser console for API response inspection
+- Check Network tab for failed requests
+- Verify localStorage for auth tokens
+- Use React Developer Tools for component state
+- Enable Tailwind CSS IntelliSense in VS Code
+
+### Common Pitfalls to Avoid
+1. **Don't forget dark mode styles** - Every color must have dark: variant
+2. **Don't use any type** - Always define proper interfaces
+3. **Don't skip loading states** - Users need feedback
+4. **Don't hardcode strings** - Use constants or i18n
+5. **Don't ignore tone guidelines** - User experience is paramount
 
 *Last Updated: 2025-01-04*
