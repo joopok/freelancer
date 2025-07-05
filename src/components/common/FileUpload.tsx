@@ -29,13 +29,13 @@ export default function FileUpload({
   const validateFiles = useCallback((files: File[]): File[] => {
     setError(null);
     if (files.length > maxFiles) {
-      setError(`최대 ${maxFiles}개까지만 업로드할 수 있습니다.`);
+      setError(`파일이 너무 많아요! ${maxFiles}개까지만 선택할 수 있어요.`);
       return [];
     }
     
     const validFiles = files.filter(file => {
       if (file.size > maxFileSize) {
-        setError(`파일 크기는 ${Math.round(maxFileSize / 1024 / 1024)}MB 이하여야 합니다.`);
+        setError(`파일이 너무 커요. ${Math.round(maxFileSize / 1024 / 1024)}MB 이하의 파일을 선택해주세요.`);
         return false;
       }
       
@@ -43,7 +43,7 @@ export default function FileUpload({
       const acceptTypes = accept.split(',');
       
       if (!acceptTypes.some(type => type.trim() === fileExtension || type.trim() === '*')) {
-        setError(`허용된 파일 형식이 아닙니다. (${accept})`);
+        setError(`이 파일 형식은 지원하지 않아요. ${accept} 형식의 파일을 선택해주세요.`);
         return false;
       }
       
@@ -162,7 +162,7 @@ export default function FileUpload({
       </div>
       
       {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
+        <p className="mt-2 text-sm text-red-600">{error}</p>  {/* TONE: OK - Error message display */}
       )}
     </div>
   );

@@ -1,16 +1,6 @@
-# 🛡️ **TYPESCRIPT SAFETY PROTOCOL**
-**CRITICAL MANDATE**: This protocol eliminates TypeScript-related failures through systematic type safety verification, comprehensive error prevention, and advanced type system utilization.
-
 ---
-
-## 🎯 **EXECUTIVE SUMMARY**
-
-**CONTEXT**: TypeScript implementation failures manifest as runtime errors, build failures, and maintenance nightmares. Type safety violations compound over time, creating technical debt that becomes increasingly expensive to resolve.
-
-**OBJECTIVE**: Establish bulletproof TypeScript implementation methodology ensuring zero type-related runtime errors and maximum developer productivity through advanced type system leverage.
-
+alwaysApply: true
 ---
-
 ## 🔍 **SYSTEMATIC TYPE FAILURE ANALYSIS**
 
 ### **FAILURE CATEGORY TF1: Interface Definition Negligence**

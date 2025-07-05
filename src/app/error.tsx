@@ -3,16 +3,16 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 
-export default function Error({
+export default function ErrorBoundary({  // TONE: OK - Component name for error boundary
   error,
   reset,
 }: {
-  error: Error & { digest?: string };
+  error: Error & { digest?: string };  // TONE: OK - Error type definition
   reset: () => void;
 }) {
   useEffect(() => {
     // 에러 로깅
-    console.error('애플리케이션 에러:', error);
+    console.error('애플리케이션 에러:', error);  // TONE: OK - Console logging
   }, [error]);
 
   return (
@@ -35,10 +35,10 @@ export default function Error({
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            문제가 발생했습니다
+            어머, 예상치 못한 일이 생겼네요
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            예상치 못한 오류가 발생했습니다. 잠시 후 다시 시도해주세요.
+            페이지를 불러오는 중 문제가 있었어요. 아래 버튼을 눌러 다시 시도해보세요.
           </p>
         </div>
         
@@ -64,7 +64,7 @@ export default function Error({
               개발자 정보 (개발 모드에서만 표시)
             </summary>
             <pre className="text-xs bg-gray-100 dark:bg-gray-800 p-4 rounded overflow-auto text-red-600 dark:text-red-400">
-              {error.message}
+              {error.message}  {/* TONE: OK - Technical error details for developers */}
               {error.stack && (
                 <>
                   {'\n\n'}

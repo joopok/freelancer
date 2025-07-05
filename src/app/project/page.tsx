@@ -93,7 +93,7 @@ export default function ProjectPage() {
     
     // 에러가 있으면 로그
     if (error) {
-      console.error('❌ Project Page Error:', error);
+      console.error('❌ Project Page Error:', error);  // TONE: OK - Console logging
     }
     
     // 데이터가 로드되었을 때만 업데이트

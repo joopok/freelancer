@@ -109,7 +109,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     if (!username1 || !password) {
-      setError("아이디와 비밀번호를 입력해주세요.");
+      setError("로그인하려면 아이디와 비밀번호가 필요해요. 두 가지 모두 입력해주세요.");
       return;
     }
 
@@ -121,7 +121,7 @@ export default function LoginPage() {
       try {
         response = await authService.login(username1, password);
       } catch (apiError) {
-        setError(apiError instanceof Error ? apiError.message : "로그인 중 오류가 발생했습니다.");
+        setError(apiError instanceof Error ? apiError.message : "로그인 연결에 문제가 생겼어요. 잠시 후 다시 시도해주세요.");
         throw apiError;
       }
 
@@ -152,17 +152,17 @@ export default function LoginPage() {
             setUser(response.user);
             setTimeout(() => router.push("/"), 500);
           } else {
-            setError("사용자 정보를 가져오는데 실패했습니다. 다시 시도해주세요.");
+            setError("거의 다 됐는데 프로필 정보를 가져오는 중 문제가 생겼어요. 새로고침 후 다시 시도해주세요.");
           }
         } else if (response.user) {
           // 토큰은 없지만 사용자 정보는 있는 경우 (부분 로그인)
           console.log('Login - 토큰 없이 사용자 정보만:', response.user);
           setUser(response.user);
-          setError("로그인이 부분적으로 완료되었습니다. 일부 기능이 제한될 수 있습니다.");
+          setError("로그인은 되었지만 일부 정보가 누락되었어요. 모든 기능을 사용하려면 다시 로그인해주세요.");
           setTimeout(() => router.push("/"), 1500);
         } else {
           // 성공 응답이지만 토큰과 사용자 정보 둘 다 없는 경우
-          setError("로그인은 성공했지만 필요한 정보를 가져오지 못했습니다.");
+          setError("로그인은 되었는데 필요한 정보를 받지 못했어요. 페이지를 새로고침하거나 다시 로그인해주세요.");
         }
       } else {
         // 실패 응답
@@ -170,11 +170,11 @@ export default function LoginPage() {
           setError(response.error);
         } else {
           // 기본 오류 메시지
-          setError("로그인에 실패했습니다.");
+          setError("로그인할 수 없었어요. 아이디와 비밀번호를 다시 확인해주세요.");
         }
       }
     } catch (error) {
-      setError("로그인 처리 중 예기치 않은 오류가 발생했습니다.");
+      setError("예상치 못한 문제가 발생했어요. 잠시 후 다시 시도해주시거나, 계속 문제가 발생하면 고객센터로 연락주세요.");
     } finally {
       setIsLoading(false);
     }

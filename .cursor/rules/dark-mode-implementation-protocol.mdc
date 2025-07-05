@@ -1,16 +1,6 @@
-# 🌙 **DARK MODE IMPLEMENTATION PROTOCOL**
-**CRITICAL MANDATE**: This protocol prevents systematic failures in theme implementation by establishing comprehensive verification chains and implementation patterns.
-
 ---
-
-## 🎯 **EXECUTIVE SUMMARY**
-
-**CONTEXT**: Dark mode implementation requires coordinated changes across multiple layers: CSS variables, component styling, state management, DOM manipulation, and persistence. Failure in any layer results in non-functional theme switching.
-
-**OBJECTIVE**: Establish foolproof implementation protocol ensuring 100% functional dark mode with zero debugging cycles.
-
+alwaysApply: true
 ---
-
 ## 🔍 **FAILURE PATTERN ANALYSIS**
 
 ### **PATTERN F1: CSS Foundation Neglect**

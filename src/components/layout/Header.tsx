@@ -169,7 +169,7 @@ export default function Header() {
   // 메뉴 아이템 정의 (블로그에 서브메뉴 추가)
   const menuItems: MenuItem[] = [
     { label: '프리랜서', href: '/freelancer' },
-    { label: '상주 프로젝트', href: '/project?page=1' },
+    { label: '상주 프로젝트', href: '/project' },
     { label: '재택 프로젝트', href: '/athome' },
     { 
       label: '블로그', 
@@ -223,7 +223,7 @@ export default function Header() {
           </div>
 
           {/* 데스크톱 네비게이션 */}
-          <nav className="hidden lg:flex items-center">
+          <nav className="hidden lg:flex items-center overflow-visible">
             {menuItems.map((item, index) => (
               <div key={item.href} className="flex items-center">
                 <div
@@ -236,16 +236,22 @@ export default function Header() {
                     href={item.href}
                     className={clsx(
                       "px-3 py-2 text-lg font-medium transition-all duration-200 relative",
-                      pathname === item.href || (item.subMenus && item.subMenus.some(sub => pathname === sub.href))
+                      pathname === item.href || 
+                      (item.subMenus && item.subMenus.some(sub => pathname === sub.href)) ||
+                      (item.href === '/project' && pathname?.startsWith('/project/')) ||
+                      (item.href === '/freelancer' && pathname?.startsWith('/freelancer/'))
                         ? "text-blue-600 dark:text-blue-400"
                         : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
                     )}
                   >
                     {item.label}
-                    {(pathname === item.href || (item.subMenus && item.subMenus.some(sub => pathname === sub.href))) && (
+                    {(pathname === item.href || 
+                      (item.subMenus && item.subMenus.some(sub => pathname === sub.href)) ||
+                      (item.href === '/project' && pathname?.startsWith('/project/')) ||
+                      (item.href === '/freelancer' && pathname?.startsWith('/freelancer/'))) && (
                       <motion.div
                         layoutId="activeMenu"
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
+                        className="absolute -bottom-[14px] left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                       />
                     )}
@@ -575,7 +581,10 @@ export default function Header() {
                   href={item.href}
                   className={clsx(
                     "block px-3 py-2 text-lg font-medium transition-colors duration-200",
-                    pathname === item.href || (item.subMenus && item.subMenus.some(sub => pathname === sub.href))
+                    pathname === item.href || 
+                    (item.subMenus && item.subMenus.some(sub => pathname === sub.href)) ||
+                    (item.href === '/project' && pathname?.startsWith('/project/')) ||
+                    (item.href === '/freelancer' && pathname?.startsWith('/freelancer/'))
                       ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
                       : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
                   )}

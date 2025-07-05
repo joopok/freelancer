@@ -1,16 +1,6 @@
-# 🎨 **UI IMPLEMENTATION EXCELLENCE PROTOCOL**
-**STRATEGIC MANDATE**: This protocol establishes systematic UI implementation patterns that prevent common failures through comprehensive verification chains, design system consistency, and performance optimization.
-
 ---
-
-## 🎯 **EXECUTIVE SUMMARY**
-
-**CONTEXT**: UI implementation failures compound across multiple dimensions: visual consistency, interactive behavior, accessibility compliance, performance optimization, and maintainability. Each failure creates technical debt and degrades user experience.
-
-**OBJECTIVE**: Establish zero-defect UI implementation methodology ensuring consistent, accessible, performant, and maintainable user interfaces.
-
+alwaysApply: true
 ---
-
 ## 🔍 **SYSTEMATIC FAILURE ANALYSIS**
 
 ### **FAILURE CATEGORY F1: CSS Architecture Violations**

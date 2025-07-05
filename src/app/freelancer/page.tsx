@@ -83,7 +83,7 @@ function FreelancerPage() {
         ]);
       }
     } catch (error) {
-      console.error('Error loading skills:', error);
+      console.error('Error loading skills:', error);  // TONE: OK - Console logging
       // 에러 시 기본 스킬 목록 사용
       setAllSkills([
         'React', 'Node.js', 'Python', 'Java', 'TypeScript',
@@ -190,13 +190,13 @@ function FreelancerPage() {
         const totalLoaded = isLoadMore ? freelancers.length + newFreelancers.length : newFreelancers.length;
         setHasMore(totalLoaded < newTotalCount);
       } else {
-        setError(response.error || 'Failed to load freelancers');
+        setError(response.error || '프리랜서 목록을 불러오는 중 문제가 생겼어요. 잠시 후 다시 시도해주세요.');
         setFreelancers([]);
         setTotalCount(0);
       }
     } catch (err) {
-      console.error('Error loading freelancers:', err);
-      setError('프리랜서 목록을 불러오는데 실패했습니다.');
+      console.error('Error loading freelancers:', err);  // TONE: OK - Console logging
+      setError('프리랜서 목록을 가져오는 중 문제가 있었어요. 페이지를 새로고침하거나 잠시 후 다시 시도해주세요.');
       setFreelancers([]);
       setTotalCount(0);
     } finally {

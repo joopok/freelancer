@@ -1011,9 +1011,48 @@ export default function ProjectDetailPage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* 관련 프로젝트 카드 1 */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700">
+          <div className="relative">
+            {/* 왼쪽 화살표 버튼 */}
+            <button
+              onClick={() => {
+                const container = document.getElementById('related-projects-container');
+                if (container) {
+                  container.scrollBy({ left: -384, behavior: 'smooth' });
+                }
+              }}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 border border-gray-200 dark:border-gray-700"
+              aria-label="이전 프로젝트"
+            >
+              <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* 오른쪽 화살표 버튼 */}
+            <button
+              onClick={() => {
+                const container = document.getElementById('related-projects-container');
+                if (container) {
+                  container.scrollBy({ left: 384, behavior: 'smooth' });
+                }
+              }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 border border-gray-200 dark:border-gray-700"
+              aria-label="다음 프로젝트"
+            >
+              <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* 프로젝트 카드 컨테이너 */}
+            <div 
+              id="related-projects-container"
+              className="overflow-x-auto scrollbar-hide"
+              style={{ scrollBehavior: 'smooth' }}
+            >
+              <div className="flex gap-6 pb-4" style={{ width: 'max-content' }}>
+                {/* 관련 프로젝트 카드 1 */}
+                <div className="w-96 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 opacity-0 animate-slideIn" style={{ animationDelay: '0ms' }}>
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
@@ -1052,8 +1091,8 @@ export default function ProjectDetailPage() {
               </div>
             </div>
 
-            {/* 관련 프로젝트 카드 2 */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700">
+                {/* 관련 프로젝트 카드 2 */}
+                <div className="w-96 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 opacity-0 animate-slideIn" style={{ animationDelay: '100ms' }}>
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
@@ -1092,8 +1131,8 @@ export default function ProjectDetailPage() {
               </div>
             </div>
 
-            {/* 관련 프로젝트 카드 3 */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700">
+                {/* 관련 프로젝트 카드 3 */}
+                <div className="w-96 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 opacity-0 animate-slideIn" style={{ animationDelay: '200ms' }}>
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
@@ -1128,6 +1167,87 @@ export default function ProjectDetailPage() {
                 <div className="flex items-center gap-1 text-green-600">
                   <span className="text-xs">매칭도</span>
                   <span className="font-semibold">78%</span>
+                </div>
+              </div>
+            </div>
+
+                {/* 추가 프로젝트 카드들 */}
+                <div className="w-96 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 opacity-0 animate-slideIn" style={{ animationDelay: '300ms' }}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                        모바일 헬스케어 앱 개발
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">헬스테크</p>
+                    </div>
+                    <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full">
+                      진행중
+                    </span>
+                  </div>
+                  
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
+                    Flutter 기반 크로스플랫폼 헬스케어 애플리케이션 개발. 웨어러블 기기 연동 경험 우대.
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {['Flutter', 'Firebase', 'BLE', 'Charts'].map((skill) => (
+                      <span key={skill} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-4">
+                      <span className="text-gray-500">
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">1.5-2억원</span>
+                      </span>
+                      <span className="text-gray-500">4개월</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-blue-600">
+                      <span className="text-xs">매칭도</span>
+                      <span className="font-semibold">82%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="w-96 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 opacity-0 animate-slideIn" style={{ animationDelay: '400ms' }}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                        블록체인 거래소 개발
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">크립토뱅크</p>
+                    </div>
+                    <span className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 text-xs rounded-full">
+                      프리미엄
+                    </span>
+                  </div>
+                  
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
+                    Solidity와 Web3.js를 활용한 DeFi 플랫폼 구축. 스마트 컨트랙트 개발 경험 필수.
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {['Solidity', 'Web3.js', 'React', 'Node.js'].map((skill) => (
+                      <span key={skill} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-4">
+                      <span className="text-gray-500">
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">7-10억원</span>
+                      </span>
+                      <span className="text-gray-500">8개월</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-yellow-600">
+                      <span className="text-xs">매칭도</span>
+                      <span className="font-semibold">68%</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

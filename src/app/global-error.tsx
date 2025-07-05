@@ -2,16 +2,16 @@
 
 import { useEffect } from 'react';
 
-export default function GlobalError({
+export default function GlobalErrorBoundary({  // TONE: OK - Component name for global error
   error,
   reset,
 }: {
-  error: Error & { digest?: string };
+  error: Error & { digest?: string };  // TONE: OK - Error type definition
   reset: () => void;
 }) {
   useEffect(() => {
     // 글로벌 에러 로깅
-    console.error('글로벌 에러 발생:', error);
+    console.error('글로벌 에러 발생:', error);  // TONE: OK - Console logging
   }, [error]);
 
   return (
@@ -36,10 +36,10 @@ export default function GlobalError({
                 </svg>
               </div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                심각한 오류가 발생했습니다
+                어머나, 큰 문제가 생겼네요
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                애플리케이션에 예상치 못한 오류가 발생했습니다.
+                애플리케이션에 예기치 못한 문제가 발생했어요. 걸정하지 마세요, 해결할 수 있습니다.
               </p>
             </div>
             
