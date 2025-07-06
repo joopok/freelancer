@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { ProjectDetail, CompanyInfo, ProjectStage, ContactPerson, WorkingConditions } from '@/types/project';
 import { useProjectDetail } from '@/hooks/useProjects';
 import ApplicationModal from '@/components/project/detail/ApplicationModal';
+import { formatDate, formatCurrency, formatCurrencyRange } from '@/utils/format';
 
 
 export default function ProjectDetailPage() {
@@ -177,7 +178,7 @@ export default function ProjectDetailPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-gray-400">⏰</span>
-                  <span className="text-gray-600 dark:text-gray-400">{project.deadline} 마감</span>
+                  <span className="text-gray-600 dark:text-gray-400">{formatDate(project.deadline)} 마감</span>
                 </div>
               </div>
 
@@ -203,7 +204,7 @@ export default function ProjectDetailPage() {
 
               {/* 스킬 태그 */}
               <div className="flex flex-wrap gap-2 mb-6">
-                {(project.skills || []).map((skill, index) => (
+                {(Array.isArray(project.skills) ? project.skills : []).map((skill, index) => (
                   <span 
                     key={index}
                     className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium"
@@ -218,7 +219,7 @@ export default function ProjectDetailPage() {
                 <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                   <div className="text-2xl font-bold text-blue-600">💰</div>
                   <div className="text-sm text-gray-500">예산</div>
-                  <div className="font-semibold">{project.budget}</div>
+                  <div className="font-semibold">{formatCurrency(project.budget)}</div>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                   <div className="text-2xl font-bold text-green-600">⏱️</div>
@@ -278,7 +279,7 @@ export default function ProjectDetailPage() {
               </div>
 
               {/* 프로젝트 스크린샷 */}
-              <div className="mt-6">
+              <div className="mt-10">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">프로젝트 이미지</h3>
                 <div className="grid grid-cols-3 gap-3">
                   {[1, 2, 3].map((index) => (
@@ -476,13 +477,13 @@ export default function ProjectDetailPage() {
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {project.budget}
+                  {formatCurrency(project.budget)}
                 </div>
                 <div className="text-sm text-gray-500">예산</div>
               </div>
               <div className="text-right">
                 <div className="text-lg font-semibold text-green-600 dark:text-green-400">
-                  {project.deadline}
+                  {formatDate(project.deadline)}
                 </div>
                 <div className="text-sm text-gray-500">마감일</div>
               </div>
@@ -571,7 +572,7 @@ export default function ProjectDetailPage() {
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
               <h3 className="text-xl font-bold mb-4">주요 업무</h3>
               <ul className="space-y-3">
-                {(project.responsibilities || []).map((responsibility, index) => (
+                {(Array.isArray(project.responsibilities) ? project.responsibilities : []).map((responsibility, index) => (
                   <li key={index} className="flex items-start space-x-3">
                     <span className="text-blue-600 text-lg">•</span>
                     <span className="text-gray-600 dark:text-gray-300">{responsibility}</span>
@@ -584,7 +585,7 @@ export default function ProjectDetailPage() {
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
               <h3 className="text-xl font-bold mb-4">필수 조건</h3>
               <ul className="space-y-3">
-                {(project.requirements || []).map((requirement, index) => (
+                {(Array.isArray(project.requirements) ? project.requirements : []).map((requirement, index) => (
                   <li key={index} className="flex items-start space-x-3">
                     <span className="text-red-500 text-lg">✓</span>
                     <span className="text-gray-600 dark:text-gray-300">{requirement}</span>
@@ -597,7 +598,7 @@ export default function ProjectDetailPage() {
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
               <h3 className="text-xl font-bold mb-4">우대 조건</h3>
               <ul className="space-y-3">
-                {(project.preferredSkills || []).map((skill, index) => (
+                {(Array.isArray(project.preferredSkills) ? project.preferredSkills : []).map((skill, index) => (
                   <li key={index} className="flex items-start space-x-3">
                     <span className="text-green-500 text-lg">+</span>
                     <span className="text-gray-600 dark:text-gray-300">{skill}</span>
@@ -708,7 +709,7 @@ export default function ProjectDetailPage() {
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
               <h3 className="text-xl font-bold mb-4">복리후생</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(project.additionalBenefits || []).map((benefit, index) => (
+                {(Array.isArray(project.additionalBenefits) ? project.additionalBenefits : []).map((benefit, index) => (
                   <div key={index} className="flex items-center space-x-3">
                     <span className="text-green-500">✓</span>
                     <span className="text-gray-600 dark:text-gray-300">{benefit}</span>
@@ -726,7 +727,7 @@ export default function ProjectDetailPage() {
               <div className="flex items-start space-x-6">
                 <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
                   <span className="text-2xl font-bold text-blue-600">
-                    {project.companyInfo?.name.charAt(0)}
+                    {project.companyInfo?.name?.charAt(0) || ''}
                   </span>
                 </div>
                 <div className="flex-1">
@@ -889,7 +890,7 @@ export default function ProjectDetailPage() {
                         </p>
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <span>프로젝트 기간: 3개월</span>
-                          <span>예산: 5,000만원</span>
+                          <span>예산: {formatCurrency(50000000)}</span>
                         </div>
                       </div>
                     </div>
@@ -942,7 +943,7 @@ export default function ProjectDetailPage() {
                 <h4 className="font-semibold text-gray-900 dark:text-white mb-3">프로젝트 정보</h4>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 dark:text-gray-300">프로젝트 예산</span>
-                  <span className="font-bold text-xl text-blue-600">{project.budget}</span>
+                  <span className="font-bold text-xl text-blue-600">{formatCurrency(project.budget)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 dark:text-gray-300">진행 기간</span>
@@ -950,7 +951,7 @@ export default function ProjectDetailPage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 dark:text-gray-300">마감일</span>
-                  <span className="font-medium text-red-600">{project.deadline}</span>
+                  <span className="font-medium text-red-600">{formatDate(project.deadline)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 dark:text-gray-300">지원자 수</span>
@@ -1080,7 +1081,7 @@ export default function ProjectDetailPage() {
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-4">
                   <span className="text-gray-500">
-                    <span className="font-semibold text-gray-700 dark:text-gray-300">3-5억원</span>
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrencyRange(3, 5, '억원')}</span>
                   </span>
                   <span className="text-gray-500">6개월</span>
                 </div>
@@ -1120,7 +1121,7 @@ export default function ProjectDetailPage() {
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-4">
                   <span className="text-gray-500">
-                    <span className="font-semibold text-gray-700 dark:text-gray-300">4-6억원</span>
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrencyRange(4, 6, '억원')}</span>
                   </span>
                   <span className="text-gray-500">4개월</span>
                 </div>
@@ -1160,7 +1161,7 @@ export default function ProjectDetailPage() {
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-4">
                   <span className="text-gray-500">
-                    <span className="font-semibold text-gray-700 dark:text-gray-300">2-3억원</span>
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrencyRange(2, 3, '억원')}</span>
                   </span>
                   <span className="text-gray-500">3개월</span>
                 </div>
@@ -1200,7 +1201,7 @@ export default function ProjectDetailPage() {
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-4">
                       <span className="text-gray-500">
-                        <span className="font-semibold text-gray-700 dark:text-gray-300">1.5-2억원</span>
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrencyRange(15000, 20000, '만원')}</span>
                       </span>
                       <span className="text-gray-500">4개월</span>
                     </div>
@@ -1239,13 +1240,53 @@ export default function ProjectDetailPage() {
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-4">
                       <span className="text-gray-500">
-                        <span className="font-semibold text-gray-700 dark:text-gray-300">7-10억원</span>
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrencyRange(7, 10, '억원')}</span>
                       </span>
                       <span className="text-gray-500">8개월</span>
                     </div>
                     <div className="flex items-center gap-1 text-yellow-600">
                       <span className="text-xs">매칭도</span>
                       <span className="font-semibold">68%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 금액 범위 예시 카드 추가 */}
+                <div className="w-96 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 opacity-0 animate-slideIn" style={{ animationDelay: '500ms' }}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                        대규모 ERP 시스템 구축
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">엔터프라이즈솔루션</p>
+                    </div>
+                    <span className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs rounded-full">
+                      장기
+                    </span>
+                  </div>
+                  
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
+                    대기업 전사 통합 ERP 시스템 구축. SAP 또는 Oracle ERP 구축 경험 필수.
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {['Java', 'Spring', 'Oracle', 'SAP'].map((skill) => (
+                      <span key={skill} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-4">
+                      <span className="text-gray-500">
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrency('6000000~8000000')}</span>
+                      </span>
+                      <span className="text-gray-500">12개월</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-red-600">
+                      <span className="text-xs">매칭도</span>
+                      <span className="font-semibold">85%</span>
                     </div>
                   </div>
                 </div>
