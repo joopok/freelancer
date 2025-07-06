@@ -5,8 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 // Removed framer-motion to fix build errors
-import { ProjectDetail, CompanyInfo, ProjectStage, ContactPerson, WorkingConditions } from '@/types/project';
+import { ProjectDetail, CompanyInfo, ProjectStage, ContactPerson, WorkingConditions, Project } from '@/types/project';
 import { useProjectDetail } from '@/hooks/useProjects';
+import { projectService } from '@/services/project';
 import ApplicationModal from '@/components/project/detail/ApplicationModal';
 import { formatDate, formatCurrency, formatCurrencyRange } from '@/utils/format';
 
@@ -33,12 +34,62 @@ export default function ProjectDetailPage() {
   const [showChatModal, setShowChatModal] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [currentViewers, setCurrentViewers] = useState(12);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [realtimeStats, setRealtimeStats] = useState({
     applicants: 23,
     views: 456,
     bookmarks: 87
   });
+  
+  // 탭별 데이터를 위한 추가 상태
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [similarProjects, setSimilarProjects] = useState<Project[]>([]);
+  const [tabDataLoading, setTabDataLoading] = useState(false);
+  const [tabDataError, setTabDataError] = useState<string | null>(null);
 
+  // 탭 데이터 가져오기
+  useEffect(() => {
+    const fetchTabData = async () => {
+      if (!project || !projectId) return;
+      
+      setTabDataLoading(true);
+      setTabDataError(null);
+      
+      try {
+        // 병렬로 데이터 가져오기 - 각각 개별적으로 에러 처리
+        const [questionsResponse, reviewsResponse, similarProjectsResponse] = await Promise.all([
+          projectService.getProjectQuestions(projectId),
+          projectService.getProjectReviews(projectId),
+          projectService.getSimilarProjects(projectId, 10)
+        ]);
+        
+        // 각 API 응답을 개별적으로 처리 (하나 실패해도 다른 것들은 표시)
+        setQuestions(questionsResponse.data || []);
+        setReviews(reviewsResponse.data || []);
+        setSimilarProjects(similarProjectsResponse.data || []);
+        
+        console.log('✅ Tab data loaded (with fallbacks):', {
+          questions: questionsResponse.data?.length || 0,
+          reviews: reviewsResponse.data?.length || 0,
+          similarProjects: similarProjectsResponse.data?.length || 0,
+          questionsSuccess: questionsResponse.success,
+          reviewsSuccess: reviewsResponse.success,
+          similarProjectsSuccess: similarProjectsResponse.success
+        });
+      } catch (error) {
+        // 전체적인 에러는 거의 발생하지 않을 것 (각 service에서 fallback 처리됨)
+        console.warn('⚠️ Tab data fetch had issues (using fallbacks):', error);
+        // 에러 상태를 설정하지 않음 - 각 service에서 빈 배열로 fallback됨
+      } finally {
+        setTabDataLoading(false);
+      }
+    };
+    
+    fetchTabData();
+  }, [project, projectId]);
+  
   // 실시간 통계 업데이트
   useEffect(() => {
     const interval = setInterval(() => {
@@ -53,6 +104,44 @@ export default function ProjectDetailPage() {
 
     return () => clearInterval(interval);
   }, []);
+  
+  // 조회수 증가 API 호출 (비필수 기능)
+  useEffect(() => {
+    if (projectId) {
+      projectService.incrementProjectView(projectId)
+        .then(response => {
+          if (response.success) {
+            console.log('✅ View count incremented');
+          } else {
+            console.log('ℹ️ View count increment not available (API not implemented)');
+          }
+        })
+        .catch(error => {
+          // 조회수 증가 실패는 치명적이지 않으므로 조용히 처리
+          console.log('ℹ️ View count increment failed (non-critical):', error?.message || error);
+        });
+    }
+  }, [projectId]);
+
+  // 이미지 모달 키보드 네비게이션
+  useEffect(() => {
+    if (!showImageModal) return;
+
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowImageModal(false);
+      } else if (e.key === 'ArrowLeft') {
+        const prevIndex = selectedImageIndex > 1 ? selectedImageIndex - 1 : 3;
+        setSelectedImageIndex(prevIndex);
+      } else if (e.key === 'ArrowRight') {
+        const nextIndex = selectedImageIndex < 3 ? selectedImageIndex + 1 : 1;
+        setSelectedImageIndex(nextIndex);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeydown);
+    return () => document.removeEventListener('keydown', handleKeydown);
+  }, [showImageModal, selectedImageIndex]);
 
   // 스킬 매칭 점수 계산 - useMemo로 최적화
   const skillMatchScore = useMemo(() => {
@@ -80,6 +169,8 @@ export default function ProjectDetailPage() {
     console.log('🔍 ProjectDetailPage - Loading:', loading);
     console.log('🔍 ProjectDetailPage - Error:', error);
     console.log('🔍 ProjectDetailPage - Project:', project);
+    console.log('🔍 ProjectDetailPage - API Base URL:', process.env.NEXT_PUBLIC_API_URL);
+    console.log('🔍 ProjectDetailPage - Use Mock API:', process.env.NEXT_PUBLIC_USE_MOCK_API);
   }, [projectId, loading, error, project]);
 
   
@@ -287,8 +378,8 @@ export default function ProjectDetailPage() {
                       key={index}
                       className="relative group cursor-pointer"
                       onClick={() => {
-                        // 이미지 모달 열기
-                        console.log(`이미지 ${index} 클릭`);
+                        setSelectedImageIndex(index);
+                        setShowImageModal(true);
                       }}
                     >
                       <div className="aspect-video relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
@@ -778,7 +869,7 @@ export default function ProjectDetailPage() {
                         : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
                     }`}
                   >
-                    질문하기 (12)
+                    질문하기 ({questions.length})
                   </button>
                   <button
                     onClick={() => setActiveSubTab('reviews')}
@@ -788,7 +879,7 @@ export default function ProjectDetailPage() {
                         : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
                     }`}
                   >
-                    프로젝트 후기 (5)
+                    프로젝트 후기 ({reviews.length})
                   </button>
                 </div>
 
@@ -814,47 +905,55 @@ export default function ProjectDetailPage() {
               {/* 질문 목록 */}
               {activeSubTab === 'questions' && (
                 <div className="space-y-4">
-                  {/* 질문 아이템 */}
-                  <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="font-medium text-gray-900 dark:text-white">김민수</span>
-                          <span className="text-sm text-gray-500">3일 전</span>
-                        </div>
-                        <p className="text-gray-700 dark:text-gray-300 mb-2">
-                          프로젝트 진행 시 원격 근무가 가능한가요? 주 2-3회 정도는 재택근무를 하고 싶습니다.
-                        </p>
-                        {/* 답변 */}
-                        <div className="ml-6 mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-medium text-blue-600 dark:text-blue-400">클라이언트 답변</span>
-                            <span className="text-sm text-gray-500">2일 전</span>
+                  {tabDataLoading ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                      <p className="text-gray-500 mt-2">질문을 불러오는 중...</p>
+                    </div>
+                  ) : questions.length > 0 ? (
+                    questions.map((question) => (
+                      <div key={question.id || Math.random()} className="border-b border-gray-200 dark:border-gray-700 pb-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="font-medium text-gray-900 dark:text-white">
+                                {question.authorName || '익명'}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {formatDate(question.createdAt)}
+                              </span>
+                            </div>
+                            <p className="text-gray-700 dark:text-gray-300 mb-2">
+                              {question.content || question.question}
+                            </p>
+                            {/* 답변 */}
+                            {question.answer && (
+                              <div className="ml-6 mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400">클라이언트 답변</span>
+                                  <span className="text-sm text-gray-500">
+                                    {formatDate(question.answeredAt)}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300">
+                                  {question.answer}
+                                </p>
+                              </div>
+                            )}
                           </div>
-                          <p className="text-sm text-gray-700 dark:text-gray-300">
-                            네, 원격 근무 가능합니다. 주 2회 정도 오피스 미팅이 필요하고 나머지는 재택근무 가능합니다.
-                          </p>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>아직 등록된 질문이 없습니다.</p>
+                      {project.status === 'active' && (
+                        <p className="mt-2">첫 번째 질문을 등록해보세요!</p>
+                      )}
                     </div>
-                  </div>
-
-                  {/* 더 많은 질문들 */}
-                  <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="font-medium text-gray-900 dark:text-white">이지연</span>
-                          <span className="text-sm text-gray-500">5일 전</span>
-                        </div>
-                        <p className="text-gray-700 dark:text-gray-300">
-                          React Native 경험이 없는데 React 경험이 풍부하면 지원 가능할까요?
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {project.status !== 'active' && (
+                  )}
+                  
+                  {project.status !== 'active' && questions.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       <p>프로젝트가 시작되어 더 이상 질문을 받지 않습니다.</p>
                     </div>
@@ -865,65 +964,58 @@ export default function ProjectDetailPage() {
               {/* 후기 목록 */}
               {activeSubTab === 'reviews' && (
                 <div className="space-y-4">
-                  {/* 후기 아이템 */}
-                  <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="font-medium text-gray-900 dark:text-white">박준호</span>
-                          <div className="flex items-center">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <svg
-                                key={star}
-                                className={`w-4 h-4 ${star <= 5 ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-                                viewBox="0 0 20 20"
-                              >
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                              </svg>
-                            ))}
+                  {tabDataLoading ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+                      <p className="text-gray-500 mt-2">후기를 불러오는 중...</p>
+                    </div>
+                  ) : reviews.length > 0 ? (
+                    reviews.map((review) => (
+                      <div key={review.id || Math.random()} className="border-b border-gray-200 dark:border-gray-700 pb-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="font-medium text-gray-900 dark:text-white">
+                                {review.authorName || review.freelancerName || '익명'}
+                              </span>
+                              <div className="flex items-center">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <svg
+                                    key={star}
+                                    className={`w-4 h-4 ${star <= (review.rating || 5) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                  </svg>
+                                ))}
+                              </div>
+                              <span className="text-sm text-gray-500">
+                                {formatDate(review.createdAt)}
+                              </span>
+                            </div>
+                            <p className="text-gray-700 dark:text-gray-300 mb-2">
+                              {review.content || review.comment}
+                            </p>
+                            {(review.projectDuration || review.projectBudget) && (
+                              <div className="flex items-center gap-4 text-sm text-gray-500">
+                                {review.projectDuration && <span>프로젝트 기간: {review.projectDuration}</span>}
+                                {review.projectBudget && <span>예산: {formatCurrency(review.projectBudget)}</span>}
+                              </div>
+                            )}
                           </div>
-                          <span className="text-sm text-gray-500">1개월 전</span>
-                        </div>
-                        <p className="text-gray-700 dark:text-gray-300 mb-2">
-                          프로젝트 진행이 매우 원활했습니다. 클라이언트님의 요구사항이 명확했고, 
-                          피드백도 빠르게 주셔서 일정 내에 잘 마무리할 수 있었습니다.
-                        </p>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>프로젝트 기간: 3개월</span>
-                          <span>예산: {formatCurrency(50000000)}</span>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>아직 등록된 후기가 없습니다.</p>
+                      {project.status === 'completed' && (
+                        <p className="mt-2">첫 번째 후기를 작성해보세요!</p>
+                      )}
                     </div>
-                  </div>
-
-                  {/* 더 많은 후기들 */}
-                  <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="font-medium text-gray-900 dark:text-white">최수진</span>
-                          <div className="flex items-center">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <svg
-                                key={star}
-                                className={`w-4 h-4 ${star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-                                viewBox="0 0 20 20"
-                              >
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                              </svg>
-                            ))}
-                          </div>
-                          <span className="text-sm text-gray-500">2개월 전</span>
-                        </div>
-                        <p className="text-gray-700 dark:text-gray-300">
-                          전반적으로 좋은 프로젝트였습니다. 다만 초기 요구사항과 조금 달라진 부분이 있어서 
-                          추가 작업이 필요했지만, 추가 비용은 합리적으로 협의되었습니다.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {project.status !== 'completed' && (
+                  )}
+                  
+                  {project.status !== 'completed' && reviews.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       <p>프로젝트가 완료된 후 후기를 작성할 수 있습니다.</p>
                     </div>
@@ -1052,244 +1144,83 @@ export default function ProjectDetailPage() {
               style={{ scrollBehavior: 'smooth' }}
             >
               <div className="flex gap-6 pb-4" style={{ width: 'max-content' }}>
-                {/* 관련 프로젝트 카드 1 */}
-                <div className="w-96 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 opacity-0 animate-slideIn" style={{ animationDelay: '0ms' }}>
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                    E-커머스 플랫폼 개발
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">테크커머스</p>
-                </div>
-                <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
-                  모집중
-                </span>
-              </div>
-              
-              <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-                React와 Node.js를 활용한 대규모 이커머스 플랫폼 구축 프로젝트입니다. MSA 아키텍처 경험자 우대.
-              </p>
+                {similarProjects.length > 0 ? (
+                  similarProjects.map((relatedProject, index) => (
+                    <Link 
+                      key={relatedProject.id} 
+                      href={`/project/${relatedProject.id}`}
+                      className="w-96 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 opacity-0 animate-slideIn" 
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                            {relatedProject.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {relatedProject.company?.name || relatedProject.companyName}
+                          </p>
+                        </div>
+                        {relatedProject.isUrgent && (
+                          <span className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs rounded-full">
+                            긴급
+                          </span>
+                        )}
+                        {!relatedProject.isUrgent && relatedProject.isRemote && (
+                          <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full">
+                            재택가능
+                          </span>
+                        )}
+                        {!relatedProject.isUrgent && !relatedProject.isRemote && (
+                          <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
+                            모집중
+                          </span>
+                        )}
+                      </div>
+                      
+                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
+                        {relatedProject.description}
+                      </p>
 
-              <div className="flex flex-wrap gap-2 mb-4">
-                {['React', 'Node.js', 'AWS', 'MongoDB'].map((skill) => (
-                  <span key={skill} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
-                    {skill}
-                  </span>
-                ))}
-              </div>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {(relatedProject.skills || []).slice(0, 4).map((skill) => (
+                          <span key={skill} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
 
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-4">
-                  <span className="text-gray-500">
-                    <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrencyRange(3, 5, '억원')}</span>
-                  </span>
-                  <span className="text-gray-500">6개월</span>
-                </div>
-                <div className="flex items-center gap-1 text-green-600">
-                  <span className="text-xs">매칭도</span>
-                  <span className="font-semibold">85%</span>
-                </div>
-              </div>
-            </div>
-
-                {/* 관련 프로젝트 카드 2 */}
-                <div className="w-96 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 opacity-0 animate-slideIn" style={{ animationDelay: '100ms' }}>
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                    금융 서비스 API 개발
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">핀테크뱅크</p>
-                </div>
-                <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 text-xs rounded-full">
-                  긴급
-                </span>
-              </div>
-              
-              <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-                마이크로서비스 기반의 금융 API 시스템 구축. Spring Boot와 Kubernetes 경험 필수.
-              </p>
-
-              <div className="flex flex-wrap gap-2 mb-4">
-                {['Spring Boot', 'Kubernetes', 'PostgreSQL', 'Redis'].map((skill) => (
-                  <span key={skill} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-4">
-                  <span className="text-gray-500">
-                    <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrencyRange(4, 6, '억원')}</span>
-                  </span>
-                  <span className="text-gray-500">4개월</span>
-                </div>
-                <div className="flex items-center gap-1 text-yellow-600">
-                  <span className="text-xs">매칭도</span>
-                  <span className="font-semibold">72%</span>
-                </div>
-              </div>
-            </div>
-
-                {/* 관련 프로젝트 카드 3 */}
-                <div className="w-96 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 opacity-0 animate-slideIn" style={{ animationDelay: '200ms' }}>
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                    AI 챗봇 시스템 구축
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">AI테크</p>
-                </div>
-                <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full">
-                  재택가능
-                </span>
-              </div>
-              
-              <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-                자연어 처리 기반 고객 상담 챗봇 개발. Python과 TensorFlow 활용한 딥러닝 모델 구축.
-              </p>
-
-              <div className="flex flex-wrap gap-2 mb-4">
-                {['Python', 'TensorFlow', 'NLP', 'FastAPI'].map((skill) => (
-                  <span key={skill} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-4">
-                  <span className="text-gray-500">
-                    <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrencyRange(2, 3, '억원')}</span>
-                  </span>
-                  <span className="text-gray-500">3개월</span>
-                </div>
-                <div className="flex items-center gap-1 text-green-600">
-                  <span className="text-xs">매칭도</span>
-                  <span className="font-semibold">78%</span>
-                </div>
-              </div>
-            </div>
-
-                {/* 추가 프로젝트 카드들 */}
-                <div className="w-96 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 opacity-0 animate-slideIn" style={{ animationDelay: '300ms' }}>
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                        모바일 헬스케어 앱 개발
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">헬스테크</p>
-                    </div>
-                    <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full">
-                      진행중
-                    </span>
-                  </div>
-                  
-                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-                    Flutter 기반 크로스플랫폼 헬스케어 애플리케이션 개발. 웨어러블 기기 연동 경험 우대.
-                  </p>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {['Flutter', 'Firebase', 'BLE', 'Charts'].map((skill) => (
-                      <span key={skill} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-4">
-                      <span className="text-gray-500">
-                        <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrencyRange(15000, 20000, '만원')}</span>
-                      </span>
-                      <span className="text-gray-500">4개월</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-blue-600">
-                      <span className="text-xs">매칭도</span>
-                      <span className="font-semibold">82%</span>
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-4">
+                          <span className="text-gray-500">
+                            <span className="font-semibold text-gray-700 dark:text-gray-300">
+                              {formatCurrency(relatedProject.budget)}
+                            </span>
+                          </span>
+                          <span className="text-gray-500">{relatedProject.duration}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-green-600">
+                          <span className="text-xs">매칭도</span>
+                          <span className="font-semibold">
+                            {Math.floor(Math.random() * 30) + 70}%
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  /* 데이터가 없을 때 표시할 메시지 */
+                  <div className="w-full flex justify-center">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-12 text-center shadow-sm border border-gray-200 dark:border-gray-700 max-w-md">
+                      <svg className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">조회된 데이터가 없습니다</h3>
+                      <p className="text-gray-600 dark:text-gray-300">현재 비슷한 프로젝트가 없습니다.</p>
                     </div>
                   </div>
-                </div>
-
-                <div className="w-96 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 opacity-0 animate-slideIn" style={{ animationDelay: '400ms' }}>
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                        블록체인 거래소 개발
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">크립토뱅크</p>
-                    </div>
-                    <span className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 text-xs rounded-full">
-                      프리미엄
-                    </span>
-                  </div>
-                  
-                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-                    Solidity와 Web3.js를 활용한 DeFi 플랫폼 구축. 스마트 컨트랙트 개발 경험 필수.
-                  </p>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {['Solidity', 'Web3.js', 'React', 'Node.js'].map((skill) => (
-                      <span key={skill} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-4">
-                      <span className="text-gray-500">
-                        <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrencyRange(7, 10, '억원')}</span>
-                      </span>
-                      <span className="text-gray-500">8개월</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-yellow-600">
-                      <span className="text-xs">매칭도</span>
-                      <span className="font-semibold">68%</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 금액 범위 예시 카드 추가 */}
-                <div className="w-96 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 opacity-0 animate-slideIn" style={{ animationDelay: '500ms' }}>
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                        대규모 ERP 시스템 구축
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">엔터프라이즈솔루션</p>
-                    </div>
-                    <span className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs rounded-full">
-                      장기
-                    </span>
-                  </div>
-                  
-                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-                    대기업 전사 통합 ERP 시스템 구축. SAP 또는 Oracle ERP 구축 경험 필수.
-                  </p>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {['Java', 'Spring', 'Oracle', 'SAP'].map((skill) => (
-                      <span key={skill} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-4">
-                      <span className="text-gray-500">
-                        <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrency('6000000~8000000')}</span>
-                      </span>
-                      <span className="text-gray-500">12개월</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-red-600">
-                      <span className="text-xs">매칭도</span>
-                      <span className="font-semibold">85%</span>
-                    </div>
-                  </div>
-                </div>
+                )}
+                {/* End of related projects */}
               </div>
             </div>
           </div>
@@ -1321,12 +1252,38 @@ export default function ProjectDetailPage() {
                 취소
               </button>
               <button
-                onClick={() => {
-                  console.log('질문 제출:', questionText);
-                  setShowQuestionModal(false);
-                  setQuestionText('');
+                onClick={async () => {
+                  if (!questionText.trim()) return;
+                  
+                  try {
+                    const response = await projectService.createProjectQuestion(projectId, {
+                      content: questionText
+                    });
+                    
+                    if (response.success) {
+                      console.log('✅ Question submitted successfully');
+                      // 질문 목록 새로고침
+                      const updatedQuestions = await projectService.getProjectQuestions(projectId);
+                      if (updatedQuestions.success) {
+                        setQuestions(updatedQuestions.data || []);
+                      }
+                      setShowQuestionModal(false);
+                      setQuestionText('');
+                    } else {
+                      console.log('ℹ️ Question API not available yet');
+                      alert(response.message || '질문 기능이 아직 구현되지 않았습니다.');
+                    }
+                  } catch (error) {
+                    console.log('ℹ️ Question submission failed:', error);
+                    alert('질문 등록에 실패했습니다. 나중에 다시 시도해주세요.');
+                  }
                 }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                disabled={!questionText.trim()}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  questionText.trim()
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
               >
                 질문하기
               </button>
@@ -1390,6 +1347,87 @@ export default function ProjectDetailPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 이미지 모달 */}
+      {showImageModal && (
+        <>
+          <div 
+            className="fixed inset-0 bg-black/50 z-40" 
+            onClick={() => setShowImageModal(false)} 
+          />
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-4xl max-h-[90vh] w-full overflow-hidden">
+              {/* 모달 헤더 */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  프로젝트 이미지 {selectedImageIndex}
+                </h3>
+                <button
+                  onClick={() => setShowImageModal(false)}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* 모달 이미지 */}
+              <div className="relative aspect-video bg-gray-100 dark:bg-gray-700">
+                <Image
+                  src={`/images/project-${selectedImageIndex}.jpg`}
+                  alt={`프로젝트 이미지 ${selectedImageIndex}`}
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              
+              {/* 이미지 네비게이션 */}
+              <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => {
+                    const prevIndex = selectedImageIndex > 1 ? selectedImageIndex - 1 : 3;
+                    setSelectedImageIndex(prevIndex);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  이전
+                </button>
+                
+                <div className="flex gap-2">
+                  {[1, 2, 3].map((index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`w-3 h-3 rounded-full transition-colors ${
+                        index === selectedImageIndex 
+                          ? 'bg-blue-600' 
+                          : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                      }`}
+                    />
+                  ))}
+                </div>
+                
+                <button
+                  onClick={() => {
+                    const nextIndex = selectedImageIndex < 3 ? selectedImageIndex + 1 : 1;
+                    setSelectedImageIndex(nextIndex);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                >
+                  다음
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
