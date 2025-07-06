@@ -317,7 +317,11 @@ export default function ProjectDetailPage() {
                 <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                   <div className="text-2xl font-bold text-blue-600">💰</div>
                   <div className="text-sm text-gray-500">예산</div>
-                  <div className="font-semibold">{formatCurrency(project.budget)}</div>
+                  <div className="font-semibold">
+                    {project.budgetMin && project.budgetMax 
+                      ? `${(project.budgetMin / 10000).toFixed(0)}~${(project.budgetMax / 10000).toFixed(0)}만원`
+                      : project.budget || '협의'}
+                  </div>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                   <div className="text-2xl font-bold text-green-600">⏱️</div>
@@ -572,18 +576,21 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* 가격 정보 */}
-            <div className="flex items-center gap-4">
-              <div className="text-right">
+            <div className="flex items-center gap-8">
+              <div className="text-center">
+                <div className="text-xl text-gray-500 mb-1">예산</div>
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {formatCurrency(project.budget)}
+                  {project.budgetMin && project.budgetMax 
+                    ? `${(project.budgetMin / 10000).toFixed(0)}~${(project.budgetMax / 10000).toFixed(0)}만원`
+                    : project.budget || '협의'}
                 </div>
-                <div className="text-sm text-gray-500">예산</div>
               </div>
-              <div className="text-right">
+              <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
+              <div className="text-center">
+                <div className="text-xl text-gray-500 mb-1">마감일</div>
                 <div className="text-lg font-semibold text-green-600 dark:text-green-400">
                   {formatDate(project.deadline)}
                 </div>
-                <div className="text-sm text-gray-500">마감일</div>
               </div>
             </div>
           </div>
