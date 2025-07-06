@@ -3,140 +3,248 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRemoteProjectDetail } from '@/hooks/useRemoteProjectDetail';
+import { remoteProjectService } from '@/services/remoteProject';
+import type { RemoteProjectDetail, RemoteProjectApplication } from '@/types/remoteProject';
+import { formatDate } from '@/utils/format';
+import { useAuthStore } from '@/store/auth';
+import BookmarkButton from '@/components/common/BookmarkButton';
+import ApplyModal, { ApplyFormData } from '@/components/project/ApplyModal';
+import InquiryModal, { InquiryFormData } from '@/components/project/InquiryModal';
+import { Share2, MessageCircle, Bookmark, BookmarkCheck, Eye, Users, Calendar, Clock, CheckCircle, Shield, TrendingUp, Award, Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { useRealtimeStats } from '@/hooks/useRealtimeStats';
 
-interface RemoteProject {
-  id: string;
-  title: string;
-  description: string;
-  client: {
-    name: string;
-    company: string;
-    rating: number;
-    reviewCount: number;
-    projectsCompleted: number;
-    verificationStatus: 'verified' | 'unverified';
-  };
-  budget: {
-    type: 'fixed' | 'hourly';
-    amount: string;
-    negotiable: boolean;
-  };
-  timeline: {
-    duration: string;
-    startDate: string;
-    deadline: string;
-    urgency: 'low' | 'medium' | 'high';
-  };
-  skills: string[];
-  category: string;
-  workType: 'full-remote' | 'hybrid' | 'flexible';
-  requirements: string[];
-  deliverables: string[];
-  applicationDeadline: string;
-  status: 'open' | 'in-progress' | 'completed' | 'closed';
-  applicationsCount: number;
-  postedDate: string;
-  experienceLevel: 'entry' | 'intermediate' | 'expert';
-  communicationMethod: string[];
-  timezone: string;
-  preferredWorkingHours?: string;
-}
+// 프로젝트 상태에 따른 색상 정의
+const statusColors = {
+  open: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+  'in-progress': 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+  completed: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+  closed: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
+};
 
-const mockProject: RemoteProject = {
-  id: '1',
-  title: '온라인 쇼핑몰 프론트엔드 개발 프로젝트',
-  description: 'React.js 기반의 모던한 온라인 쇼핑몰 프론트엔드를 개발할 경험 있는 개발자를 찾고 있습니다. 반응형 디자인으로 모바일과 데스크톱에 최적화된 사용자 인터페이스를 구축하고, 결제 시스템 연동, 상품 검색 및 필터링, 장바구니 기능, 사용자 리뷰 시스템 등을 포함합니다.',
-  client: {
-    name: '김철수',
-    company: '테크스타트업 (주)',
-    rating: 4.8,
-    reviewCount: 23,
-    projectsCompleted: 15,
-    verificationStatus: 'verified'
-  },
-  budget: {
-    type: 'fixed',
-    amount: '500-800만원',
-    negotiable: true
-  },
-  timeline: {
-    duration: '2-3개월',
-    startDate: '2024년 1월 15일',
-    deadline: '2024년 4월 15일',
-    urgency: 'medium'
-  },
-  skills: ['React.js', 'TypeScript', 'Tailwind CSS', 'JavaScript', 'HTML/CSS', 'API 연동', 'Git'],
-  category: '웹 개발',
-  workType: 'full-remote',
-  requirements: [
-    'React.js 2년 이상 실무 경험',
-    'TypeScript 사용 경험 필수',
-    'Git을 이용한 협업 경험',
-    '전자상거래 사이트 개발 경험 우대',
-    '반응형 웹 개발 능숙',
-    '원활한 커뮤니케이션 능력'
-  ],
-  deliverables: [
-    '완성된 쇼핑몰 웹사이트',
-    '소스코드 및 문서화',
-    '배포 가이드',
-    '사용자 매뉴얼',
-    '유지보수 가이드'
-  ],
-  applicationDeadline: '2024년 1월 10일',
-  status: 'open',
-  applicationsCount: 12,
-  postedDate: '2023년 12월 20일',
-  experienceLevel: 'intermediate',
-  communicationMethod: ['Slack', 'Zoom', '이메일', '카카오톡'],
-  timezone: 'KST (한국 표준시)',
-  preferredWorkingHours: '오전 9시 - 오후 6시 (유연근무 가능)'
+// 경험 레벨에 따른 표시
+const experienceLevelLabels = {
+  entry: '초급',
+  intermediate: '중급',
+  expert: '고급'
+};
+
+// 작업 타입에 따른 표시
+const workTypeLabels = {
+  'full-remote': '완전 재택',
+  'hybrid': '하이브리드',
+  'flexible': '유연 근무'
+};
+
+// 긴급도에 따른 색상과 라벨
+const urgencyColors = {
+  low: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+  high: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+};
+
+const urgencyLabels = {
+  low: '여유',
+  medium: '보통',
+  high: '급함'
+};
+
+// 프로젝트 데이터 변환 함수
+const formatBudget = (project: RemoteProjectDetail) => {
+  if (project.budgetType === 'hourly') {
+    return `시간당 ${project.budget}${project.budgetNegotiable ? ' (협의 가능)' : ''}`;
+  }
+  return `${project.budget}${project.budgetNegotiable ? ' (협의 가능)' : ''}`;
+};
+
+const getDeadlineDays = (deadline: string) => {
+  const deadlineDate = new Date(deadline);
+  const today = new Date();
+  const diffTime = deadlineDate.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays > 0 ? diffDays : 0;
 };
 
 export default function RemoteProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
   const projectId = params.id as string;
+  const { isLoggedIn, user } = useAuthStore();
   
-  const [project, setProject] = useState<RemoteProject | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'requirements' | 'timeline' | 'client'>('overview');
+  // API 호출을 위한 커스텀 훅 사용
+  const { project, loading, error, toggleBookmark, isBookmarked } = useRemoteProjectDetail(projectId);
+  
+  const [activeTab, setActiveTab] = useState<'overview' | 'requirements' | 'timeline' | 'client' | 'environment' | 'benefits'>('overview');
   const [showApplicationModal, setShowApplicationModal] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  // WebSocket을 통한 실시간 통계
+  const { stats: realtimeStats, connected: wsConnected, updateStats, connectionStatus, retry } = useRealtimeStats({
+    projectId,
+    initialStats: {
+      viewCount: project?.viewCount || 0,
+      applicationsCount: project?.applicationsCount || 0,
+      bookmarkCount: project?.bookmarkCount || 0,
+      currentViewers: 1
+    },
+    enableWebSocket: true
+  });
+  const [showInquiryModal, setShowInquiryModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [skillMatchScore, setSkillMatchScore] = useState(0);
+  const [showTimeZoneModal, setShowTimeZoneModal] = useState(false);
+  const [estimatedDeliveryTime, setEstimatedDeliveryTime] = useState(0);
+  const [previousStats, setPreviousStats] = useState<typeof realtimeStats | null>(null);
 
+  // 프로젝트 정보가 업데이트되면 실시간 통계도 업데이트
   useEffect(() => {
-    const loadProjectDetail = async () => {
-      setLoading(true);
-      setTimeout(() => {
-        setProject(mockProject);
-        setLoading(false);
-      }, 1000);
-    };
-
-    if (projectId) {
-      loadProjectDetail();
+    if (project) {
+      updateStats({
+        viewCount: project.viewCount || 0,
+        applicationsCount: project.applicationsCount || 0,
+        bookmarkCount: project.bookmarkCount || 0
+      });
     }
-  }, [projectId]);
+  }, [project, updateStats]);
 
-  const handleApply = () => {
-    setShowApplicationModal(true);
+  // 통계 변경 시 애니메이션 효과를 위한 이전 값 저장
+  useEffect(() => {
+    if (previousStats && 
+        (previousStats.viewCount !== realtimeStats.viewCount ||
+         previousStats.applicationsCount !== realtimeStats.applicationsCount ||
+         previousStats.bookmarkCount !== realtimeStats.bookmarkCount)) {
+      // 숫자가 변경되면 애니메이션 효과 트리거
+      const statElements = document.querySelectorAll('.stat-value');
+      statElements.forEach(el => {
+        el.classList.add('stat-update-animation');
+        setTimeout(() => {
+          el.classList.remove('stat-update-animation');
+        }, 600);
+      });
+    }
+    setPreviousStats(realtimeStats);
+  }, [realtimeStats, previousStats]);
+
+  // 스킬 매칭 점수 계산
+  useEffect(() => {
+    if (project && user) {
+      // 사용자의 보유 스킬 (실제로는 로그인한 사용자의 프로필에서 가져옴)
+      const userSkills = ['React.js', 'TypeScript', 'JavaScript', 'Git'];
+      const matchingSkills = project.skills.filter(skill => 
+        userSkills.some(userSkill => 
+          userSkill.toLowerCase().includes(skill.toLowerCase()) || 
+          skill.toLowerCase().includes(userSkill.toLowerCase())
+        )
+      );
+      const score = Math.round((matchingSkills.length / project.skills.length) * 100);
+      setSkillMatchScore(score);
+    }
+  }, [project, user]);
+
+  // 지원하기 핸들러
+  const handleApplication = async (data: ApplyFormData) => {
+    if (!isLoggedIn) {
+      alert('로그인이 필요합니다.');
+      router.push('/login');
+      return;
+    }
+    
+    try {
+      const result = await remoteProjectService.applyProject(projectId, {
+        coverLetter: data.coverLetter,
+        portfolioUrls: data.portfolio ? [data.portfolio] : [],
+        proposedRate: data.expectedRate,
+        availableStartDate: data.availableDate,
+        freelancerId: user?.id || '',
+        status: 'pending'
+      });
+      
+      if (result.success) {
+        alert('프로젝트에 성공적으로 지원했습니다.');
+        setShowApplicationModal(false);
+        // 지원자 수 업데이트
+        updateStats({ applicationsCount: realtimeStats.applicationsCount + 1 });
+      } else {
+        alert(result.error || '지원에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Application error:', error);
+      alert('지원 중 오류가 발생했습니다.');
+    }
+  };
+  
+  // 문의하기 핸들러  
+  const handleInquiry = async (data: InquiryFormData) => {
+    if (!isLoggedIn) {
+      alert('로그인이 필요합니다.');
+      router.push('/login');
+      return;
+    }
+    
+    try {
+      const result = await remoteProjectService.inquireProject(projectId, {
+        subject: data.subject,
+        message: data.message,
+        
+        userId: user?.id || ''
+      });
+      
+      if (result.success) {
+        alert('문의가 성공적으로 전송되었습니다.');
+        setShowInquiryModal(false);
+      } else {
+        alert(result.error || '문의 전송에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Inquiry error:', error);
+      alert('문의 전송 중 오류가 발생했습니다.');
+    }
   };
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
+  const handleShare = () => {
+    if (navigator.share && project) {
+      navigator.share({
+        title: project.title,
+        text: `${project.title} - 재택 프로젝트`,
+        url: window.location.href,
+      });
+    } else {
+      setShowShareModal(true);
+    }
   };
 
+  // 로딩 상태
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-300">프로젝트 정보를 불러오는 중...</p>
+          <div className="flex justify-center mb-4">
+            <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-bounce mx-1" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          </div>
         </div>
       </div>
     );
   }
 
+  // 에러 상태
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">오류가 발생했습니다</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <Link 
+            href="/athome" 
+            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+          >
+            재택 프로젝트 목록으로 돌아가기
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // 프로젝트가 없는 경우
   if (!project) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -153,53 +261,20 @@ export default function RemoteProjectDetailPage() {
     );
   }
 
-  const urgencyColors = {
-    low: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-    medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    high: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-  };
-
-  const urgencyLabels = {
-    low: '여유',
-    medium: '보통',
-    high: '급함'
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 animate-fadeIn">
+      {/* Breadcrumb */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              프로젝트 목록으로
-            </button>
-            <div className="flex items-center space-x-4">
-              <button 
-                onClick={handleBookmark}
-                className={`p-2 rounded-lg transition-colors ${
-                  isBookmarked 
-                    ? 'text-red-500 bg-red-50 dark:bg-red-900/20' 
-                    : 'text-gray-400 hover:text-red-500 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-              >
-                <svg className="w-5 h-5" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </button>
-              <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                </svg>
-              </button>
-            </div>
-          </div>
+          <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+            <Link href="/" className="hover:text-blue-600">홈</Link>
+            <span>›</span>
+            <Link href="/athome" className="hover:text-blue-600">재택 프로젝트</Link>
+            <span>›</span>
+            <span className="hover:text-blue-600">상세보기</span>
+            <span>›</span>
+            <span className="text-gray-900 dark:text-white">{project.title}</span>
+          </nav>
         </div>
       </div>
 
@@ -227,20 +302,20 @@ export default function RemoteProjectDetailPage() {
                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        {project.timeline.duration}
+                        {project.duration}
                       </span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${urgencyColors[project.timeline.urgency]}`}>
-                        {urgencyLabels[project.timeline.urgency]}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${urgencyColors[project.urgency]}`}>
+                        {urgencyLabels[project.urgency]}
                       </span>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                      {project.budget.amount}
+                      {formatBudget(project)}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-300">
-                      {project.budget.type === 'fixed' ? '고정 금액' : '시간당'}
-                      {project.budget.negotiable && ' · 협의 가능'}
+                      {project.budgetType === 'fixed' ? '고정 금액' : '시간당'}
+                      {project.budgetNegotiable && ' · 협의 가능'}
                     </div>
                   </div>
                 </div>
@@ -262,23 +337,25 @@ export default function RemoteProjectDetailPage() {
                 {/* Status Info */}
                 <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
                   <div className="flex items-center space-x-4">
-                    <span>{project.applicationsCount}명 지원</span>
+                    <span>{realtimeStats.applicationsCount}명 지원</span>
                     <span>·</span>
-                    <span>{project.postedDate} 게시</span>
+                    <span>{formatDate(project.postedDate)} 게시</span>
                   </div>
                   <div>
-                    마감: {project.applicationDeadline}
+                    마감: {formatDate(project.applicationDeadline)} (D-{getDeadlineDays(project.applicationDeadline)})
                   </div>
                 </div>
               </div>
 
               {/* Tab Navigation */}
               <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-                <nav className="-mb-px flex space-x-8">
+                <nav className="-mb-px flex flex-wrap space-x-6 overflow-x-auto">
                   {[
                     { id: 'overview', label: '프로젝트 개요' },
                     { id: 'requirements', label: '요구사항' },
                     { id: 'timeline', label: '일정 및 조건' },
+                    { id: 'environment', label: '원격근무 환경' },
+                    { id: 'benefits', label: '지원 혜택' },
                     { id: 'client', label: '발주자 정보' }
                   ].map((tab) => (
                     <button
@@ -299,163 +376,200 @@ export default function RemoteProjectDetailPage() {
               {/* Tab Content */}
               <div className="space-y-6">
                 {activeTab === 'overview' && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">프로젝트 상세 설명</h3>
-                    <div className="prose dark:prose-invert max-w-none">
-                      <div className="text-gray-700 dark:text-gray-300">
-                        {project.description}
-                      </div>
-                    </div>
-                    
-                    <div className="mt-8">
-                      <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">산출물</h4>
-                      <ul className="space-y-2">
-                        {project.deliverables.map((deliverable, index) => (
-                          <li key={index} className="flex items-start">
-                            <svg className="w-5 h-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                            <span className="text-gray-700 dark:text-gray-300">{deliverable}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  <div className="animate-fadeIn">
+                    <h3 className="text-lg font-semibold mb-4">프로젝트 설명</h3>
+                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{project.description}</p>
                   </div>
                 )}
 
                 {activeTab === 'requirements' && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">필수 요구사항</h3>
-                    <ul className="space-y-3">
-                      {project.requirements.map((requirement, index) => (
+                  <div className="animate-fadeIn">
+                    <h3 className="text-lg font-semibold mb-4">필수 요구사항</h3>
+                    <ul className="space-y-2">
+                      {project.requirements?.map((req, index) => (
                         <li key={index} className="flex items-start">
-                          <svg className="w-5 h-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          <svg className="w-5 h-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span className="text-gray-700 dark:text-gray-300">{requirement}</span>
+                          <span className="text-gray-700 dark:text-gray-300">{req}</span>
                         </li>
                       ))}
                     </ul>
 
-                    <div className="mt-8">
-                      <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-3">경력 수준</h4>
-                      <div className="inline-flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                        <span className="text-gray-700 dark:text-gray-300">
-                          {project.experienceLevel === 'entry' && '신입/주니어'}
-                          {project.experienceLevel === 'intermediate' && '중급'}
-                          {project.experienceLevel === 'expert' && '시니어/전문가'}
-                        </span>
-                      </div>
-                    </div>
+                    <h3 className="text-lg font-semibold mt-6 mb-4">산출물</h3>
+                    <ul className="space-y-2">
+                      {project.deliverables?.map((del, index) => (
+                        <li key={index} className="flex items-start">
+                          <svg className="w-5 h-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                          </svg>
+                          <span className="text-gray-700 dark:text-gray-300">{del}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
 
                 {activeTab === 'timeline' && (
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">프로젝트 일정</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                          <h4 className="font-medium text-gray-900 dark:text-white mb-2">시작 예정일</h4>
-                          <p className="text-gray-700 dark:text-gray-300">{project.timeline.startDate}</p>
-                        </div>
-                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                          <h4 className="font-medium text-gray-900 dark:text-white mb-2">완료 예정일</h4>
-                          <p className="text-gray-700 dark:text-gray-300">{project.timeline.deadline}</p>
-                        </div>
-                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                          <h4 className="font-medium text-gray-900 dark:text-white mb-2">예상 기간</h4>
-                          <p className="text-gray-700 dark:text-gray-300">{project.timeline.duration}</p>
-                        </div>
-                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                          <h4 className="font-medium text-gray-900 dark:text-white mb-2">지원 마감일</h4>
-                          <p className="text-gray-700 dark:text-gray-300">{project.applicationDeadline}</p>
+                  <div className="animate-fadeIn">
+                    <h3 className="text-lg font-semibold mb-4">프로젝트 일정</h3>
+                    <div className="space-y-4">
+                      <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">프로젝트 기간</p>
+                            <p className="font-semibold">{project.duration}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">시작일</p>
+                            <p className="font-semibold">{formatDate(project.startDate)}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">마감일</p>
+                            <p className="font-semibold">{formatDate(project.deadline)}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">경험 레벨</p>
+                            <p className="font-semibold">{experienceLevelLabels[project.experienceLevel]}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">근무 조건</h3>
-                      <div className="space-y-4">
-                        <div className="flex items-start">
-                          <span className="font-medium text-gray-900 dark:text-white w-32 flex-shrink-0">근무 형태:</span>
-                          <span className="text-gray-700 dark:text-gray-300">
-                            {project.workType === 'full-remote' && '100% 원격근무'}
-                            {project.workType === 'hybrid' && '하이브리드 근무'}
-                            {project.workType === 'flexible' && '유연근무'}
-                          </span>
-                        </div>
-                        <div className="flex items-start">
-                          <span className="font-medium text-gray-900 dark:text-white w-32 flex-shrink-0">시간대:</span>
-                          <span className="text-gray-700 dark:text-gray-300">{project.timezone}</span>
-                        </div>
-                        {project.preferredWorkingHours && (
-                          <div className="flex items-start">
-                            <span className="font-medium text-gray-900 dark:text-white w-32 flex-shrink-0">선호 시간:</span>
-                            <span className="text-gray-700 dark:text-gray-300">{project.preferredWorkingHours}</span>
+                      {project.projectStages && project.projectStages.length > 0 && (
+                        <>
+                          <h3 className="text-lg font-semibold mt-6 mb-4">프로젝트 단계</h3>
+                          <div className="space-y-3">
+                            {project.projectStages.map((stage, index) => (
+                              <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h4 className="font-semibold">{stage.name}</h4>
+                                  <span className={`px-2 py-1 text-xs rounded-full ${
+                                    stage.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                    stage.status === 'current' ? 'bg-blue-100 text-blue-800' :
+                                    'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {stage.status === 'completed' ? '완료' :
+                                     stage.status === 'current' ? '진행중' : '예정'}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{stage.description}</p>
+                                <p className="text-sm font-medium">기간: {stage.duration}</p>
+                              </div>
+                            ))}
                           </div>
-                        )}
-                        <div className="flex items-start">
-                          <span className="font-medium text-gray-900 dark:text-white w-32 flex-shrink-0">소통 방식:</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'environment' && (
+                  <div className="animate-fadeIn">
+                    <h3 className="text-lg font-semibold mb-4">원격근무 환경</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">근무 형태</p>
+                        <p className="font-semibold">{workTypeLabels[project.workType]}</p>
+                      </div>
+                      
+                      {project.timezone && (
+                        <div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">시간대</p>
+                          <p className="font-semibold">{project.timezone}</p>
+                        </div>
+                      )}
+
+                      {project.preferredWorkingHours && (
+                        <div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">선호 근무시간</p>
+                          <p className="font-semibold">{project.preferredWorkingHours}</p>
+                        </div>
+                      )}
+
+                      {project.communicationMethod && project.communicationMethod.length > 0 && (
+                        <div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">소통 방식</p>
                           <div className="flex flex-wrap gap-2">
                             {project.communicationMethod.map((method, index) => (
-                              <span 
-                                key={index}
-                                className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded dark:bg-blue-900 dark:text-blue-200"
-                              >
+                              <span key={index} className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm rounded-full">
                                 {method}
                               </span>
                             ))}
                           </div>
                         </div>
-                      </div>
+                      )}
+
+                      {project.remoteWorkTools && project.remoteWorkTools.length > 0 && (
+                        <div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">협업 도구</p>
+                          <div className="flex flex-wrap gap-2">
+                            {project.remoteWorkTools.map((tool, index) => (
+                              <span key={index} className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full">
+                                {tool}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
 
-                {activeTab === 'client' && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">발주자 정보</h3>
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-                      <div className="flex items-start space-x-4">
-                        <div className="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                          <span className="text-gray-500 dark:text-gray-400 text-xl font-semibold">
-                            {project.client.name.charAt(0)}
-                          </span>
+                {activeTab === 'benefits' && project.benefits && project.benefits.length > 0 && (
+                  <div className="animate-fadeIn">
+                    <h3 className="text-lg font-semibold mb-4">지원 혜택</h3>
+                    <ul className="space-y-2">
+                      {project.benefits.map((benefit, index) => (
+                        <li key={index} className="flex items-start">
+                          <svg className="w-5 h-5 text-yellow-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          <span className="text-gray-700 dark:text-gray-300">{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {activeTab === 'client' && project.client && (
+                  <div className="animate-fadeIn">
+                    <h3 className="text-lg font-semibold mb-4">발주자 정보</h3>
+                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                      <div className="flex items-center mb-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                          {project.client.name.charAt(0)}
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <h4 className="font-semibold text-gray-900 dark:text-white">{project.client.name}</h4>
-                            {project.client.verificationStatus === 'verified' && (
-                              <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                              </svg>
-                            )}
-                          </div>
-                          <p className="text-gray-600 dark:text-gray-300 mb-3">{project.client.company}</p>
-                          <div className="grid grid-cols-3 gap-4 text-sm">
-                            <div>
-                              <div className="flex items-center mb-1">
-                                <svg className="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <span className="text-gray-900 dark:text-white font-medium">{project.client.rating}</span>
-                              </div>
-                              <p className="text-gray-600 dark:text-gray-300">({project.client.reviewCount}개 리뷰)</p>
-                            </div>
-                            <div>
-                              <div className="text-gray-900 dark:text-white font-medium mb-1">{project.client.projectsCompleted}건</div>
-                              <p className="text-gray-600 dark:text-gray-300">완료 프로젝트</p>
-                            </div>
-                            <div>
-                              <div className="text-green-600 dark:text-green-400 font-medium mb-1">
-                                {project.client.verificationStatus === 'verified' ? '인증 완료' : '미인증'}
-                              </div>
-                              <p className="text-gray-600 dark:text-gray-300">신원 확인</p>
-                            </div>
-                          </div>
+                        <div className="ml-4">
+                          <h4 className="font-semibold text-lg">{project.client.name}</h4>
+                          <p className="text-gray-600 dark:text-gray-400">{project.client.company}</p>
                         </div>
                       </div>
+                      
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <p className="text-2xl font-bold text-yellow-500">
+                            {'★'.repeat(Math.floor(project.client.rating))}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">평점 {project.client.rating}</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold">{project.client.reviewCount}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">리뷰</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold">{project.client.projectsCompleted}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">완료 프로젝트</p>
+                        </div>
+                      </div>
+                      
+                      {project.client.verificationStatus === 'verified' && (
+                        <div className="mt-4 flex items-center text-green-600 dark:text-green-400">
+                          <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          인증된 발주자
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -464,121 +578,192 @@ export default function RemoteProjectDetailPage() {
           </div>
 
           {/* Right Sidebar */}
-          <div className="space-y-6">
-            {/* Application Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-              <button 
-                onClick={handleApply}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors mb-4"
-              >
-                프로젝트 지원하기
-              </button>
-              
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">지원 마감일</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{project.applicationDeadline}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">현재 지원자</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{project.applicationsCount}명</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">프로젝트 상태</span>
-                  <span className="font-medium text-green-600 dark:text-green-400">
-                    {project.status === 'open' && '지원 받는 중'}
-                    {project.status === 'in-progress' && '진행 중'}
-                    {project.status === 'completed' && '완료'}
-                    {project.status === 'closed' && '마감'}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Project Summary */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">프로젝트 요약</h3>
-              <div className="space-y-3">
-                <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">카테고리</div>
-                  <div className="font-medium text-gray-900 dark:text-white">{project.category}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">예산</div>
-                  <div className="font-medium text-gray-900 dark:text-white">{project.budget.amount}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">기간</div>
-                  <div className="font-medium text-gray-900 dark:text-white">{project.timeline.duration}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">근무 형태</div>
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    {project.workType === 'full-remote' && '100% 원격'}
-                    {project.workType === 'hybrid' && '하이브리드'}
-                    {project.workType === 'flexible' && '유연근무'}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Share & Report */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-              <div className="space-y-3">
-                <button className="w-full text-left text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
-                  <div className="flex items-center">
-                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                    </svg>
-                    프로젝트 공유하기
-                  </div>
+          <div className="lg:col-span-1">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 sticky top-4">
+              {/* Action Buttons */}
+              <div className="space-y-3 mb-6">
+                <button
+                  onClick={() => {
+                    if (!isLoggedIn) {
+                      alert('로그인이 필요합니다.');
+                      router.push('/login');
+                      return;
+                    }
+                    setShowApplicationModal(true);
+                  }}
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  disabled={project.status !== 'open'}
+                >
+                  {project.status === 'open' ? '지원하기' : '마감된 프로젝트'}
                 </button>
-                <button className="w-full text-left text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
-                  <div className="flex items-center">
-                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                    부적절한 내용 신고
-                  </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <BookmarkButton
+                    isBookmarked={isBookmarked}
+                    onToggle={toggleBookmark}
+                    size="md"
+                    className="py-2 px-4 rounded-lg border border-gray-300"
+                  />
+                  
+                  <button
+                    onClick={handleShare}
+                    className="py-2 px-4 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center"
+                  >
+                    <Share2 className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setShowInquiryModal(true)}
+                  className="w-full py-2 px-4 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center"
+                >
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  문의하기
                 </button>
               </div>
+
+              {/* Real-time Stats */}
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold">실시간 현황</h3>
+                  <div className="flex items-center gap-2">
+                    {connectionStatus === 'connected' && (
+                      <span className="flex items-center text-xs text-green-600 dark:text-green-400">
+                        <Wifi className="w-3 h-3 mr-1" />
+                        <span className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full animate-pulse"></span>
+                      </span>
+                    )}
+                    {connectionStatus === 'connecting' && (
+                      <span className="flex items-center text-xs text-yellow-600 dark:text-yellow-400">
+                        <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                        연결중
+                      </span>
+                    )}
+                    {connectionStatus === 'disconnected' && (
+                      <button
+                        onClick={retry}
+                        className="flex items-center text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                      >
+                        <WifiOff className="w-3 h-3 mr-1" />
+                        재연결
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center group">
+                    <span className="text-gray-600 dark:text-gray-400 flex items-center">
+                      <Eye className="w-4 h-4 mr-1.5" />
+                      조회수
+                    </span>
+                    <span className="stat-value font-semibold transition-all duration-300 group-hover:scale-110">
+                      {realtimeStats.viewCount.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center group">
+                    <span className="text-gray-600 dark:text-gray-400 flex items-center">
+                      <Users className="w-4 h-4 mr-1.5" />
+                      지원자
+                    </span>
+                    <span className="stat-value font-semibold transition-all duration-300 group-hover:scale-110">
+                      {realtimeStats.applicationsCount}명
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center group">
+                    <span className="text-gray-600 dark:text-gray-400 flex items-center">
+                      <Bookmark className="w-4 h-4 mr-1.5" />
+                      북마크
+                    </span>
+                    <span className="stat-value font-semibold transition-all duration-300 group-hover:scale-110">
+                      {realtimeStats.bookmarkCount}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center group">
+                    <span className="text-gray-600 dark:text-gray-400">현재 보는 사람</span>
+                    <div className="flex items-center">
+                      <span className="font-semibold text-green-600 dark:text-green-400 transition-all duration-300 group-hover:scale-110">
+                        {realtimeStats.currentViewers}명
+                      </span>
+                      {connectionStatus === 'connected' && realtimeStats.currentViewers > 1 && (
+                        <div className="ml-2 flex -space-x-1">
+                          {[...Array(Math.min(3, realtimeStats.currentViewers - 1))].map((_, i) => (
+                            <div
+                              key={i}
+                              className="w-2 h-2 bg-green-500 rounded-full animate-pulse"
+                              style={{ animationDelay: `${i * 200}ms` }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Connection Status Message */}
+                {connectionStatus === 'disconnected' && (
+                  <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                    <p className="text-xs text-yellow-800 dark:text-yellow-200 text-center">
+                      실시간 업데이트가 일시적으로 중단되었습니다
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Skill Match Score */}
+              {isLoggedIn && skillMatchScore > 0 && (
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                  <h3 className="font-semibold mb-3">스킬 매칭도</h3>
+                  <div className="relative pt-1">
+                    <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+                      <div 
+                        style={{ width: `${skillMatchScore}%` }}
+                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
+                      />
+                    </div>
+                    <p className="text-center text-lg font-bold text-blue-600">{skillMatchScore}%</p>
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Similar Projects */}
+            {project.similarProjects && project.similarProjects.length > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mt-4">
+                <h3 className="font-semibold mb-4">비슷한 프로젝트</h3>
+                <div className="space-y-3">
+                  {project.similarProjects.slice(0, 3).map((similar) => (
+                    <Link
+                      key={similar.id}
+                      href={`/athome/${similar.id}`}
+                      className="block p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <h4 className="font-medium text-sm mb-1 line-clamp-2">{similar.title}</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{similar.companyName}</p>
+                      <p className="text-sm font-semibold text-blue-600 mt-1">{similar.budget}</p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Application Modal */}
-      {showApplicationModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-             onClick={() => setShowApplicationModal(false)}
-        >
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md"
-               onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">프로젝트 지원</h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
-              이 프로젝트에 지원하시겠습니까? 지원서 작성 페이지로 이동합니다.
-            </p>
-            <div className="flex space-x-4">
-              <button
-                onClick={() => setShowApplicationModal(false)}
-                className="flex-1 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors"
-              >
-                취소
-              </button>
-              <button
-                onClick={() => {
-                  setShowApplicationModal(false);
-                  router.push(`/project/apply/${projectId}`);
-                }}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors"
-              >
-                지원하기
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ApplyModal
+        project={project}
+        isOpen={showApplicationModal}
+        onClose={() => setShowApplicationModal(false)}
+        onApply={handleApplication}
+      />
+      
+      {/* Inquiry Modal */}
+      <InquiryModal
+        projectTitle={project.title}
+        isOpen={showInquiryModal}
+        onClose={() => setShowInquiryModal(false)}
+        onInquire={handleInquiry}
+      />
     </div>
   );
-} 
+}

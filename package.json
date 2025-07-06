@@ -23,8 +23,8 @@
     "tone:validate": "npm run tone:check && npm run tone:errors && npm run tone:naming"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "axios": "^1.8.3",
-    "bcryptjs": "^3.0.2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.19.2",
     "jsonwebtoken": "^9.0.2",
@@ -35,12 +35,11 @@
     "next-bundle-analyzer": "^0.6.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "swiper": "^11.2.6",
+    "socket.io-client": "^4.8.1",
     "uuid": "^11.1.0",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "20.11.0",
     "@types/react": "18.2.0",

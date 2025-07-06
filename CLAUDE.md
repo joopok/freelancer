@@ -5,6 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 JobKorea Billboard (잡코리아 빌보드) - A modern freelancer matching platform connecting talented freelancers with companies. Built with Next.js 14 App Router, React 18, TypeScript, and Spring Boot backend. Features include 3D rotating carousel, glassmorphism effects, real-time search, and comprehensive project/freelancer management.
 
+### Project Path
+/Users/doseunghyeon/developerApp/react/aiproject02
+
 ## Essential Commands
 
 ### Development & Build
@@ -52,9 +55,10 @@ npm run db:categories        # Apply categories table updates
 - **State Management**: Zustand 5.0.3 with persistence
 - **Animations**: Framer Motion 12.19.2
 - **HTTP Client**: Axios 1.8.3 with custom instance
+- **Real-time**: Socket.io-client 4.8.1 for WebSocket
 - **Authentication**: JWT stored in localStorage
 - **Database**: MariaDB 3.4.2
-- **Backend**: Spring Boot (localhost:8080)
+- **Backend**: Spring Boot (localhost:8080) + Socket.io (localhost:9092)
 
 ### API Integration Pattern
 - All API calls MUST go through service layer (`/src/services/`)
@@ -121,6 +125,10 @@ NEXT_PUBLIC_API_URL=http://localhost:8080
 NEXT_PUBLIC_USE_MOCK_API=false
 NEXT_PUBLIC_API_TIMEOUT=30000
 NEXT_PUBLIC_AUTH_TOKEN_NAME=auth_token
+
+# WebSocket Configuration
+NEXT_PUBLIC_ENABLE_WEBSOCKET=true
+NEXT_PUBLIC_WS_URL=http://localhost:9092
 ```
 
 ## Authentication Flow
@@ -177,29 +185,6 @@ if (freelancer?.hourlyRate) {
 }
 ```
 
-## Recent Feature Implementations
-
-### Project Detail Page Enhancements
-- **Real-time Statistics**: View counts, applicant numbers, and bookmarks updated every 5 seconds
-- **Project Progress Stages**: Visual timeline showing project phases
-- **Q&A/Review System**: Conditional display based on project status
-- **Related Projects**: Carousel showing similar projects
-- **FAQ Section**: Collapsible frequently asked questions
-- **Sticky Action Buttons**: Apply/Bookmark buttons remain visible
-
-### Freelancer Detail Page Enhancements
-- **Skill Verification System**: Visual badges for verified skills
-- **Project Matching Score**: Algorithm-based compatibility percentage
-- **Availability Calendar**: Interactive monthly calendar
-- **Rating Trend Chart**: Visual representation of rating changes
-- **Work Style Information**: Communication preferences and work hours
-- **Enhanced FAQ Section**: Categorized FAQs with expand/collapse
-
-### Component Library Additions
-- `AvailabilityCalendar`: Full-featured calendar component
-- `RatingTrendChart`: Simple bar chart for rating visualization
-- `ApplicationModal`: Reusable modal for project applications
-
 ## UI/UX Patterns
 
 ### Card Button Styling
@@ -254,11 +239,58 @@ if (freelancer?.hourlyRate) {
 - Run backend: `./gradlew bootRun`
 - Backend CORS configured for localhost:3000
 
-## Active Development Areas
-1. **Skills API** - `/api/freelancers/skills/` integration
-2. **Multi-search** - Tag-based filtering enhancement
-3. **Dynamic routing** - Detail pages for freelancers/projects
-4. **Settings page** - User preference management
-5. **Test framework** - Jest/Vitest implementation needed
+## Real-time WebSocket Integration
 
-*Last Updated: 2025-01-04*
+### Client-side WebSocket Setup
+- WebSocket service at `/src/services/websocket.ts`
+- Custom hook `useRealtimeStats` for real-time statistics
+- WebSocketProvider wraps the app for connection management
+- Auto-reconnect with exponential backoff
+- Room-based subscriptions for projects/freelancers
+
+### Server-side WebSocket Implementation
+- Socket.io server runs on port 9092 (separate from main API)
+- Event handlers in `/websocket/` directory
+- Real-time updates for:
+  - Viewer count (join/leave)
+  - Application count
+  - Bookmark count
+  - Inquiry notifications
+
+### WebSocket Events
+- `join_project` / `leave_project` - Project room management
+- `join_freelancer` / `leave_freelancer` - Freelancer room management  
+- `realtime_update` / `stats_update` - Statistics broadcasts
+
+## Backend Server Commands
+```bash
+cd /Users/doseunghyeon/developerApp/JAVA/project_ai01
+./gradlew bootRun  # Starts both Spring Boot (8080) and Socket.io (9092)
+```
+
+## Recent Major Features
+
+### 1. Remote Project (재택 프로젝트) Full Implementation
+- Complete API integration for remote project pages
+- Service layer: `remoteProjectService` with all CRUD operations
+- Custom hooks: `useRemoteProjects`, `useRemoteProjectDetail`
+- Features: search, filtering, pagination, apply, bookmark, inquire
+
+### 2. Common UI Components
+- **BookmarkButton**: Reusable bookmark toggle with auth check
+- **ApplyModal**: Project application modal with form validation
+- **InquiryModal**: Inquiry form modal with contact info
+
+### 3. API Response Transformations
+- Handle JSON string fields (skills, techStack) from backend
+- Type safety with proper interfaces
+- Error handling with user-friendly messages
+
+## Active Development Areas
+1. **Remote Project System** - Complete with all features
+2. **Real-time Statistics** - WebSocket integration complete
+3. **Freelancer Detail Page** - API integration complete
+4. **Common Components** - Bookmark, Apply, Inquiry modals
+5. **Performance** - Debounced search, optimistic updates
+
+*Last Updated: 2025-01-06*

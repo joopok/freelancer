@@ -717,6 +717,7 @@ export default function ProjectDetailPage() {
             </div>
           }>
             <SimilarProjects 
+              projectId={projectId}
               projects={similarProjects}
               loading={tabDataLoading}
             />

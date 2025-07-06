@@ -121,8 +121,10 @@ export default function LoginPage() {
       try {
         response = await authService.login(username1, password);
       } catch (apiError) {
-        setError(apiError instanceof Error ? apiError.message : "로그인 연결에 문제가 생겼어요. 잠시 후 다시 시도해주세요.");
-        throw apiError;
+        const errorMessage = apiError instanceof Error ? apiError.message : "로그인 연결에 문제가 생겼어요. 잠시 후 다시 시도해주세요.";
+        setError(errorMessage);
+        setIsLoading(false);
+        return;
       }
 
       // 디버깅을 위한 로그
@@ -174,7 +176,10 @@ export default function LoginPage() {
         }
       }
     } catch (error) {
-      setError("예상치 못한 문제가 발생했어요. 잠시 후 다시 시도해주시거나, 계속 문제가 발생하면 고객센터로 연락주세요.");
+      // 이미 setError로 처리된 경우는 그대로 유지
+      if (!error || (error instanceof Error && error.message !== "")) {
+        // error가 이미 처리된 경우가 아니면 추가 처리 없음
+      }
     } finally {
       setIsLoading(false);
     }

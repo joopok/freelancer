@@ -20,6 +20,17 @@ export interface Freelancer {
   completionRate?: number;
 }
 
+// FeaturedFreelancer 타입 추가
+export interface FeaturedFreelancer {
+  id: number;
+  name: string;
+  position: string;
+  experience: string;
+  skills: string[];
+  avatar: string;
+  rating: number;
+}
+
 // 프리랜서 포트폴리오 타입
 export interface Portfolio {
   id: string;
@@ -324,4 +335,6 @@ export interface FreelancerDetail extends Freelancer {
     endorserTitle: string;
     date: string;
   }[];
-} 
+  repeatClientRate?: number;
+  responseRate?: number;
+}

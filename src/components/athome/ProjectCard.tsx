@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { AthomeProject } from '@/types/athome';
+import { formatDate } from '@/utils/format';
 
 interface ProjectCardProps {
   project: AthomeProject;
@@ -18,7 +19,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
           <span className="bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-400 dark:to-red-400 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">
-            {project.deadline}
+            {formatDate(project.deadline)}
           </span>
           <span className="text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-700">
             {project.type}

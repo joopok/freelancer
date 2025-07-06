@@ -4,6 +4,7 @@ import React, { memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Project } from '@/types/project';
+import { useNumberFormat } from '@/hooks/useNumberFormat';
 
 interface ProjectCardProps {
   project: Project;
@@ -11,6 +12,8 @@ interface ProjectCardProps {
 
 // 프로젝트 카드 컴포넌트를 메모이제이션하여 불필요한 리렌더링 방지
 const ProjectCard = memo(({ project }: ProjectCardProps) => {
+  const { formatManwonRange } = useNumberFormat();
+  
   // company 정보 추출
   const companyInfo = typeof project.company === 'object' 
     ? project.company 
@@ -151,16 +154,14 @@ const ProjectCard = memo(({ project }: ProjectCardProps) => {
 
           {/* 예산 */}
           <div className="text-right">
-            <div className="flex items-baseline justify-end">
+            <div className="flex items-center justify-end gap-2">
               <span className="text-lg font-bold text-gray-900 dark:text-white">
                 {project.budgetMin && project.budgetMax 
-                  ? `${(project.budgetMin / 10000).toFixed(0)}~${(project.budgetMax / 10000).toFixed(0)}만원`
+                  ? formatManwonRange(project.budgetMin, project.budgetMax)
                   : project.budget || '협의'}
               </span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">({project.duration || '협의'})</span>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {project.duration || '협의'}
-            </p>
           </div>
         </div>
 

@@ -9,10 +9,10 @@ export default function BlogPostsPage() {
   
   // 페이지 로드 시 로딩 효과 표시
   useEffect(() => {
-    // 3초 후에 로딩 상태 해제
+    // 2초 후에 로딩 상태 해제
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 3000);
+    }, 2000);
     
     // 컴포넌트 언마운트 시 타이머 정리
     return () => clearTimeout(timer);

@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLoading } from '@/components/layout/Loading';
+import { formatDate } from '@/utils/format';
 
 // 블로그 포스트 타입 정의
 interface BlogPost {
@@ -83,7 +84,7 @@ export default function BlogPostPage() {
       setPost(postData);
       setLocalLoading(false);
       setLoading(false);
-    }, 3000); // 3초 로딩 효과
+    }, 2000); // 2초 로딩 효과
     
     return () => clearTimeout(timer);
   }, [id, setLoading]);
@@ -150,7 +151,7 @@ export default function BlogPostPage() {
             <div>
               <p className="font-medium">{post.author}</p>
               <div className="flex items-center text-sm opacity-80">
-                <span>{post.date}</span>
+                <span>{formatDate(post.date)}</span>
                 <span className="mx-2">•</span>
                 <span>{post.readTime} 읽기</span>
               </div>

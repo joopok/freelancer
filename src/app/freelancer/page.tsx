@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import MultiSearchInput from '@/components/common/MultiSearchInput';
 import { freelancerService, type FreelancerSearchParams } from '@/services/freelancer';
 import type { Freelancer } from '@/types/freelancer';
@@ -17,9 +17,20 @@ export default function FreelancerPageWrapper() {
 
 function FreelancerPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   
-  // URL 파라미터에서 탭 가져오기
+  // URL 파라미터에서 값들 가져오기
   const tabFromUrl = searchParams.get('tab');
+  const skillsFromUrl = searchParams.get('skills');
+  const experienceFromUrl = searchParams.get('experience');
+  const typeFromUrl = searchParams.get('type');
+  const sortFromUrl = searchParams.get('sort');
+  const searchFromUrl = searchParams.get('search');
+  const ratingFromUrl = searchParams.get('rating');
+  const hourlyRateMinFromUrl = searchParams.get('hourlyRateMin');
+  const hourlyRateMaxFromUrl = searchParams.get('hourlyRateMax');
+  const projectCountFromUrl = searchParams.get('projectCount');
+  const availabilityFromUrl = searchParams.get('availability');
   
   // 상태 관리
   const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
@@ -38,6 +49,13 @@ function FreelancerPage() {
   const [allSkills, setAllSkills] = useState<string[]>([]); // API에서 로드할 기술 스택
   const [skillsLoading, setSkillsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true); // 더 로드할 데이터가 있는지
+  
+  // 추가 필터 상태
+  const [selectedRating, setSelectedRating] = useState<string>('');
+  const [hourlyRateMin, setHourlyRateMin] = useState<string>('');
+  const [hourlyRateMax, setHourlyRateMax] = useState<string>('');
+  const [selectedProjectCount, setSelectedProjectCount] = useState<string>('');
+  const [selectedAvailability, setSelectedAvailability] = useState<string>('');
   
   // 디바운싱용 ref
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -60,6 +78,21 @@ function FreelancerPage() {
     };
   }, []);
   const tabs = ["전체","PM/PL","PMO", "개발자", "기획자", "퍼블리셔", "디자이너", "기타"];
+  
+  // URL 파라미터에서 초기값 설정
+  useEffect(() => {
+    if (skillsFromUrl) setSelectedSkills(skillsFromUrl.split(','));
+    if (experienceFromUrl) setSelectedExperience(experienceFromUrl);
+    if (typeFromUrl) setSelectedType(typeFromUrl);
+    if (sortFromUrl) setSortBy(sortFromUrl);
+    if (searchFromUrl) setSearchTerms(searchFromUrl.split(' '));
+    if (ratingFromUrl) setSelectedRating(ratingFromUrl);
+    if (hourlyRateMinFromUrl) setHourlyRateMin(hourlyRateMinFromUrl);
+    if (hourlyRateMaxFromUrl) setHourlyRateMax(hourlyRateMaxFromUrl);
+    if (projectCountFromUrl) setSelectedProjectCount(projectCountFromUrl);
+    if (availabilityFromUrl) setSelectedAvailability(availabilityFromUrl);
+  }, [skillsFromUrl, experienceFromUrl, typeFromUrl, sortFromUrl, searchFromUrl,
+      ratingFromUrl, hourlyRateMinFromUrl, hourlyRateMaxFromUrl, projectCountFromUrl, availabilityFromUrl]);
 
   // 기술 스택 목록 로드
   const loadSkills = async () => {
@@ -143,7 +176,12 @@ function FreelancerPage() {
         skills: selectedSkills.length > 0 ? selectedSkills : undefined,
         search: searchTerms.length > 0 ? searchTerms.join(' ') : undefined,
         sortBy: sortBy ? (sortBy as any) : undefined,
-        sortOrder: 'desc'
+        sortOrder: sortBy === 'hourlyRateLow' ? 'asc' : 'desc',
+        rating: selectedRating ? parseFloat(selectedRating) : undefined,
+        hourlyRateMin: hourlyRateMin ? parseInt(hourlyRateMin) : undefined,
+        hourlyRateMax: hourlyRateMax ? parseInt(hourlyRateMax) : undefined,
+        projectCount: selectedProjectCount ? parseInt(selectedProjectCount) : undefined,
+        availability: selectedAvailability || undefined
       };
 
       console.log('Loading freelancers with params:', searchParams);
@@ -239,13 +277,18 @@ function FreelancerPage() {
   
   // 필터/정렬 변경 시 로드 (디바운싱 적용)
   useEffect(() => {
-    // 초기 렌더링에서는 실행하지 않음 (빈 배열 상태에서는 스킬)
+    // 초기 렌더링에서는 실행하지 않음
     const isInitialRender = selectedSkills.length === 0 && 
                            searchTerms.length === 0 && 
                            selectedExperience === '' && 
                            selectedType === '' && 
                            sortBy === '' && 
-                           activeTab === '전체';
+                           activeTab === '전체' &&
+                           selectedRating === '' &&
+                           hourlyRateMin === '' &&
+                           hourlyRateMax === '' &&
+                           selectedProjectCount === '' &&
+                           selectedAvailability === '';
     
     if (isInitialRender) {
       console.log('⏭️ Skipping filter effect on initial render');
@@ -267,7 +310,17 @@ function FreelancerPage() {
     
     return () => clearTimeout(timeoutId);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, selectedType, selectedExperience, selectedSkills, searchTerms, sortBy]);
+  }, [activeTab, selectedType, selectedExperience, selectedSkills, searchTerms, sortBy,
+      selectedRating, hourlyRateMin, hourlyRateMax, selectedProjectCount, selectedAvailability]);
+
+  // URL 파라미터 업데이트
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateUrlParams();
+    }, 500); // 500ms 디바운싱
+    
+    return () => clearTimeout(timer);
+  }, [updateUrlParams]);
 
   // 총 페이지 수 계산
   const totalPages = Math.ceil(totalCount / itemsPerPage);
@@ -307,6 +360,27 @@ function FreelancerPage() {
     setSortBy(e.target.value);
   }, []);
 
+  // URL 파라미터 업데이트 함수
+  const updateUrlParams = useCallback(() => {
+    const params = new URLSearchParams();
+    
+    if (activeTab !== "전체") params.set('tab', activeTab);
+    if (selectedSkills.length > 0) params.set('skills', selectedSkills.join(','));
+    if (selectedExperience) params.set('experience', selectedExperience);
+    if (selectedType) params.set('type', selectedType);
+    if (sortBy) params.set('sort', sortBy);
+    if (searchTerms.length > 0) params.set('search', searchTerms.join(' '));
+    if (selectedRating) params.set('rating', selectedRating);
+    if (hourlyRateMin) params.set('hourlyRateMin', hourlyRateMin);
+    if (hourlyRateMax) params.set('hourlyRateMax', hourlyRateMax);
+    if (selectedProjectCount) params.set('projectCount', selectedProjectCount);
+    if (selectedAvailability) params.set('availability', selectedAvailability);
+    
+    const queryString = params.toString();
+    router.push(`/freelancer${queryString ? `?${queryString}` : ''}`, { scroll: false });
+  }, [activeTab, selectedSkills, selectedExperience, selectedType, sortBy, searchTerms, 
+      selectedRating, hourlyRateMin, hourlyRateMax, selectedProjectCount, selectedAvailability, router]);
+
   // 필터 초기화 함수
   const resetFilters = useCallback(() => {
     console.log('🔄 Resetting all filters');
@@ -316,7 +390,13 @@ function FreelancerPage() {
     setSearchTerms([]);
     setSortBy('');
     setActiveTab("전체");
-  }, []);
+    setSelectedRating('');
+    setHourlyRateMin('');
+    setHourlyRateMax('');
+    setSelectedProjectCount('');
+    setSelectedAvailability('');
+    router.push('/freelancer');
+  }, [router]);
 
   // 탭 변경 핸들러
   const handleTabChange = useCallback((tab: string) => {
@@ -640,6 +720,122 @@ function FreelancerPage() {
               프리랜서 필터
             </h3>
 
+            {/* 적용된 필터 표시 */}
+            {(selectedSkills.length > 0 || selectedExperience || selectedType || selectedRating || 
+              hourlyRateMin || hourlyRateMax || selectedProjectCount || selectedAvailability || 
+              searchTerms.length > 0) && (
+              <div className="mb-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center justify-between mb-2">
+                  <h5 className="text-sm font-medium text-blue-800 dark:text-blue-300">적용된 필터</h5>
+                  <button
+                    onClick={resetFilters}
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                  >
+                    모두 제거
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {searchTerms.map((term, index) => (
+                    <span key={`search-${index}`} className="inline-flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-800 rounded-full text-xs border border-blue-200 dark:border-blue-700">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      {term}
+                      <button
+                        onClick={() => setSearchTerms(searchTerms.filter((_, i) => i !== index))}
+                        className="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  {selectedSkills.map(skill => (
+                    <span key={skill} className="inline-flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-800 rounded-full text-xs border border-blue-200 dark:border-blue-700">
+                      {skill}
+                      <button
+                        onClick={() => toggleSkillFilter(skill)}
+                        className="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  {selectedExperience && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-800 rounded-full text-xs border border-blue-200 dark:border-blue-700">
+                      경력: {selectedExperience === '1' ? '1년 미만' : 
+                             selectedExperience === '3' ? '1-3년' :
+                             selectedExperience === '5' ? '3-5년' :
+                             selectedExperience === '7' ? '5-7년' :
+                             selectedExperience === '10' ? '7-10년' : '10년 이상'}
+                      <button
+                        onClick={() => setSelectedExperience('')}
+                        className="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {selectedType && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-800 rounded-full text-xs border border-blue-200 dark:border-blue-700">
+                      타입: {selectedType}
+                      <button
+                        onClick={() => setSelectedType('')}
+                        className="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {selectedRating && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-800 rounded-full text-xs border border-blue-200 dark:border-blue-700">
+                      평점: {selectedRating}점 이상
+                      <button
+                        onClick={() => setSelectedRating('')}
+                        className="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {(hourlyRateMin || hourlyRateMax) && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-800 rounded-full text-xs border border-blue-200 dark:border-blue-700">
+                      시급: {hourlyRateMin || '0'}~{hourlyRateMax || '∞'}만원
+                      <button
+                        onClick={() => { setHourlyRateMin(''); setHourlyRateMax(''); }}
+                        className="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {selectedProjectCount && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-800 rounded-full text-xs border border-blue-200 dark:border-blue-700">
+                      프로젝트: {selectedProjectCount}건 이상
+                      <button
+                        onClick={() => setSelectedProjectCount('')}
+                        className="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {selectedAvailability && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-800 rounded-full text-xs border border-blue-200 dark:border-blue-700">
+                      시간대: {selectedAvailability === 'fulltime' ? '풀타임' : 
+                              selectedAvailability === 'parttime' ? '파트타임' :
+                              selectedAvailability === 'weekend' ? '주말 가능' : '저녁 가능'}
+                      <button
+                        onClick={() => setSelectedAvailability('')}
+                        className="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* 기술 스택 필터 */}
             <div className="mb-8">
               <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
@@ -694,10 +890,111 @@ function FreelancerPage() {
                 disabled={isFiltering}
               >
                 <option value=""> 전체 </option>
-                <option value="3"> 3년 이하 </option>
-                <option value="6"> 6년 이하 </option>
-                <option value="10"> 10년 이하 </option>
-                <option value="11"> 10년 초과 </option>
+                <option value="1"> 1년 미만 </option>
+                <option value="3"> 1-3년 </option>
+                <option value="5"> 3-5년 </option>
+                <option value="7"> 5-7년 </option>
+                <option value="10"> 7-10년 </option>
+                <option value="11"> 10년 이상 </option>
+              </select>
+            </div>
+
+            {/* 평점 필터 */}
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+                <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+                평점
+              </h4>
+              <select
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
+                value={selectedRating}
+                onChange={(e) => setSelectedRating(e.target.value)}
+                disabled={isFiltering}
+              >
+                <option value="">전체</option>
+                <option value="4.5">4.5점 이상</option>
+                <option value="4.0">4.0점 이상</option>
+                <option value="3.5">3.5점 이상</option>
+                <option value="3.0">3.0점 이상</option>
+              </select>
+            </div>
+
+            {/* 시급 범위 필터 */}
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+                <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                시급 범위
+              </h4>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="최소"
+                  value={hourlyRateMin}
+                  onChange={(e) => setHourlyRateMin(e.target.value)}
+                  className="flex-1 p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isFiltering}
+                />
+                <span className="flex items-center text-gray-500 dark:text-gray-400">~</span>
+                <input
+                  type="number"
+                  placeholder="최대"
+                  value={hourlyRateMax}
+                  onChange={(e) => setHourlyRateMax(e.target.value)}
+                  className="flex-1 p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isFiltering}
+                />
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">단위: 만원</p>
+            </div>
+
+            {/* 프로젝트 완료 수 필터 */}
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+                <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                프로젝트 완료 수
+              </h4>
+              <select
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
+                value={selectedProjectCount}
+                onChange={(e) => setSelectedProjectCount(e.target.value)}
+                disabled={isFiltering}
+              >
+                <option value="">전체</option>
+                <option value="5">5건 이상</option>
+                <option value="10">10건 이상</option>
+                <option value="20">20건 이상</option>
+                <option value="50">50건 이상</option>
+              </select>
+            </div>
+
+            {/* 가능한 작업 시간대 필터 */}
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+                <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                작업 시간대
+              </h4>
+              <select
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all appearance-none bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
+                value={selectedAvailability}
+                onChange={(e) => setSelectedAvailability(e.target.value)}
+                disabled={isFiltering}
+              >
+                <option value="">전체</option>
+                <option value="fulltime">풀타임 가능</option>
+                <option value="parttime">파트타임</option>
+                <option value="weekend">주말 가능</option>
+                <option value="evening">저녁 가능</option>
               </select>
             </div>
 
@@ -739,9 +1036,12 @@ function FreelancerPage() {
                 disabled={isFiltering}
               >
                 <option value="">기본 정렬</option>
+                <option value="viewCount">인기순 (조회수)</option>
                 <option value="rating">평점 높은순</option>
-                <option value="experience">경력 높은순</option>
-                <option value="viewCount">조회수 많은순</option>
+                <option value="hourlyRateHigh">시급 높은순</option>
+                <option value="hourlyRateLow">시급 낮은순</option>
+                <option value="experience">경력순</option>
+                <option value="recentActivity">최근 활동순</option>
               </select>
             </div>
 
@@ -775,55 +1075,30 @@ function FreelancerPage() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <button 
-                  onClick={() => {
-                    setSortBy('rating');
-                  }}
-                  disabled={isFiltering}
-                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm disabled:opacity-50 ${
-                    sortBy === 'rating' 
-                      ? 'bg-blue-500 text-white border-blue-500' 
-                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  평점 높은순
-                </button>
-                <button 
-                  onClick={() => {
-                    setSortBy('experience');
-                  }}
-                  disabled={isFiltering}
-                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm disabled:opacity-50 ${
-                    sortBy === 'experience' 
-                      ? 'bg-blue-500 text-white border-blue-500' 
-                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  경력 높은순
-                </button>
-                <button 
-                  onClick={() => {
-                    setSortBy('viewCount');
-                  }}
-                  disabled={isFiltering}
-                  className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-1 shadow-sm disabled:opacity-50 ${
-                    sortBy === 'viewCount' 
-                      ? 'bg-blue-500 text-white border-blue-500' 
-                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  조회수 많은순
-                </button>
+                {[
+                  { value: 'viewCount', label: '인기순', icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' },
+                  { value: 'rating', label: '평점순', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' },
+                  { value: 'hourlyRateHigh', label: '시급↑', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+                  { value: 'hourlyRateLow', label: '시급↓', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+                  { value: 'experience', label: '경력순', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+                  { value: 'recentActivity', label: '최근활동', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' }
+                ].map(sort => (
+                  <button
+                    key={sort.value}
+                    onClick={() => setSortBy(sortBy === sort.value ? '' : sort.value)}
+                    disabled={isFiltering}
+                    className={`px-3 py-2 border rounded-xl transition-all flex items-center gap-1 text-sm shadow-sm disabled:opacity-50 ${
+                      sortBy === sort.value
+                        ? 'bg-blue-500 text-white border-blue-500'
+                        : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sort.icon} />
+                    </svg>
+                    {sort.label}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -898,20 +1173,43 @@ function FreelancerPage() {
                     </span>
                   ))}
                     </div>
-                          <div className="flex justify-between text-sm bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
-                            <span className="text-gray-600 dark:text-gray-300 flex items-center">
-                              <svg className="w-4 h-4 mr-1 text-blue-400 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              </svg>
-                              조회 {freelancer.viewCount}회
-                            </span>
-                            <span className="font-medium text-gray-900 dark:text-white flex items-center">
-                              <svg className="w-4 h-4 mr-1 text-blue-400 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                              프로젝트 {freelancer.projectCount}건
-                            </span>
+                          <div className="grid grid-cols-2 gap-4 text-sm bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
+                            <div className="flex flex-col">
+                              <span className="text-gray-600 dark:text-gray-300 flex items-center mb-1">
+                                <svg className="w-4 h-4 mr-1 text-blue-400 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                조회 {freelancer.viewCount}회
+                              </span>
+                              <span className="font-medium text-gray-900 dark:text-white flex items-center">
+                                <svg className="w-4 h-4 mr-1 text-blue-400 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                프로젝트 {freelancer.projectCount}건
+                              </span>
+                            </div>
+                            <div className="flex flex-col">
+                              {freelancer.hourlyRate && (
+                                <span className="text-green-600 dark:text-green-400 font-bold flex items-center mb-1">
+                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  {typeof freelancer.hourlyRate === 'number' 
+                                    ? `${freelancer.hourlyRate.toLocaleString()}만원/시간`
+                                    : `${freelancer.hourlyRate}`
+                                  }
+                                </span>
+                              )}
+                              {freelancer.responseTime && (
+                                <span className="text-gray-600 dark:text-gray-300 flex items-center text-xs">
+                                  <svg className="w-3 h-3 mr-1 text-blue-400 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  응답시간: {freelancer.responseTime}
+                                </span>
+                              )}
+                            </div>
                     </div>
                 </div>
                 
@@ -930,7 +1228,7 @@ function FreelancerPage() {
                   <svg className="w-20 h-20 mx-auto text-gray-300 dark:text-gray-600 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-3"> 일치하는 프리랜서가 없습니다 </h3>
+                  <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-3"> 조회된 데이터가 없습니다 </h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-6"> 검색어나 필터 조건을 변경해 보세요.</p>
                   <button
                     onClick={resetFilters}

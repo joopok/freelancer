@@ -9,8 +9,12 @@ import ProjectBanner from '@/components/project/ProjectBanner';
 import ProjectFilters from '@/components/project/ProjectFilters';
 import ProjectCard from '@/components/project/ProjectCard';
 import ProjectTabs from '@/components/project/ProjectTabs';
+import { useNumberFormat } from '@/hooks/useNumberFormat';
 
 export default function ProjectPage() {
+  // 숫자 포맷팅 훅
+  const { formatNumber } = useNumberFormat();
+  
   // 초기 로딩 상태
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   
@@ -340,7 +344,7 @@ export default function ProjectPage() {
                 <svg className="w-20 h-20 mx-auto text-gray-300 dark:text-gray-600 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-3">일치하는 프로젝트가 없습니다</h3>
+                <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-3">조회된 데이터가 없습니다</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-6">검색어나 필터 조건을 변경해 보세요.</p>
                 <button
                   onClick={() => {
@@ -544,11 +548,11 @@ export default function ProjectPage() {
               <p className="text-gray-700 dark:text-gray-300 font-medium">프로젝트 완료율</p>
             </div>
             <div className="text-center transform hover:scale-105 transition-transform duration-300">
-              <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text mb-3">12,000+</p>
+              <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text mb-3">{formatNumber(12000)}+</p>
               <p className="text-gray-700 dark:text-gray-300 font-medium">등록된 프리랜서</p>
             </div>
             <div className="text-center transform hover:scale-105 transition-transform duration-300">
-              <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text mb-3">2,800+</p>
+              <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text mb-3">{formatNumber(2800)}+</p>
               <p className="text-gray-700 dark:text-gray-300 font-medium">완료된 상주 프로젝트</p>
             </div>
             <div className="text-center transform hover:scale-105 transition-transform duration-300">

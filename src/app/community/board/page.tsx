@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { formatDate } from '@/utils/format';
+import { useLoading } from '@/components/layout/Loading';
 
 // 게시글 타입 정의
 interface Post {
@@ -21,6 +23,7 @@ interface Post {
 }
 
 export default function CommunityBoardPage() {
+  const { setLoading: setGlobalLoading } = useLoading();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('all');
@@ -31,6 +34,18 @@ export default function CommunityBoardPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const loader = useRef(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  
+  // 초기 로딩 처리 (2초)
+  useEffect(() => {
+    setGlobalLoading(true);
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false);
+      setGlobalLoading(false);
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, [setGlobalLoading]);
   
   // 필터 옵션
   const filters = [
@@ -104,7 +119,7 @@ export default function CommunityBoardPage() {
         setPosts((prevPosts) => [...prevPosts, ...newPosts]);
         setHasMore(endIndex < mockPosts.length);
         setLoading(false);
-      }, 1000);
+      }, 2000);
     };
     
     fetchData();
@@ -440,7 +455,7 @@ export default function CommunityBoardPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{post.date}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(post.date)}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{post.views}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{post.likes}</td>
                     </motion.tr>

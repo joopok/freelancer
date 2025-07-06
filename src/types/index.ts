@@ -45,4 +45,19 @@ export interface JobPosting {
   description: string;
   requirements: string[];
   postDate: Date;
-} 
+}
+
+export interface Stat {
+  id: number;
+  label: string;
+  value: string;
+  icon: string;
+}
+
+export interface Testimonial {
+  id: number;
+  name: string;
+  position: string;
+  quote: string;
+  avatar: string;
+}

@@ -11,6 +11,7 @@ import clsx from 'clsx';
 import { useLoading } from './Loading';
 import api from '@/utils/api';
 import { authService } from '@/services/auth';
+import NotificationButton from '@/components/common/NotificationButton';
 
 // 서브메뉴를 가질 수 있는 메뉴 아이템 타입 정의
 interface MenuItem {
@@ -173,7 +174,7 @@ export default function Header() {
     { label: '재택 프로젝트', href: '/athome' },
     { 
       label: '블로그', 
-      href: '/blog',
+      href: '/blog', // 유니크한 href로 변경
       subMenus: [
         { label: '블로그 메인화면', href: '/blog' },
         { label: '개발테크', href: '/blog/dev-tech' },
@@ -190,7 +191,7 @@ export default function Header() {
     },
     { 
       label: '커뮤니티', 
-      href: '/community',
+      href: '/community', // 유니크한 href로 변경
       subMenus: [
         { label: '자유게시판', href: '/community/free' },
         { label: '갤러리', href: '/community/gallery' },
@@ -227,35 +228,66 @@ export default function Header() {
             {menuItems.map((item, index) => (
               <div key={item.href} className="flex items-center">
                 <div
-                  className="relative"
-                  onMouseEnter={() => handleMenuMouseEnter(item.href)}
-                  onMouseLeave={handleMenuMouseLeave}
+                  className="relative group"
+                  onMouseEnter={() => item.subMenus && handleMenuMouseEnter(item.href)}
+                  onMouseLeave={() => item.subMenus && handleMenuMouseLeave()}
                   ref={(el) => { subMenuRefs.current[item.href] = el; }}
                 >
-                  <Link
-                    href={item.href}
-                    className={clsx(
-                      "px-3 py-2 text-lg font-medium transition-all duration-200 relative",
-                      pathname === item.href || 
-                      (item.subMenus && item.subMenus.some(sub => pathname === sub.href)) ||
-                      (item.href === '/project' && pathname?.startsWith('/project/')) ||
-                      (item.href === '/freelancer' && pathname?.startsWith('/freelancer/'))
-                        ? "text-blue-600 dark:text-blue-400"
-                        : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                    )}
-                  >
-                    {item.label}
-                    {(pathname === item.href || 
-                      (item.subMenus && item.subMenus.some(sub => pathname === sub.href)) ||
-                      (item.href === '/project' && pathname?.startsWith('/project/')) ||
-                      (item.href === '/freelancer' && pathname?.startsWith('/freelancer/'))) && (
-                      <motion.div
-                        layoutId="activeMenu"
-                        className="absolute -bottom-[14px] left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                      />
-                    )}
-                  </Link>
+                  {item.subMenus ? (
+                    <div
+                      className={clsx(
+                        "px-3 py-2 text-lg font-medium transition-all duration-200 relative cursor-pointer",
+                        pathname === item.href || 
+                        (item.subMenus?.some(sub => pathname === sub.href)) ||
+                        (item.href === '/project' && pathname?.startsWith('/project/')) ||
+                        (item.href === '/freelancer' && pathname?.startsWith('/freelancer/')) ||
+                        (item.href === '/athome' && pathname?.startsWith('/athome/'))
+                          ? "text-blue-600 dark:text-blue-400"
+                          : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                      )}
+                      onClick={() => router.push(item.href)}
+                    >
+                      {item.label}
+                      {(pathname === item.href || 
+                        (item.subMenus && item.subMenus.some(sub => pathname === sub.href)) ||
+                        (item.href === '/project' && pathname?.startsWith('/project/')) ||
+                        (item.href === '/freelancer' && pathname?.startsWith('/freelancer/')) ||
+                        (item.href === '/athome' && pathname?.startsWith('/athome/'))) && (
+                        <motion.div
+                          layoutId="activeMenu"
+                          className="absolute -bottom-[14px] left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
+                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      className={clsx(
+                        "px-3 py-2 text-lg font-medium transition-all duration-200 relative",
+                        pathname === item.href || 
+                        (item.subMenus?.some(sub => pathname === sub.href)) ||
+                        (item.href === '/project' && pathname?.startsWith('/project/')) ||
+                        (item.href === '/freelancer' && pathname?.startsWith('/freelancer/')) ||
+                        (item.href === '/athome' && pathname?.startsWith('/athome/'))
+                          ? "text-blue-600 dark:text-blue-400"
+                          : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                      )}
+                    >
+                      {item.label}
+                      {(pathname === item.href || 
+                        (item.subMenus && item.subMenus.some(sub => pathname === sub.href)) ||
+                        (item.href === '/project' && pathname?.startsWith('/project/')) ||
+                        (item.href === '/freelancer' && pathname?.startsWith('/freelancer/')) ||
+                        (item.href === '/athome' && pathname?.startsWith('/athome/'))) && (
+                        <motion.div
+                          layoutId="activeMenu"
+                          className="absolute -bottom-[14px] left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
+                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
+                      )}
+                    </Link>
+                  )}
                 
                   {/* 서브메뉴 */}
                   {item.subMenus && activeMenu === item.href && (
@@ -265,23 +297,26 @@ export default function Header() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 min-w-48 border border-gray-200 dark:border-gray-700"
+                        className="absolute top-full left-0 pt-2 pb-2 bg-transparent z-50"
                       >
-                        {item.subMenus.map((subItem) => (
-                          <Link
-                            key={subItem.href}
-                            href={subItem.href}
-                            className={clsx(
-                              "flex items-center px-4 py-2 text-sm first:rounded-t-md last:rounded-b-md transition-colors duration-200",
-                              pathname === subItem.href
-                                ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400"
-                            )}
-                          >
-                            {subItem.icon}
-                            {subItem.label}
-                          </Link>
-                        ))}
+                        <div className="bg-white dark:bg-gray-800 rounded-md shadow-lg min-w-48 border border-gray-200 dark:border-gray-700 overflow-hidden">
+                          {item.subMenus.map((subItem) => (
+                            <Link
+                              key={subItem.href}
+                              href={subItem.href}
+                              className={clsx(
+                                "flex items-center px-4 py-2 text-sm first:rounded-t-md last:rounded-b-md transition-colors duration-200",
+                                pathname === subItem.href
+                                  ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400"
+                              )}
+                              onClick={() => setActiveMenu(null)}
+                            >
+                              {subItem.icon}
+                              {subItem.label}
+                            </Link>
+                          ))}
+                        </div>
                       </motion.div>
                     </AnimatePresence>
                   )}
@@ -297,6 +332,8 @@ export default function Header() {
 
           {/* 데스크톱 설정 */}
           <div className="hidden lg:flex items-center space-x-4">
+            {/* 알림 버튼 */}
+            <NotificationButton />
 
             {/* 개인/기업 토글 & 설정 아이콘 */}
             <div className="flex items-center space-x-2">
@@ -538,6 +575,9 @@ export default function Header() {
 
           {/* 모바일 메뉴 버튼 */}
           <div className="lg:hidden flex items-center space-x-2">
+            {/* 모바일 알림 버튼 */}
+            <NotificationButton />
+            
             {/* 모바일 설정 아이콘 */}
             <motion.button
               whileHover={{ scale: 1.1, rotate: 15 }}
@@ -577,21 +617,40 @@ export default function Header() {
           <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
             {menuItems.map((item) => (
               <div key={item.href}>
-                <Link
-                  href={item.href}
-                  className={clsx(
-                    "block px-3 py-2 text-lg font-medium transition-colors duration-200",
-                    pathname === item.href || 
-                    (item.subMenus && item.subMenus.some(sub => pathname === sub.href)) ||
-                    (item.href === '/project' && pathname?.startsWith('/project/')) ||
-                    (item.href === '/freelancer' && pathname?.startsWith('/freelancer/'))
-                      ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                      : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  )}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
+                {item.subMenus ? (
+                  <div
+                    className={clsx(
+                      "block px-3 py-2 text-lg font-medium transition-colors duration-200",
+                      pathname === item.href || 
+                      (item.subMenus?.some(sub => pathname === sub.href)) ||
+                      (item.href === '/project' && pathname?.startsWith('/project/')) ||
+                      (item.href === '/freelancer' && pathname?.startsWith('/freelancer/')) ||
+                      (item.href === '/athome' && pathname?.startsWith('/athome/'))
+                        ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                        : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    )}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.label}
+                  </div>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className={clsx(
+                      "block px-3 py-2 text-lg font-medium transition-colors duration-200",
+                      pathname === item.href || 
+                      (item.subMenus?.some(sub => pathname === sub.href)) ||
+                      (item.href === '/project' && pathname?.startsWith('/project/')) ||
+                      (item.href === '/freelancer' && pathname?.startsWith('/freelancer/')) ||
+                      (item.href === '/athome' && pathname?.startsWith('/athome/'))
+                        ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                        : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    )}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                )}
                 {/* 모바일 서브메뉴 */}
                 {item.subMenus && (
                   <div className="pl-6 space-y-1">

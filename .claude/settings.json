@@ -1,0 +1,52 @@
+{
+  "projectName": "JobKorea Billboard",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "inputFilter": "src/(components|pages|app).*\\.(tsx|jsx)$",
+        "hooks": [{
+          "type": "command",
+          "command": "echo '🎨 UI 컴포넌트 수정 감지: 다크모드 지원 확인 중...' && grep -q 'dark:' \"$TOOL_INPUT_FILE_PATH\" 2>/dev/null || echo '{\"action\": \"approve\", \"message\": \"💡 다크모드 스타일(dark:) 추가를 잊지 마세요!\"}'",
+          "timeout": 3000
+        }]
+      },
+      {
+        "matcher": "Bash",
+        "inputFilter": "rm\\s+-rf|rm\\s+-fr",
+        "hooks": [{
+          "type": "command",
+          "command": "echo '{\"action\": \"block\", \"message\": \"⛔ 위험한 rm -rf 명령이 차단되었습니다. 삭제할 파일을 구체적으로 지정해주세요.\"}'"
+        }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "MultiEdit",
+        "hooks": [{
+          "type": "command",
+          "command": "echo '🔄 여러 파일이 수정되었습니다. 관련 컴포넌트 확인 권장'"
+        }]
+      },
+      {
+        "matcher": "Bash",
+        "inputFilter": "npm\\s+install|npm\\s+i\\s",
+        "hooks": [{
+          "type": "command",
+          "command": "echo '📦 패키지 설치 완료! package-lock.json 커밋을 잊지 마세요'"
+        }]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "type": "command",
+        "command": "echo '🤖 서브 에이전트 작업 완료'"
+      }
+    ]
+  },
+  "customCommands": {
+    "quickTest": "npm run lint && npx tsc --noEmit && npm run tone:validate",
+    "safeCommit": "npm run lint && npx tsc --noEmit && git add -A && git commit",
+    "devCheck": "curl -s http://localhost:3000 > /dev/null && echo '✅ 개발 서버 실행 중' || echo '❌ 개발 서버가 실행되지 않았습니다'"
+  }
+}

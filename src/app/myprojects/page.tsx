@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuthStore } from '@/store/auth';
 import { Calendar, Clock, MapPin, DollarSign, Filter } from 'lucide-react';
+import { formatDate } from '@/utils/format';
 
 export default function MyProjectsPage() {
   const { user, isLoggedIn } = useAuthStore();
@@ -159,7 +160,7 @@ export default function MyProjectsPage() {
                           </span>
                           <span className="flex items-center">
                             <Calendar className="h-4 w-4 mr-1" />
-                            {project.deadline}
+                            {formatDate(project.deadline)}
                           </span>
                         </div>
                       </div>

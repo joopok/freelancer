@@ -49,6 +49,7 @@ export interface Project {
   applicants?: number; // 레거시 호환
   isFeatured?: boolean;
   isUrgent?: boolean;
+  matchingScore?: number;
   
   // 시간 정보
   createdAt?: string; // ISO 8601 format (YYYY-MM-DDTHH:mm:ss)
@@ -67,7 +68,42 @@ export interface Project {
   bookmarkCount?: number;
   type?: string; // 레거시 호환
   isRemote?: boolean; // 레거시 호환
-  teamSize?: number;
+  teamSize?: string; // DB 스키마와 일치 (varchar(50))
+  
+  // 원격/상주 근무 관련 추가 필드
+  remoteTools?: string[]; // JSON string - 원격 근무 도구 목록
+  communicationMethods?: string[]; // JSON string - 커뮤니케이션 방법 목록
+  developmentMethodology?: string; // 개발 방법론 (예: Agile, Waterfall, Scrum, Kanban)
+  codeReviewProcess?: string; // 코드 리뷰 프로세스 설명
+  workingHours?: string; // 근무 시간 (예: 9AM-6PM KST, Flexible)
+  flexibleHours?: boolean; // 유연 근무제 여부
+}
+
+/**
+ * FeaturedProject 인터페이스
+ */
+export interface FeaturedProject {
+  id: number;
+  title: string;
+  company: string;
+  budget: string;
+  duration: string;
+  skills: string[];
+  type: string;
+  deadline: string;
+}
+
+/**
+ * HeroProject 인터페이스
+ */
+export interface HeroProject {
+  id: number;
+  title: string;
+  company: string;
+  budget: string;
+  duration: string;
+  skills: string[];
+  bgColor: string;
 }
 
 /**
@@ -97,6 +133,13 @@ export interface ProjectDto {
   status?: 'draft' | 'active' | 'in_progress' | 'closed' | 'completed' | 'cancelled';
   isFeatured?: boolean;
   isUrgent?: boolean;
+  teamSize?: string;
+  remoteTools?: string;
+  communicationMethods?: string;
+  developmentMethodology?: string;
+  codeReviewProcess?: string;
+  workingHours?: string;
+  flexibleHours?: boolean;
 }
 
 /**
@@ -126,6 +169,15 @@ export interface ProjectDetail extends Project {
   evaluationCriteria?: string[];
   submissionGuidelines?: string[];
   additionalBenefits?: string[];
+  
+  // 원격/상주 근무 관련 상세 정보
+  remoteTools?: string[];
+  communicationMethods?: string[];
+  developmentMethodology?: string;
+  codeReviewProcess?: string;
+  workingHours?: string;
+  flexibleHours?: boolean;
+  teamSize?: string;
 }
 
 /**

@@ -7,6 +7,7 @@ import { useLoading } from '@/components/layout/Loading';
 import { useBlogPosts } from '@/hooks/useBlogPosts';
 import { useAuthStore } from '@/store/auth';
 import BlogMenuSearch from '@/components/blog/BlogMenuSearch';
+import { formatDate } from '@/utils/format';
 // 숫자 포맷팅 함수
 const formatNumber = (num: number): string => {
   if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
@@ -135,6 +136,18 @@ export default function BlogPage() {
     isOpen: false,
     post: null,
   });
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  
+  // 초기 로딩 처리 (2초)
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false);
+      setLoading(false);
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, [setLoading]);
 
 
 
@@ -627,6 +640,10 @@ export default function BlogPage() {
     setShareModal({ isOpen: true, post });
   };
 
+  if (isInitialLoading) {
+    return null; // Loading component will be shown by LoadingProvider
+  }
+  
   return (
     <div className="min-h-screen bg-white dark:bg-gray-800 dark:bg-gray-900 transition-colors duration-300">
       {/* 헤더 섹션 */}
@@ -677,7 +694,7 @@ export default function BlogPage() {
                           </div>
                           <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
                             <div className="flex items-center gap-4">
-                              <span>{post.date}</span>
+                              <span>{formatDate(post.date)}</span>
                               <span>조회수 {formatNumber(post.views)}</span>
                             </div>
                             <button 
@@ -714,7 +731,7 @@ export default function BlogPage() {
                         </div>
                         <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
                           <div className="flex items-center gap-4">
-                    <span>{post.date}</span>
+                    <span>{formatDate(post.date)}</span>
                             <span>조회수 {formatNumber(post.views)}</span>
                           </div>
                           <button 
@@ -775,7 +792,7 @@ export default function BlogPage() {
                   </div>
                       <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
                         <div className="flex items-center gap-4">
-                          <span>{post.date}</span>
+                          <span>{formatDate(post.date)}</span>
                           <span>조회수 {formatNumber(post.views)}</span>
                         </div>
                         <button 

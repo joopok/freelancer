@@ -3,6 +3,7 @@ import "@/app/styles/globals.css";
 import LoadingProvider from '@/components/layout/Loading';
 import Header from '@/components/layout/Header';
 import Bottom from '@/components/layout/Bottom';
+import { WebSocketProvider } from '@/components/providers/WebSocketProvider';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,13 +35,15 @@ export default function RootLayout({
           }}
         />
         <LoadingProvider>
-          <div className="min-h-screen flex flex-col">
-            <Header />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Bottom />
-          </div>
+          <WebSocketProvider>
+            <div className="min-h-screen flex flex-col">
+              <Header />
+              <main className="flex-1">
+                {children}
+              </main>
+              <Bottom />
+            </div>
+          </WebSocketProvider>
         </LoadingProvider>
       </body>
     </html>

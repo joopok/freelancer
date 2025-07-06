@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { useLoading } from '@/components/layout/Loading';
 
 // 커뮤니티 메뉴 타입 정의
 interface CommunityMenu {
@@ -16,9 +17,22 @@ interface CommunityMenu {
 }
 
 export default function CommunityPage() {
+  const { setLoading } = useLoading();
   const [scrollY, setScrollY] = useState(0);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  
+  // 초기 로딩 처리 (2초)
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false);
+      setLoading(false);
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, [setLoading]);
   
   // 스크롤 위치 추적
   useEffect(() => {
@@ -134,6 +148,10 @@ export default function CommunityPage() {
     }
   ];
 
+  if (isInitialLoading) {
+    return null; // Loading component will be shown by LoadingProvider
+  }
+  
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* 인터랙티브한 헤더 섹션 */}

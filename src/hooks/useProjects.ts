@@ -470,13 +470,12 @@ const createMockProjectDetail = (id: string | number): ProjectDetail => {
     level: "중급",
     category: "웹개발",
     applicants: 15,
-    applicantCount: 15,
+    applicationsCount: 15,
     views: 234,
-    viewCount: 234,
     isUrgent: false,
     isRemote: true,
     isFeatured: false,
-    teamSize: 5,
+    teamSize: "5",
     responsibilities: ["프론트엔드 개발", "UI/UX 구현"],
     requirements: ["React 2년 이상 경험"],
     workingConditions: {
@@ -488,8 +487,9 @@ const createMockProjectDetail = (id: string | number): ProjectDetail => {
       equipment_provided: true
     },
     additionalBenefits: ["점심 제공", "교통비 지원"],
-    contactInfo: {
+    contactPerson: {
       name: "김담당",
+      position: "프로젝트 매니저",
       email: "contact@company.com",
       phone: "02-1234-5678"
     },
@@ -614,7 +614,7 @@ export const useProjectDetail = (id: string | number) => {
             budget: projectData.budget || (projectData.budgetMin && projectData.budgetMax 
               ? `${(projectData.budgetMin / 10000).toFixed(0)}~${(projectData.budgetMax / 10000).toFixed(0)}만원`
               : '협의'),
-            teamSize: projectData.teamSize || 1,
+            teamSize: projectData.teamSize || "1",
             deadline: projectData.deadline || '협의',
             type: projectData.type || projectData.workType || '상주',
             applicants: projectData.applicants || projectData.applications || projectData.applicationsCount || 0,

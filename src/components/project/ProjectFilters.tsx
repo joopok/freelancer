@@ -1,6 +1,7 @@
 'use client';
 
 import React, { memo, useCallback } from 'react';
+import { useNumberFormat } from '@/hooks/useNumberFormat';
 
 interface ProjectFiltersProps {
   selectedSkills: string[];
@@ -108,6 +109,8 @@ const BudgetRangeFilter = memo(({
   maxBudget?: number; 
   onChange: (min?: number, max?: number) => void;
 }) => {
+  const { formatNumber } = useNumberFormat();
+  
   const handleBudgetSelect = useCallback((range: string) => {
     switch (range) {
       case '1000-3000':
@@ -146,10 +149,10 @@ const BudgetRangeFilter = memo(({
           className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
         >
           <option value="">전체</option>
-          <option value="1000-3000">1,000 - 3,000만원</option>
-          <option value="3000-5000">3,000 - 5,000만원</option>
-          <option value="5000-7000">5,000 - 7,000만원</option>
-          <option value="7000+">7,000만원 이상</option>
+          <option value="1000-3000">{formatNumber(1000)} - {formatNumber(3000)}만원</option>
+          <option value="3000-5000">{formatNumber(3000)} - {formatNumber(5000)}만원</option>
+          <option value="5000-7000">{formatNumber(5000)} - {formatNumber(7000)}만원</option>
+          <option value="7000+">{formatNumber(7000)}만원 이상</option>
         </select>
         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
           <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">

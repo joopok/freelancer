@@ -29,7 +29,7 @@ interface ApiConfig {
 
 // API 설정
 const apiConfig: ApiConfig = {
-  baseURL: API_URL,
+  baseURL: '', // Next.js rewrites를 사용하므로 빈 문자열로 설정
   timeout: API_TIMEOUT,
   withCredentials: true,
   useMock: USE_MOCK_API,

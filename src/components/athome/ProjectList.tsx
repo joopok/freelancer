@@ -37,7 +37,7 @@ export function ProjectList({
         <svg className="w-20 h-20 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-3 transition-colors duration-300">일치하는 프로젝트가 없습니다</h3>
+        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-3 transition-colors duration-300">조회된 데이터가 없습니다</h3>
         <p className="text-gray-600 dark:text-gray-300 mb-6 transition-colors duration-300">검색어나 필터 조건을 변경해 보세요.</p>
         <button
           onClick={resetFilters}

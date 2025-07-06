@@ -1,283 +1,116 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-
-
-
-// 프로젝트 타입 정의
-interface Project {
-  id: string;
-  title: string;
-  company: string;
-  skills: string[];
-  duration: string;
-  budget: string;
-  deadline: string;
-  type: '재택' | '외주';
-  description?: string;
-  level?: string;
-}
+import { useRemoteProjects } from '@/hooks/useRemoteProjects';
+import { remoteProjectService } from '@/services/remoteProject';
+import type { RemoteProject } from '@/types/remoteProject';
+import BookmarkButton from '@/components/common/BookmarkButton';
+import { useAuthStore } from '@/store/auth';
+import { Eye, Users, Calendar, MapPin } from 'lucide-react';
 
 export default function RemoteProjectPage() {
-  // 로컬 상태만 사용
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [localLoading, setLocalLoading] = useState(true);
+  // API 호출을 위한 커스텀 훅 사용
+  const { 
+    projects, 
+    loading, 
+    error, 
+    totalCount, 
+    hasMore,
+    fetchProjects,
+    loadMore 
+  } = useRemoteProjects();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [selectedDuration, setSelectedDuration] = useState<string>('');
   const [selectedBudget, setSelectedBudget] = useState<string>('');
+  const [sortBy, setSortBy] = useState<string>('');
+  const [allSkills, setAllSkills] = useState<string[]>([]);
+  const [skillsLoading, setSkillsLoading] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  
+  // 디바운싱을 위한 타이머 관리
+  const [searchTimer, setSearchTimer] = useState<NodeJS.Timeout | null>(null);
 
-  // 페이지네이션 상태
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const projectsPerPage = 10;
-  const [sortBy, setSortBy] = useState<string>(''); // 정렬 기준 상태
-
-  // 모든 기술 스택 목록
-  const allSkills = [
-    'React', 'Node.js', 'Python', 'Java', 'TypeScript',
-    'React Native', 'Flutter', 'AWS', 'Docker', 'Spring',
-    'Django', 'PHP', 'JavaScript', 'Vue.js', 'Angular'
-  ];
-
-  // 재택 프로젝트 데이터 로드 - 컴포넌트 마운트 시 한 번만 실행
+  // 기술 스택 목록 로드
   useEffect(() => {
-    setLocalLoading(true);
-
-    const timer = setTimeout(() => {
-      const projectsData: Project[] = [
-        {
-          id: "1",
-          title: "AI 기반 추천 시스템 개발",
-          company: "(주)테크인사이트",
-          skills: ["Python", "TensorFlow", "AWS"],
-          duration: "4개월",
-          budget: "4,500만원",
-          deadline: "D-3",
-          type: "재택",
-          description: "사용자 행동 패턴 분석을 통한 맞춤형 상품 추천 시스템 개발 프로젝트입니다.",
-          level: "중급"
-        },
-        {
-          id: "3",
-          title: "블록체인 기반 결제 시스템 구축",
-          company: "(주)블록테크",
-          skills: ["Solidity", "Web3.js", "Node.js"],
-          duration: "6개월",
-          budget: "7,000만원",
-          deadline: "D-7",
-          type: "재택",
-          description: "블록체인 기술을 활용한 안전한 결제 시스템 개발 프로젝트입니다.",
-          level: "고급"
-        },
-        {
-          id: "6",
-          title: "IoT 디바이스 모니터링 앱 개발",
-          company: "(주)스마트테크",
-          skills: ["Flutter", "Firebase", "MQTT"],
-          duration: "4개월",
-          budget: "4,000만원",
-          deadline: "D-6",
-          type: "재택",
-          description: "다양한 IoT 디바이스 상태를 실시간으로 모니터링하는 모바일 앱 개발 프로젝트입니다.",
-          level: "중급"
-        },
-        {
-          id: "8",
-          title: "SNS 플랫폼 API 개발",
-          company: "(주)소셜미디어",
-          skills: ["Node.js", "GraphQL", "MongoDB"],
-          duration: "4개월",
-          budget: "4,200만원",
-          deadline: "D-2",
-          type: "재택",
-          description: "소셜 미디어 플랫폼의 효율적인 데이터 처리를 위한 API 개발 프로젝트입니다.",
-          level: "중급"
-        },
-        {
-          id: "10",
-          title: "메타버스 플랫폼 개발",
-          company: "(주)메타랩스",
-          skills: ["Unity", "WebGL", "Three.js"],
-          duration: "6개월",
-          budget: "8,000만원",
-          deadline: "D-1",
-          type: "재택",
-          description: "가상 현실 기반의 메타버스 플랫폼 프론트엔드 개발 프로젝트입니다.",
-          level: "고급"
-        },
-        {
-          id: "11",
-          title: "AI 챗봇 시스템 개발",
-          company: "(주)인텔리봇",
-          skills: ["NLP", "Python", "TensorFlow"],
-          duration: "5개월",
-          budget: "5,800만원",
-          deadline: "D-2",
-          type: "재택",
-          description: "자연어 처리 기술을 활용한 고객 응대용 AI 챗봇 시스템 개발 프로젝트입니다.",
-          level: "중급"
-        },
-        {
-          id: "13",
-          title: "보안 시스템 강화 프로젝트",
-          company: "(주)시큐리티솔루션",
-          skills: ["Java", "Spring Security", "Penetration Testing"],
-          duration: "3개월",
-          budget: "4,200만원",
-          deadline: "D-6",
-          type: "재택",
-          description: "기업 보안 시스템 취약점 분석 및 보안 강화 솔루션 개발 프로젝트입니다.",
-          level: "고급"
-        },
-        {
-          id: "15",
-          title: "CRM 시스템 개발",
-          company: "(주)고객관리시스템",
-          skills: ["React", "GraphQL", "PostgreSQL"],
-          duration: "5개월",
-          budget: "6,000만원",
-          deadline: "D-5",
-          type: "재택",
-          description: "기업 고객 관리를 위한 대시보드 및 관리 시스템 개발 프로젝트입니다.",
-          level: "중급"
-        },
-        {
-          id: "21",
-          title: "온라인 교육 플랫폼 개발",
-          company: "(주)에듀테크",
-          skills: ["React", "Node.js", "MongoDB"],
-          duration: "4개월",
-          budget: "5,000만원",
-          deadline: "D-8",
-          type: "재택",
-          description: "실시간 강의 및 학습 관리 기능을 제공하는 온라인 교육 플랫폼 개발 프로젝트입니다.",
-          level: "중급"
-        },
-        {
-          id: "22",
-          title: "디지털 헬스케어 앱 개발",
-          company: "(주)헬스케어솔루션",
-          skills: ["React Native", "Firebase", "Node.js"],
-          duration: "5개월",
-          budget: "6,500만원",
-          deadline: "D-4",
-          type: "재택",
-          description: "사용자 건강 데이터 분석 및 맞춤형 건강 관리 서비스를 제공하는 모바일 앱 개발 프로젝트입니다.",
-          level: "중급"
-        },
-        {
-          id: "23",
-          title: "실시간 협업 툴 개발",
-          company: "(주)팀워크솔루션",
-          skills: ["Vue.js", "WebSocket", "Node.js"],
-          duration: "6개월",
-          budget: "7,200만원",
-          deadline: "D-3",
-          type: "재택",
-          description: "실시간 문서 공유 및 협업 기능을 제공하는 웹 애플리케이션 개발 프로젝트입니다.",
-          level: "중급"
-        },
-        {
-          id: "24",
-          title: "AI 이미지 처리 서비스 개발",
-          company: "(주)비전테크",
-          skills: ["Python", "TensorFlow", "OpenCV"],
-          duration: "5개월",
-          budget: "6,800만원",
-          deadline: "D-9",
-          type: "재택",
-          description: "인공지능 기술을 활용한 이미지 분석 및 처리 서비스 개발 프로젝트입니다.",
-          level: "고급"
+    const loadSkills = async () => {
+      try {
+        setSkillsLoading(true);
+        const result = await remoteProjectService.getSkills();
+        if (result.success && result.data) {
+          setAllSkills(result.data);
+        } else {
+          // 기본 스킬 목록 사용
+          setAllSkills([
+            'React', 'Node.js', 'Python', 'Java', 'TypeScript',
+            'React Native', 'Flutter', 'AWS', 'Docker', 'Spring',
+            'Django', 'PHP', 'JavaScript', 'Vue.js', 'Angular'
+          ]);
         }
-      ];
-
-      setProjects(projectsData);
-      setLocalLoading(false);
-    }, 800);
-
-    return () => {
-      clearTimeout(timer);
+      } catch (error) {
+        console.error('Error loading skills:', error);
+        // 에러 시 기본 스킬 목록 사용
+        setAllSkills([
+          'React', 'Node.js', 'Python', 'Java', 'TypeScript',
+          'React Native', 'Flutter', 'AWS', 'Docker', 'Spring',
+          'Django', 'PHP', 'JavaScript', 'Vue.js', 'Angular'
+        ]);
+      } finally {
+        setSkillsLoading(false);
+      }
     };
-  }, []); // 빈 의존성 배열로 컴포넌트 마운트 시 한 번만 실행
-
-  // 필터링 및 정렬된 프로젝트 계산
-  const filteredProjects = useMemo(() => {
-    let filtered = projects.filter(project => {
-      const matchesSearch = searchTerm === '' ||
-        project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (project.description && project.description.toLowerCase().includes(searchTerm.toLowerCase()));
-
-      const matchesSkills = selectedSkills.length === 0 ||
-        selectedSkills.every(skill => project.skills.includes(skill));
-
-      const projectDuration = parseInt(project.duration.replace(/[^0-9]/g, ''));
-      const matchesDuration = selectedDuration === '' ||
-        (selectedDuration === '3' && projectDuration <= 3) ||
-        (selectedDuration === '6' && projectDuration <= 6) ||
-        (selectedDuration === '12' && projectDuration <= 12);
-
-      const projectBudget = parseInt(project.budget.replace(/[^0-9]/g, ''));
-      const matchesBudget = selectedBudget === '' ||
-        (selectedBudget === '3000000' && projectBudget >= 3000000) ||
-        (selectedBudget === '5000000' && projectBudget >= 5000000) ||
-        (selectedBudget === '10000000' && projectBudget >= 10000000) ||
-        (selectedBudget === '30000000' && projectBudget >= 30000000) ||
-        (selectedBudget === '50000000' && projectBudget >= 50000000);
-
-      return matchesSearch && matchesSkills && matchesDuration && matchesBudget;
-    });
-
-    // 정렬 적용
-    if (sortBy) {
-      filtered = filtered.sort((a, b) => {
-        switch (sortBy) {
-          case 'latest':
-            return parseInt(a.id) - parseInt(b.id); // 최신순 (ID 역순)
-          case 'budget':
-            const budgetA = parseInt(a.budget.replace(/[^0-9]/g, ''));
-            const budgetB = parseInt(b.budget.replace(/[^0-9]/g, ''));
-            return budgetB - budgetA; // 금액 높은순
-          case 'duration':
-            const durationA = parseInt(a.duration.replace(/[^0-9]/g, ''));
-            const durationB = parseInt(b.duration.replace(/[^0-9]/g, ''));
-            return durationB - durationA; // 기간 긴순
-          case 'deadline':
-            const deadlineA = parseInt(a.deadline.replace('D-', ''));
-            const deadlineB = parseInt(b.deadline.replace('D-', ''));
-            return deadlineA - deadlineB; // 마감일 임박순
-          default:
-            return 0;
-        }
-      });
+    
+    loadSkills();
+  }, []);
+  
+  // 디바운싱된 검색 처리
+  const handleSearch = useCallback(() => {
+    if (searchTimer) {
+      clearTimeout(searchTimer);
     }
-
-    return filtered;
-  }, [projects, searchTerm, selectedSkills, selectedDuration, selectedBudget, sortBy]);
-
-  // 페이지네이션된 프로젝트 계산
-  const paginatedProjects = useMemo(() => {
-    const indexOfLastProject = currentPage * projectsPerPage;
-    const indexOfFirstProject = indexOfLastProject - projectsPerPage;
-    return filteredProjects.slice(indexOfFirstProject, indexOfLastProject);
-  }, [filteredProjects, currentPage, projectsPerPage]);
-
-  // 총 페이지 수 계산
-  const totalPages = Math.ceil(filteredProjects.length / projectsPerPage);
+    
+    const timer = setTimeout(() => {
+      setIsSearching(true);
+      
+      const budgetRange = selectedBudget ? {
+        budgetMin: parseInt(selectedBudget),
+        budgetMax: selectedBudget === '50000000' ? undefined : parseInt(selectedBudget) * 2
+      } : {};
+      
+      fetchProjects({
+        page: 1,
+        searchTerm,
+        skills: selectedSkills,
+        duration: selectedDuration,
+        ...budgetRange,
+        sortBy
+      }).finally(() => setIsSearching(false));
+    }, 500);
+    
+    setSearchTimer(timer);
+  }, [searchTerm, selectedSkills, selectedDuration, selectedBudget, sortBy, fetchProjects]);
+  
+  // 검색 조건 변경 시 자동 검색
+  useEffect(() => {
+    handleSearch();
+    
+    return () => {
+      if (searchTimer) {
+        clearTimeout(searchTimer);
+      }
+    };
+  }, [searchTerm, selectedSkills, selectedDuration, selectedBudget, sortBy]);
 
   // 이벤트 핸들러
   const handlePageChange = (pageNumber: number) => {
-    if (pageNumber === currentPage) return;
-    setCurrentPage(pageNumber);
+    fetchProjects({ page: pageNumber });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // 검색어 변경 시 첫 페이지로
   };
 
   const toggleSkillFilter = (skill: string) => {
@@ -286,17 +119,18 @@ export default function RemoteProjectPage() {
         ? prev.filter(s => s !== skill)
         : [...prev, skill]
     );
-    setCurrentPage(1); // 필터 변경 시 첫 페이지로
   };
 
   const handleDurationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedDuration(e.target.value);
-    setCurrentPage(1);
   };
 
   const handleBudgetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedBudget(e.target.value);
-    setCurrentPage(1);
+  };
+  
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortBy(e.target.value);
   };
 
   // 필터 초기화 함수
@@ -306,7 +140,23 @@ export default function RemoteProjectPage() {
     setSelectedBudget('');
     setSearchTerm('');
     setSortBy('');
-    setCurrentPage(1);
+    fetchProjects({ page: 1 });
+  };
+  
+  // 프로젝트 데이터 변환 (API 응답을 UI 형식으로)
+  const formatBudget = (project: RemoteProject) => {
+    if (project.budgetType === 'hourly') {
+      return `시간당 ${project.budget}`;
+    }
+    return project.budget;
+  };
+  
+  const getDeadlineDays = (deadline: string) => {
+    const deadlineDate = new Date(deadline);
+    const today = new Date();
+    const diffTime = deadlineDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? `D-${diffDays}` : '마감';
   };
 
   return (
@@ -768,10 +618,7 @@ export default function RemoteProjectPage() {
                 className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all appearance-none bg-no-repeat bg-right pr-10"
                 style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundSize: "1.5em 1.5em" }}
                 value={sortBy}
-                onChange={(e) => {
-                  setSortBy(e.target.value);
-                  setCurrentPage(1);
-                }}
+                onChange={handleSortChange}
               >
                 <option value="">기본 정렬</option>
                 <option value="latest">최신순</option>
@@ -858,14 +705,11 @@ export default function RemoteProjectPage() {
                   <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"> 재택 프로젝트 </span>
                   <span className="ml-2 text-sm font-normal bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded-full transition-colors duration-300"> NEW </span>
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300"> 총 <span className="font-semibold text-indigo-600 dark:text-indigo-400">{filteredProjects.length}</span>개의 프로젝트가 있습니다</p>
+                <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300"> 총 <span className="font-semibold text-indigo-600 dark:text-indigo-400">{totalCount}</span>개의 프로젝트가 있습니다</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button 
-                  onClick={() => {
-                    setSortBy('latest');
-                    setCurrentPage(1);
-                  }}
+                  onClick={() => setSortBy('latest')}
                   className={`px-4 py-2 border rounded-xl transition-all duration-300 flex items-center gap-1 shadow-sm ${
                     sortBy === 'latest' 
                       ? 'bg-indigo-500 text-white border-indigo-500' 
@@ -878,10 +722,7 @@ export default function RemoteProjectPage() {
                   최신순
                 </button>
                 <button 
-                  onClick={() => {
-                    setSortBy('deadline');
-                    setCurrentPage(1);
-                  }}
+                  onClick={() => setSortBy('deadline')}
                   className={`px-4 py-2 border rounded-xl transition-all duration-300 flex items-center gap-1 shadow-sm ${
                     sortBy === 'deadline' 
                       ? 'bg-indigo-500 text-white border-indigo-500' 
@@ -894,10 +735,7 @@ export default function RemoteProjectPage() {
                   마감임박순
                 </button>
                 <button 
-                  onClick={() => {
-                    setSortBy('budget');
-                    setCurrentPage(1);
-                  }}
+                  onClick={() => setSortBy('budget')}
                   className={`px-4 py-2 border rounded-xl transition-all duration-300 flex items-center gap-1 shadow-sm ${
                     sortBy === 'budget' 
                       ? 'bg-indigo-500 text-white border-indigo-500' 
@@ -912,15 +750,30 @@ export default function RemoteProjectPage() {
               </div>
             </div>
 
-            {/* 로딩 인디케이터 - 로컬 로딩만 사용하고 전역 로딩은 StateProvider에서 처리 */}
-            {localLoading ? (
-              <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 dark:border-blue-400"></div>
+            {/* 로딩 인디케이터 - API 호출 중 */}
+            {loading || isSearching ? (
+              <div className="flex flex-col justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 dark:border-blue-400 mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-400 font-medium">재택 프로젝트 목록을 불러오는 중...</p>
+              </div>
+            ) : error ? (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
+                <svg className="w-12 h-12 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 className="text-lg font-medium text-red-800 dark:text-red-300 mb-2">오류가 발생했습니다</h3>
+                <p className="text-red-600 dark:text-red-400">{error}</p>
+                <button
+                  onClick={() => fetchProjects({ page: 1 })}
+                  className="mt-4 px-4 py-2 bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-200 rounded-lg hover:bg-red-200 dark:hover:bg-red-700 transition-colors"
+                >
+                  다시 시도
+                </button>
               </div>
             ) : (
-              filteredProjects.length > 0 ? (
+              projects.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {paginatedProjects.map((project) => (
+                  {projects.map((project) => (
                     <div
                       key={project.id}
                       className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden group relative"
@@ -929,11 +782,24 @@ export default function RemoteProjectPage() {
                     <div className="p-6">
                                               <div className="flex justify-between items-start mb-4">
                           <span className="bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-400 dark:to-red-400 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">
-                            {project.deadline}
+                            {getDeadlineDays(project.applicationDeadline)}
                           </span>
-                          <span className="text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-700">
-                            {project.type}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-700">
+                              재택
+                            </span>
+                            <BookmarkButton
+                              isBookmarked={project.isBookmarked || false}
+                              onToggle={async () => {
+                                const result = await remoteProjectService.toggleBookmark(project.id);
+                                if (result.success) {
+                                  // 성공 시 로컬 상태 업데이트
+                                  fetchProjects({ page: 1 });
+                                }
+                              }}
+                              size="sm"
+                            />
+                          </div>
                         </div>
                         <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                           {project.title}
@@ -942,7 +808,7 @@ export default function RemoteProjectPage() {
                           <svg className="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                           </svg>
-                          {project.company}
+                          {project.companyName}
                         </p>
 
                                                                     {project.description && (
@@ -962,16 +828,32 @@ export default function RemoteProjectPage() {
                           </div>
                                                         <div className="flex justify-between text-sm bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
                             <span className="text-gray-600 dark:text-gray-300 flex items-center">
-                              <svg className="w-4 h-4 mr-1 text-blue-400 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zM9 9h6v6H9V9z" />
-                              </svg>
+                              <Calendar className="w-4 h-4 mr-1 text-blue-400 dark:text-blue-300" />
                               {project.duration}
                             </span>
                             <span className="font-medium text-gray-900 dark:text-white flex items-center">
                               <svg className="w-4 h-4 mr-1 text-blue-400 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
-                              {project.budget}
+                              {formatBudget(project)}
+                            </span>
+                          </div>
+                          
+                          {/* 통계 정보 추가 */}
+                          <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-600 text-xs text-gray-500 dark:text-gray-400">
+                            <div className="flex items-center gap-3">
+                              <span className="flex items-center">
+                                <Eye className="w-3 h-3 mr-1" />
+                                {project.viewCount || 0}
+                              </span>
+                              <span className="flex items-center">
+                                <Users className="w-3 h-3 mr-1" />
+                                {project.applicationsCount || 0}
+                              </span>
+                            </div>
+                            <span className="flex items-center">
+                              <MapPin className="w-3 h-3 mr-1" />
+                              {project.workType === 'full-remote' ? '원격' : '현장'}
                             </span>
                           </div>
                         </div>
@@ -991,7 +873,7 @@ export default function RemoteProjectPage() {
                   <svg className="w-20 h-20 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-3 transition-colors duration-300"> 일치하는 프로젝트가 없습니다 </h3>
+                  <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-3 transition-colors duration-300"> 조회된 데이터가 없습니다 </h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-6 transition-colors duration-300"> 검색어나 필터 조건을 변경해 보세요.</p>
                   <button
                     onClick={() => {
@@ -1011,60 +893,28 @@ export default function RemoteProjectPage() {
               )
             )}
 
-            {/* 페이지네이션 */}
-            {filteredProjects.length > 0 && (
+            {/* 더보기 버튼 */}
+            {hasMore && !loading && (
               <div className="flex justify-center mt-12 relative z-10">
-                <nav className="flex items-center space-x-3">
-                  <button
-                    className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-indigo-300 hover:text-indigo-600"
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    이전
-                  </button>
-
-                  <div className="flex items-center space-x-2">
-                    {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
-                      let pageNumber: number;
-                      if (totalPages <= 5) {
-                        pageNumber = index + 1;
-                      } else if (currentPage <= 3) {
-                        pageNumber = index + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNumber = totalPages - 4 + index;
-                      } else {
-                        pageNumber = currentPage - 2 + index;
-                      }
-
-                      return (
-                        <button
-                          key={pageNumber}
-                          onClick={() => handlePageChange(pageNumber)}
-                          className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${currentPage === pageNumber
-                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
-                            : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:border-indigo-300 hover:text-indigo-600'
-                          }`}
-                        >
-                          {pageNumber}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <button
-                    className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-sm hover:border-indigo-300 hover:text-indigo-600"
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                  >
-                    다음
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                </nav>
+                <button
+                  onClick={loadMore}
+                  disabled={loading}
+                  className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 dark:hover:from-indigo-600 dark:hover:to-purple-600 transition-all font-medium shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      로딩 중...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                      </svg>
+                      더 보기
+                    </>
+                  )}
+                </button>
               </div>
             )}
           </div>

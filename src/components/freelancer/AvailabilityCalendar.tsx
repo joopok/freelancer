@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Clock, Calendar as CalendarIcon, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 interface AvailabilityCalendarProps {
-  freelancerId: number;
+  freelancerId: string | number;
 }
 
 interface DaySchedule {

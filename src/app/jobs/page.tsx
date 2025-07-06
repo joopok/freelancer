@@ -98,7 +98,7 @@ export default function JobsPage() {
       
       setJobs(jobsData);
       setLocalLoading(false);
-    }, 800);
+    }, 2000);
 
     return () => {
       clearTimeout(timer);

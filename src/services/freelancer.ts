@@ -1,5 +1,5 @@
 import api from '@/utils/api';
-import type { Freelancer } from '@/types/freelancer';
+import type { Freelancer, FreelancerDetail } from '@/types/freelancer';
 
 export interface FreelancerListResponse {
   success: boolean;
@@ -17,8 +17,14 @@ export interface FreelancerListResponse {
 
 export interface FreelancerDetailResponse {
   success: boolean;
-  data?: Freelancer;
+  data?: FreelancerDetail;
   error?: string;
+}
+
+export interface ContactFreelancerDto {
+  subject: string;
+  message: string;
+  projectId?: string;
 }
 
 export interface FreelancerSearchParams {
@@ -29,8 +35,13 @@ export interface FreelancerSearchParams {
   type?: string;
   experience?: string;
   skills?: string[];
-  sortBy?: 'rating' | 'experience' | 'viewCount' | 'projectCount';
+  sortBy?: 'rating' | 'experience' | 'viewCount' | 'projectCount' | 'hourlyRateHigh' | 'hourlyRateLow' | 'recentActivity';
   sortOrder?: 'asc' | 'desc';
+  rating?: number;
+  hourlyRateMin?: number;
+  hourlyRateMax?: number;
+  projectCount?: number;
+  availability?: string;
 }
 
 class FreelancerService {
@@ -53,6 +64,11 @@ class FreelancerService {
         }
         if (params.sortBy) queryParams.append('sortBy', params.sortBy);
         if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+        if (params.rating) queryParams.append('rating', params.rating.toString());
+        if (params.hourlyRateMin) queryParams.append('hourlyRateMin', params.hourlyRateMin.toString());
+        if (params.hourlyRateMax) queryParams.append('hourlyRateMax', params.hourlyRateMax.toString());
+        if (params.projectCount) queryParams.append('projectCount', params.projectCount.toString());
+        if (params.availability) queryParams.append('availability', params.availability);
       }
 
       const url = `/api/freelancers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
@@ -181,6 +197,120 @@ class FreelancerService {
         success: true,
         data: defaultSkills,
         error: 'API 연결 실패로 기본 스킬 목록을 사용합니다.'
+      };
+    }
+  }
+
+  /**
+   * Get freelancer detail with portfolio, reviews, etc.
+   */
+  async getFreelancerDetail(id: string): Promise<FreelancerDetailResponse> {
+    try {
+      const response = await api.get<FreelancerDetailResponse>(`/api/freelancers/${id}/detail`);
+      
+      // Transform backend data to match frontend expectations
+      if (response.data.success && response.data.data) {
+        const freelancer = response.data.data;
+        
+        // Parse JSON fields if they come as strings
+        if (typeof freelancer.skills === 'string') {
+          try {
+            freelancer.skills = JSON.parse(freelancer.skills);
+          } catch (e) {
+            console.warn('Failed to parse skills JSON:', freelancer.skills);
+            freelancer.skills = [];
+          }
+        }
+        
+        if (typeof freelancer.techStack === 'string') {
+          try {
+            freelancer.techStack = JSON.parse(freelancer.techStack);
+          } catch (e) {
+            console.warn('Failed to parse techStack JSON:', freelancer.techStack);
+            freelancer.techStack = [];
+          }
+        }
+        
+        if (typeof freelancer.certificates === 'string') {
+          try {
+            freelancer.certificates = JSON.parse(freelancer.certificates);
+          } catch (e) {
+            console.warn('Failed to parse certificates JSON:', freelancer.certificates);
+            freelancer.certificates = [];
+          }
+        }
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      console.error(`Failed to fetch freelancer detail ${id}:`, error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to fetch freelancer details'
+      };
+    }
+  }
+
+  /**
+   * Toggle bookmark for freelancer
+   */
+  async toggleBookmark(id: string): Promise<{ success: boolean; data?: { bookmarked: boolean }; error?: string }> {
+    try {
+      const response = await api.post(`/api/freelancers/${id}/bookmark`);
+      return response.data;
+    } catch (error: any) {
+      console.error(`Failed to toggle bookmark for freelancer ${id}:`, error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to toggle bookmark'
+      };
+    }
+  }
+
+  /**
+   * Contact freelancer
+   */
+  async contactFreelancer(id: string, data: ContactFreelancerDto): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await api.post(`/api/freelancers/${id}/contact`, data);
+      return response.data;
+    } catch (error: any) {
+      console.error(`Failed to contact freelancer ${id}:`, error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to send message'
+      };
+    }
+  }
+
+  /**
+   * Get similar freelancers
+   */
+  async getSimilarFreelancers(id: string, limit: number = 6): Promise<FreelancerListResponse> {
+    try {
+      const response = await api.get(`/api/freelancers/${id}/similar?limit=${limit}`);
+      return response.data;
+    } catch (error: any) {
+      console.error(`Failed to fetch similar freelancers for ${id}:`, error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to fetch similar freelancers'
+      };
+    }
+  }
+
+  /**
+   * Rate freelancer
+   */
+  async rateFreelancer(id: string, rating: number, review?: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await api.post(`/api/freelancers/${id}/rate`, { rating, review });
+      return response.data;
+    } catch (error: any) {
+      console.error(`Failed to rate freelancer ${id}:`, error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to submit rating'
       };
     }
   }

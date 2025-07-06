@@ -13,6 +13,7 @@ export const authService = {
    * 사용자 로그인을 처리하고 인증 토큰을 반환합니다.
    */
   async login(username: string, password: string): Promise<AuthResponse> {
+    console.log('🔐 AuthService.login 호출됨:', { username, password: '***' });
     try {
       // 입력값 검증
       if (!username || !password) {
@@ -21,7 +22,8 @@ export const authService = {
       
       // 로그인 API 호출
       const loginData: LoginRequest = { username, password };
-      const response = await api.post<any>('/auth/login', loginData);
+      console.log('🚀 로그인 API 요청 시작');
+      const response = await api.post<any>('/api/auth/login', loginData);
       
       // 응답 데이터 검증
       if (!response.data) {
@@ -35,6 +37,15 @@ export const authService = {
       console.log('AuthService - 서버 응답 데이터:', responseData);
       console.log('AuthService - 사용자 데이터:', responseData.data);
       console.log('AuthService - Role 값:', responseData.data?.role);
+
+      // 로그인 실패 처리
+      if (!responseData.success) {
+        // 서버 메시지가 "로그인 처리 중 오류 발생 하였습니다."인 경우 더 친화적인 메시지로 변경
+        if (responseData.message && responseData.message.includes('로그인 처리 중 오류')) {
+          throw new Error('아이디 또는 비밀번호가 올바르지 않습니다. 다시 확인해주세요.');
+        }
+        throw new Error(responseData.message || '로그인에 실패했습니다.');
+      }
 
       // API 응답 구조 매핑
       const authResponse: AuthResponse = {
@@ -78,7 +89,7 @@ export const authService = {
   async logout(): Promise<void> {
     try {
       // 백엔드 로그아웃 API 호출
-      await api.post('/auth/logout');
+      await api.post('/api/auth/logout');
       
       // 클라이언트 측 상태 정리
       if (typeof window !== 'undefined') {
@@ -118,7 +129,7 @@ export const authService = {
       }
       
       // 세션 체크 API 호출 (Java backend endpoint)
-      const response = await api.get<any>('/auth/session-info');
+      const response = await api.get<any>('/api/auth/session-info');
       
       // Java backend response format에 맞게 변환
       const responseData = response.data;
@@ -167,7 +178,7 @@ export const authService = {
    */
   async register(userData: any): Promise<AuthResponse> {
     try {
-      const response = await api.post<AuthResponse>('/auth/register', userData);
+      const response = await api.post<AuthResponse>('/api/auth/register', userData);
       return response.data;
     } catch (error: unknown) {
       const errorMessage = ApiUtils.getErrorMessage(error);
@@ -180,7 +191,7 @@ export const authService = {
    */
   async resetPasswordRequest(email: string): Promise<AuthResponse> {
     try {
-      const response = await api.post<AuthResponse>('/auth/reset-password-request', { email });
+      const response = await api.post<AuthResponse>('/api/auth/reset-password-request', { email });
       return response.data;
     } catch (error: unknown) {
       const errorMessage = ApiUtils.getErrorMessage(error);
@@ -193,7 +204,7 @@ export const authService = {
    */
   async resetPasswordComplete(token: string, newPassword: string): Promise<AuthResponse> {
     try {
-      const response = await api.post<AuthResponse>('/auth/reset-password-complete', { 
+      const response = await api.post<AuthResponse>('/api/auth/reset-password-complete', { 
         token, 
         newPassword 
       });
