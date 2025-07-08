@@ -64,10 +64,6 @@ function FreelancerPage() {
 
   const itemsPerPage = 10;
   
-  // 추가 디버깅 로그
-  useEffect(() => {
-    console.log(`📋 Frontend pagination: currentPage=${currentPage}, itemsPerPage=${itemsPerPage}, totalCount=${totalCount}, totalPages=${Math.ceil(totalCount / itemsPerPage)}`);
-  }, [currentPage, totalCount]);
   
   // 컴포넌트 언마운트 시 타이머 정리
   useEffect(() => {
@@ -137,14 +133,11 @@ function FreelancerPage() {
     try {
       // 로딩 상태 설정 - 더 명확하게 처리
       if (isInitialLoad) {
-        console.log('🚀 Initial load - setting page to 1');
         setLocalLoading(true);
         setCurrentPage(1);
       } else if (isLoadMore) {
-        console.log('➕ Load more - incrementing page');
         setIsLoadingMore(true);
       } else {
-        console.log('🔄 Filter change - resetting to page 1');
         setCurrentPage(1); // 필터 변경 시 첫 페이지로 리셋
         
         // 즉시 로딩 상태 표시 (필터링 중 표시 대신 로딩 표시)
@@ -165,8 +158,6 @@ function FreelancerPage() {
         pageToLoad = 1;
       }
       
-      console.log(`🔢 Page calculation: currentPage=${currentPage}, pageToLoad=${pageToLoad}, isLoadMore=${isLoadMore}, isInitialLoad=${isInitialLoad}`);
-      
       const searchParams: FreelancerSearchParams = {
         page: pageToLoad,
         pageSize: itemsPerPage,
@@ -184,40 +175,24 @@ function FreelancerPage() {
         availability: selectedAvailability || undefined
       };
 
-      console.log('Loading freelancers with params:', searchParams);
-      console.log(`🔄 Requesting page ${pageToLoad} with ${itemsPerPage} items per page (isLoadMore: ${isLoadMore})`);
       const response = await freelancerService.getFreelancers(searchParams);
       
       // 최신 요청이 아니면 무시 (race condition 방지)
       if (lastRequestRef.current !== requestId) {
-        console.log('⏭️ Ignoring outdated request');
         return;
       }
       
       if (response.success && response.data) {
-        console.log(`📈 Received ${response.data.freelancers?.length || 0} freelancers out of ${response.data.totalCount} total`);
-        console.log('API Response:', {
-          freelancersCount: response.data.freelancers?.length,
-          totalCount: response.data.totalCount,
-          currentPage: response.data.currentPage,
-          totalPages: response.data.totalPages
-        });
-        
-        if (response.data.freelancers && response.data.freelancers.length > 0) {
-          console.log('Sample freelancer:', response.data.freelancers[0]);
-        }
         
         const newFreelancers = response.data.freelancers || [];
         const newTotalCount = response.data.totalCount || 0;
         
         if (isLoadMore) {
           // 더보기의 경우 기존 데이터에 추가
-          console.log(`➕ Appending ${newFreelancers.length} freelancers to existing ${freelancers.length}`);
           setFreelancers(prev => [...prev, ...newFreelancers]);
           setCurrentPage(pageToLoad);
         } else {
           // 초기 로드나 필터 변경의 경우 새로 설정
-          console.log(`🔄 Setting ${newFreelancers.length} freelancers (replacing existing)`);
           setFreelancers(newFreelancers);
           setCurrentPage(1);
         }
@@ -245,7 +220,86 @@ function FreelancerPage() {
         setIsLoadingMore(false);
       }
     }
-  }, [currentPage, itemsPerPage, activeTab, selectedType, selectedExperience, selectedSkills, searchTerms, sortBy, freelancers.length]);
+  }, [currentPage, itemsPerPage, activeTab, selectedType, selectedExperience, selectedSkills, searchTerms, sortBy, freelancers.length, selectedRating, hourlyRateMin, hourlyRateMax, selectedProjectCount, selectedAvailability]);
+
+  // URL 파라미터 업데이트 함수
+  const updateUrlParams = useCallback(() => {
+    const params = new URLSearchParams();
+    
+    if (activeTab !== "전체") params.set('tab', activeTab);
+    if (selectedSkills.length > 0) params.set('skills', selectedSkills.join(','));
+    if (selectedExperience) params.set('experience', selectedExperience);
+    if (selectedType) params.set('type', selectedType);
+    if (sortBy) params.set('sort', sortBy);
+    if (searchTerms.length > 0) params.set('search', searchTerms.join(' '));
+    if (selectedRating) params.set('rating', selectedRating);
+    if (hourlyRateMin) params.set('hourlyRateMin', hourlyRateMin);
+    if (hourlyRateMax) params.set('hourlyRateMax', hourlyRateMax);
+    if (selectedProjectCount) params.set('projectCount', selectedProjectCount);
+    if (selectedAvailability) params.set('availability', selectedAvailability);
+    
+    const queryString = params.toString();
+    router.push(`/freelancer${queryString ? `?${queryString}` : ''}`, { scroll: false });
+  }, [activeTab, selectedSkills, selectedExperience, selectedType, sortBy, searchTerms, 
+      selectedRating, hourlyRateMin, hourlyRateMax, selectedProjectCount, selectedAvailability, router]);
+
+  // 이벤트 핸들러
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !isLoadingMore) {
+      loadFreelancers(false, true);
+    }
+  }, [hasMore, isLoadingMore, loadFreelancers]);
+
+  const handleSearchTermsChange = useCallback((terms: string[]) => {
+    setSearchTerms(terms);
+  }, []);
+
+  const toggleSkillFilter = useCallback((skill: string) => {
+    setSelectedSkills(prev => {
+      const newSkills = prev.includes(skill)
+        ? prev.filter(s => s !== skill)
+        : [...prev, skill];
+      return newSkills;
+    });
+  }, []);
+
+  const handleExperienceChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedExperience(e.target.value);
+  }, []);
+
+  const handleTypeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedType(e.target.value);
+  }, []);
+
+  const handleSortChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortBy(e.target.value);
+  }, []);
+
+  // 필터 초기화 함수
+  const resetFilters = useCallback(() => {
+    setSelectedSkills([]);
+    setSelectedExperience('');
+    setSelectedType('');
+    setSearchTerms([]);
+    setSortBy('');
+    setActiveTab("전체");
+    setSelectedRating('');
+    setHourlyRateMin('');
+    setHourlyRateMax('');
+    setSelectedProjectCount('');
+    setSelectedAvailability('');
+    router.push('/freelancer');
+  }, [router]);
+
+  // 탭 변경 핸들러
+  const handleTabChange = useCallback((tab: string) => {
+    if (tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [activeTab]);
+
+  // 총 페이지 수 계산
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   // 컴포넌트 마운트 시 스킬 목록 로드
   useEffect(() => {
@@ -257,15 +311,13 @@ function FreelancerPage() {
     if (tabFromUrl && tabFromUrl !== activeTab) {
       setActiveTab(tabFromUrl);
     }
-  }, [tabFromUrl]);
+  }, [tabFromUrl, activeTab]);
 
   // 초기 로드 (한 번만)
   useEffect(() => {
-    console.log('🎬 Initial useEffect triggered - setting initial loading state');
     setLocalLoading(true); // Set loading to true immediately
 
     const timer = setTimeout(() => {
-      console.log('⏳ 4-second delay finished, loading freelancers now');
       loadFreelancers(true); // Fetch data after delay
     }, 2000); // 2 seconds delay
 
@@ -291,18 +343,8 @@ function FreelancerPage() {
                            selectedAvailability === '';
     
     if (isInitialRender) {
-      console.log('⏭️ Skipping filter effect on initial render');
       return;
     }
-    
-    console.log('🔄 Filter/Sort change detected:', {
-      activeTab,
-      selectedType,
-      selectedExperience,
-      selectedSkills: selectedSkills.length,
-      searchTerms: searchTerms.length,
-      sortBy
-    });
     
     const timeoutId = setTimeout(() => {
       loadFreelancers(false, false); // 필터 변경 시 첫 페이지부터 새로 로드
@@ -321,89 +363,6 @@ function FreelancerPage() {
     
     return () => clearTimeout(timer);
   }, [updateUrlParams]);
-
-  // 총 페이지 수 계산
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
-
-  // 이벤트 핸들러
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoadingMore) {
-      loadFreelancers(false, true);
-    }
-  }, [hasMore, isLoadingMore, loadFreelancers]);
-
-  const handleSearchTermsChange = useCallback((terms: string[]) => {
-    setSearchTerms(terms);
-  }, []);
-
-  const toggleSkillFilter = useCallback((skill: string) => {
-    setSelectedSkills(prev => {
-      const newSkills = prev.includes(skill)
-        ? prev.filter(s => s !== skill)
-        : [...prev, skill];
-      return newSkills;
-    });
-  }, []);
-
-  const handleExperienceChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    console.log('🔧 Experience filter changed:', e.target.value);
-    setSelectedExperience(e.target.value);
-  }, []);
-
-  const handleTypeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    console.log('🔧 Type filter changed:', e.target.value);
-    setSelectedType(e.target.value);
-  }, []);
-
-  const handleSortChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    console.log('🔧 Sort filter changed:', e.target.value);
-    setSortBy(e.target.value);
-  }, []);
-
-  // URL 파라미터 업데이트 함수
-  const updateUrlParams = useCallback(() => {
-    const params = new URLSearchParams();
-    
-    if (activeTab !== "전체") params.set('tab', activeTab);
-    if (selectedSkills.length > 0) params.set('skills', selectedSkills.join(','));
-    if (selectedExperience) params.set('experience', selectedExperience);
-    if (selectedType) params.set('type', selectedType);
-    if (sortBy) params.set('sort', sortBy);
-    if (searchTerms.length > 0) params.set('search', searchTerms.join(' '));
-    if (selectedRating) params.set('rating', selectedRating);
-    if (hourlyRateMin) params.set('hourlyRateMin', hourlyRateMin);
-    if (hourlyRateMax) params.set('hourlyRateMax', hourlyRateMax);
-    if (selectedProjectCount) params.set('projectCount', selectedProjectCount);
-    if (selectedAvailability) params.set('availability', selectedAvailability);
-    
-    const queryString = params.toString();
-    router.push(`/freelancer${queryString ? `?${queryString}` : ''}`, { scroll: false });
-  }, [activeTab, selectedSkills, selectedExperience, selectedType, sortBy, searchTerms, 
-      selectedRating, hourlyRateMin, hourlyRateMax, selectedProjectCount, selectedAvailability, router]);
-
-  // 필터 초기화 함수
-  const resetFilters = useCallback(() => {
-    console.log('🔄 Resetting all filters');
-    setSelectedSkills([]);
-    setSelectedExperience('');
-    setSelectedType('');
-    setSearchTerms([]);
-    setSortBy('');
-    setActiveTab("전체");
-    setSelectedRating('');
-    setHourlyRateMin('');
-    setHourlyRateMax('');
-    setSelectedProjectCount('');
-    setSelectedAvailability('');
-    router.push('/freelancer');
-  }, [router]);
-
-  // 탭 변경 핸들러
-  const handleTabChange = useCallback((tab: string) => {
-    if (tab !== activeTab) {
-      setActiveTab(tab);
-    }
-  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
@@ -920,36 +879,6 @@ function FreelancerPage() {
                 <option value="3.5">3.5점 이상</option>
                 <option value="3.0">3.0점 이상</option>
               </select>
-            </div>
-
-            {/* 시급 범위 필터 */}
-            <div className="mb-8">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
-                <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                시급 범위
-              </h4>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder="최소"
-                  value={hourlyRateMin}
-                  onChange={(e) => setHourlyRateMin(e.target.value)}
-                  className="flex-1 p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isFiltering}
-                />
-                <span className="flex items-center text-gray-500 dark:text-gray-400">~</span>
-                <input
-                  type="number"
-                  placeholder="최대"
-                  value={hourlyRateMax}
-                  onChange={(e) => setHourlyRateMax(e.target.value)}
-                  className="flex-1 p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isFiltering}
-                />
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">단위: 만원</p>
             </div>
 
             {/* 프로젝트 완료 수 필터 */}
