@@ -549,9 +549,9 @@ export default function RemoteProjectDetailPage() {
       // 숫자가 변경되면 애니메이션 효과 트리거
       const statElements = document.querySelectorAll('.stat-value');
       statElements.forEach(el => {
-        el.classList.add(styles.statUpdateAnimation);
+        el.classList.add('animate-pulse-once');
         setTimeout(() => {
-          el.classList.remove(styles.statUpdateAnimation);
+          el.classList.remove('animate-pulse-once');
         }, 500);
       });
     }
