@@ -145,7 +145,7 @@ const NotificationBell = React.memo(({ className = '' }: NotificationBellProps) 
     if (isOpen) {
       loadNotifications();
     }
-  }, [isOpen]); // loadNotifications는 안정적이므로 의존성에서 제외
+  }, [isOpen, loadNotifications]); // loadNotifications는 안정적이므로 의존성에서 제외
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>

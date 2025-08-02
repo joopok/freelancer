@@ -154,9 +154,11 @@ export function isTokenExpired(token: string): boolean {
   }
 }
 
-export default {
+const jwtUtils = {
   generateToken,
   verifyToken,
   decodeToken,
   isTokenExpired
-}; 
+};
+
+export default jwtUtils; 

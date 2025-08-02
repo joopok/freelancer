@@ -37,7 +37,7 @@ export default function Header() {
   
   useEffect(() => {
     setMounted(true);
-  }, []);
+  }, [mounted]);
   
   useEffect(() => {
     if (mounted) {

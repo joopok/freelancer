@@ -103,7 +103,7 @@ export default function JobsPage() {
     return () => {
       clearTimeout(timer);
     };
-  }, []);
+  }, [allSkills]);
   
   // 필터링된 채용정보 계산
   const filteredJobs = useMemo(() => {

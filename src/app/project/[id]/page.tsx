@@ -58,9 +58,10 @@ function FreelancerPage() {
 
   // 컴포넌트 언마운트 시 타이머 정리
   useEffect(() => {
+    const currentLoadingTimeoutRef = loadingTimeoutRef.current;
     return () => {
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
+      if (currentLoadingTimeoutRef) {
+        clearTimeout(currentLoadingTimeoutRef);
       }
     };
   }, []);

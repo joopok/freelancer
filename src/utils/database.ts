@@ -175,7 +175,7 @@ export const initializeDatabase = async (): Promise<void> => {
   }
 };
 
-export default {
+const databaseFunctions = {
   createPool,
   getConnection,
   executeQuery,
@@ -184,4 +184,6 @@ export default {
   closePool,
   checkDatabaseHealth,
   initializeDatabase,
-}; 
+};
+
+export default databaseFunctions; 

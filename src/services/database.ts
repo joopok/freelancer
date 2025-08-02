@@ -361,9 +361,11 @@ export class DatabaseHealthService {
   }
 }
 
-export default {
+const databaseServices = {
   UserService,
   ProjectService,
   BlogService,
   DatabaseHealthService,
-}; 
+};
+
+export default databaseServices; 

@@ -108,6 +108,7 @@ export default function CommunityFreePage() {
   }, [page]);
 
   useEffect(() => {
+    const currentLoader = loader.current;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loading) {
@@ -117,13 +118,13 @@ export default function CommunityFreePage() {
       { threshold: 1 }
     );
 
-    if (loader.current) {
-      observer.observe(loader.current);
+    if (currentLoader) {
+      observer.observe(currentLoader);
     }
 
     return () => {
-      if (loader.current) {
-        observer.unobserve(loader.current);
+      if (currentLoader) {
+        observer.unobserve(currentLoader);
       }
     };
   }, [hasMore, loading]);

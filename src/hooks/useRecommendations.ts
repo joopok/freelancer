@@ -76,15 +76,7 @@ export const useRecommendations = (
   const [loadingStats, setLoadingStats] = useState(false);
 
   // 추천 요청 객체 생성 - filters 객체를 안정화
-  const stableFilters = useMemo(() => filters, [
-    filters?.category,
-    filters?.budgetRange?.min,
-    filters?.budgetRange?.max,
-    filters?.location,
-    filters?.experienceLevel,
-    filters?.skills?.join(','),
-    filters?.workType
-  ]);
+  const stableFilters = useMemo(() => filters, [filters]);
 
   const request = useMemo((): RecommendationRequest => ({
     userId,
@@ -93,7 +85,7 @@ export const useRecommendations = (
     limit,
     excludeIds,
     filters: stableFilters
-  }), [userId, projectId, type, limit, excludeIds?.join(','), stableFilters]);
+  }), [userId, projectId, type, limit, excludeIds, stableFilters]);
 
   // 추천 데이터 가져오기
   const fetchRecommendations = useCallback(async () => {
@@ -233,7 +225,7 @@ export const useRecommendations = (
     return () => {
       mounted = false;
     };
-  }, []); // 빈 배열로 마운트 시 한 번만 실행
+  }, [autoFetch, fetchRecommendations]);
 
   // 통계 데이터 로딩
   useEffect(() => {

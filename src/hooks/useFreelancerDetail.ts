@@ -99,7 +99,7 @@ export function useFreelancerDetail(freelancerId: string): UseFreelancerDetailRe
     return () => {
       isMountedRef.current = false;
     };
-  }, [freelancerId]);
+  }, [freelancerId, fetchFreelancerDetail]);
   
   return {
     freelancer,

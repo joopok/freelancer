@@ -95,7 +95,7 @@ export function useRemoteProjectDetail(projectId: string): UseRemoteProjectDetai
     return () => {
       isMountedRef.current = false;
     };
-  }, [projectId]);
+  }, [projectId, fetchProjectDetail]);
   
   return {
     project,

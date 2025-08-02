@@ -40,14 +40,7 @@ export function useNotifications(initialFilter: NotificationFilter = {}): UseNot
   const isMounted = useRef(true);
   
   // Memoize filter to prevent object recreation
-  const stableFilter = useMemo(() => initialFilter, [
-    initialFilter.type,
-    initialFilter.read,
-    initialFilter.limit,
-    initialFilter.offset,
-    initialFilter.sortBy,
-    initialFilter.sortOrder
-  ]);
+  const stableFilter = useMemo(() => initialFilter, [initialFilter]);
 
   // 알림 목록 조회 (최적화: isMounted 체크 추가)
   const fetchNotifications = useCallback(async (filter?: NotificationFilter) => {
@@ -254,7 +247,7 @@ export function useNotifications(initialFilter: NotificationFilter = {}): UseNot
     return () => {
       isMounted.current = false;
     };
-  }, []); // Empty dependency array is intentional
+  }, [fetchNotifications, loadSettings]);
 
   // 주기적으로 배지 업데이트 (1분마다)
   useEffect(() => {
@@ -265,7 +258,7 @@ export function useNotifications(initialFilter: NotificationFilter = {}): UseNot
     }, 60000);
     
     return () => clearInterval(interval);
-  }, []); // Empty dependency array to prevent interval reset
+  }, [updateBadge]);
 
   // 필터 변경 시 알림 재로드 (최적화된 비교)
   useEffect(() => {

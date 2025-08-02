@@ -47,7 +47,7 @@ export default function CommunityStudyPage() {
   // 데이터 가져오기
   useEffect(() => {
     fetchData();
-  }, [page]);
+  }, [page, fetchData]);
 
   // 모의 데이터 가져오기 함수
   const fetchData = () => {
