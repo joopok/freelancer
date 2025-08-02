@@ -44,6 +44,10 @@ export interface RemoteProjectDetail extends RemoteProject {
     industry?: string; // 추가
     size?: string; // 추가
     founded?: string; // 추가
+    contact?: { // 추가
+      name?: string;
+      role?: string;
+    };
   };
   requirements: string[];
   deliverables: string[];
