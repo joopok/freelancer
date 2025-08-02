@@ -12,7 +12,7 @@ export default function TermsPage() {
     setLoading(true, '이용약관 페이지 로딩 중');
     setTimeout(() => {
       setLoading(false);
-    }, 1000);
+    }, 500);
   }, [setLoading]);
 
   const tabs = [
@@ -71,7 +71,7 @@ export default function TermsPage() {
                 <section>
                   <h3 className="text-lg font-semibold text-gray-800 dark:text-white">제 1 조 (목적)</h3>
                   <p className="text-gray-600 dark:text-gray-300 mt-2">
-                    이 약관은 잡코리아 빌보드(이하 "회사")가 제공하는 서비스의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
+                    이 약관은 잡코리아 빌보드(이하 &quot;회사&quot;)가 제공하는 서비스의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
                   </p>
                 </section>
                 
@@ -81,10 +81,10 @@ export default function TermsPage() {
                     이 약관에서 사용하는 용어의 정의는 다음과 같습니다.
                   </p>
                   <ul className="list-disc list-inside mt-2 text-gray-600 dark:text-gray-300 space-y-1">
-                    <li>"서비스"란 회사가 제공하는 모든 서비스를 의미합니다.</li>
-                    <li>"회원"이란 회사의 서비스에 접속하여 이 약관에 따라 회사와 이용계약을 체결하고, 회사가 제공하는 서비스를 이용하는 고객을 말합니다.</li>
-                    <li>"아이디(ID)"란 회원의 식별과 서비스 이용을 위하여 회원이 설정하고 회사가 승인하는 문자와 숫자의 조합을 말합니다.</li>
-                    <li>"비밀번호"란 회원의 정보 보호를 위해 회원 자신이 설정한 문자와 숫자의 조합을 말합니다.</li>
+                    <li>&quot;서비스&quot;란 회사가 제공하는 모든 서비스를 의미합니다.</li>
+                    <li>&quot;회원&quot;이란 회사의 서비스에 접속하여 이 약관에 따라 회사와 이용계약을 체결하고, 회사가 제공하는 서비스를 이용하는 고객을 말합니다.</li>
+                    <li>&quot;아이디(ID)&quot;란 회원의 식별과 서비스 이용을 위하여 회원이 설정하고 회사가 승인하는 문자와 숫자의 조합을 말합니다.</li>
+                    <li>&quot;비밀번호&quot;란 회원의 정보 보호를 위해 회원 자신이 설정한 문자와 숫자의 조합을 말합니다.</li>
                   </ul>
                 </section>
                 
@@ -92,7 +92,7 @@ export default function TermsPage() {
                   <h3 className="text-lg font-semibold text-gray-800 dark:text-white">제 3 조 (약관의 효력 및 변경)</h3>
                   <p className="text-gray-600 dark:text-gray-300 mt-2">
                     ① 이 약관은 서비스 화면에 게시하거나 기타의 방법으로 회원에게 공지함으로써 효력이 발생합니다.<br />
-                    ② 회사는 "약관의 규제에 관한 법률", "정보통신망 이용촉진 및 정보보호 등에 관한 법률" 등 관련법을 위배하지 않는 범위에서 이 약관을 개정할 수 있습니다.<br />
+                    ② 회사는 &quot;약관의 규제에 관한 법률&quot;, &quot;정보통신망 이용촉진 및 정보보호 등에 관한 법률&quot; 등 관련법을 위배하지 않는 범위에서 이 약관을 개정할 수 있습니다.<br />
                     ③ 회사가 약관을 개정할 경우에는 적용일자 및 개정사유를 명시하여 현행 약관과 함께 서비스 초기화면에 그 적용일자 7일 이전부터 적용일자 전일까지 공지합니다. 다만, 회원에게 불리한 약관의 개정의 경우에는 30일 이전부터 공지합니다.<br />
                     ④ 회원은 개정된 약관에 동의하지 않을 경우 회원 탈퇴를 요청할 수 있으며, 개정된 약관의 효력 발생일로부터 7일 이후에도 거부의사를 표시하지 않고 서비스를 계속 이용할 경우 약관의 개정 내용에 동의한 것으로 간주됩니다.
                   </p>
@@ -207,4 +207,4 @@ export default function TermsPage() {
       </motion.div>
     </div>
   );
-} 
+}

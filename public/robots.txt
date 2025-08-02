@@ -1,0 +1,43 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# 크롤링 제한 디렉토리
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /auth/
+Disallow: /private/
+
+# 크롤링 속도 제한
+Crawl-delay: 1
+
+# 사이트맵
+Sitemap: https://techbridge.co.kr/sitemap.xml
+Sitemap: https://techbridge.co.kr/sitemap-0.xml
+
+# 주요 검색 엔진 봇 설정
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Yandex
+Allow: /
+Crawl-delay: 2
+
+# 나쁜 봇 차단
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /

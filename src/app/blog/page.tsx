@@ -45,7 +45,7 @@ const ShareModal = ({ isOpen, onClose, post }: { isOpen: boolean; onClose: () =>
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 500);
     } catch (err) {
       console.error('Failed to copy:', err);
     }
@@ -144,7 +144,7 @@ export default function BlogPage() {
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
       setLoading(false);
-    }, 2000);
+    }, 500);
     
     return () => clearTimeout(timer);
   }, [setLoading]);

@@ -25,8 +25,6 @@ export function useRemoteProjectDetail(projectId: string): UseRemoteProjectDetai
       setLoading(true);
       setError(null);
       
-      console.log('🔍 Fetching remote project detail:', projectId);
-      
       // 조회수 증가
       await remoteProjectService.incrementViewCount(projectId);
       
@@ -38,20 +36,22 @@ export function useRemoteProjectDetail(projectId: string): UseRemoteProjectDetai
       if (result.success && result.data) {
         setProject(result.data);
         setIsBookmarked(result.data.isBookmarked || false);
-        console.log('✅ Loaded remote project detail:', result.data.title);
       } else {
         setError(result.error || '프로젝트 정보를 불러오는데 실패했습니다.');
-        console.error('❌ Failed to fetch remote project detail:', result.error);
       }
     } catch (err: any) {
       if (!isMountedRef.current) return;
       
       const errorMessage = err.message || '네트워크 오류가 발생했습니다.';
       setError(errorMessage);
-      console.error('❌ Error fetching remote project detail:', err);
     } finally {
       if (isMountedRef.current) {
-        setLoading(false);
+        // 렌더링이 완료될 때까지 약간의 지연을 추가
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setLoading(false);
+          });
+        });
       }
     }
   }, [projectId]);
@@ -67,11 +67,12 @@ export function useRemoteProjectDetail(projectId: string): UseRemoteProjectDetai
         setIsBookmarked(result.data.bookmarked);
         
         // 프로젝트 객체 업데이트
-        setProject(prev => prev ? {
-          ...prev,
-          isBookmarked: result.data.bookmarked,
-          bookmarkCount: prev.bookmarkCount + (result.data.bookmarked ? 1 : -1)
-        } : null);
+        if (result.data) {
+          setProject(prev => prev ? {
+            ...prev,
+            bookmarkCount: prev.bookmarkCount + (result.data!.bookmarked ? 1 : -1)
+          } : null);
+        }
       }
     } catch (err) {
       console.error('❌ Error toggling bookmark:', err);

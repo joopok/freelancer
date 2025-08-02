@@ -81,7 +81,7 @@ export default function CommunityQnaPage() {
         setQuestions((prevQuestions) => [...prevQuestions, ...newQuestions]);
         setHasMore(endIndex < dummyQuestions.length);
         setLoading(false);
-      }, 800);
+      }, 500);
     };
     
     fetchData();

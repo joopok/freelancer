@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import { HeroSection } from '@/components/main/HeroSection';
 import { SearchSection } from '@/components/main/SearchSection';
 import { CategorySection } from '@/components/main/CategorySection';
@@ -14,12 +16,15 @@ import { CtaSection } from '@/components/main/CtaSection';
 // Mock 데이터 - 실제로는 API 호출로 대체되어야 합니다.
 import { stats, categories, featuredProjects, featuredFreelancers, testimonials, heroProjects } from '@/data/mainPageData';
 
-export default async function Home() {
-  // 서버 컴포넌트에서는 API 호출 등을 통해 데이터를 미리 가져올 수 있습니다.
-  // 예: const projects = await fetchProjects();
+function HomePage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-300">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <main>
         <HeroSection heroProjects={heroProjects} />
         <SearchSection />
@@ -35,4 +40,8 @@ export default async function Home() {
       </main>
     </div>
   );
+}
+
+export default function Home() {
+  return <HomePage />;
 }

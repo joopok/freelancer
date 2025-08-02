@@ -1,7 +1,7 @@
 import { AuthResponse, LoginRequest, User } from '@/types/auth';
 import axios from 'axios';
 import api, { ApiUtils } from '@/utils/api';
-import { AUTH_TOKEN_NAME, USE_MOCK_API, API_URL } from '@/utils/env';
+import { getAuthTokenName } from '@/utils/env';
 
 /**
  * 인증 관련 API 서비스
@@ -94,7 +94,7 @@ export const authService = {
       // 클라이언트 측 상태 정리
       if (typeof window !== 'undefined') {
         // 로컬 스토리지에서 토큰 제거
-        localStorage.removeItem(AUTH_TOKEN_NAME);
+        localStorage.removeItem(getAuthTokenName());
         
         // 추가 안전장치: 세션 스토리지 정리
         sessionStorage.clear();
@@ -105,7 +105,7 @@ export const authService = {
     } catch (error: unknown) {
       // 로그아웃 실패 시에도 클라이언트 상태는 정리
       if (typeof window !== 'undefined') {
-        localStorage.removeItem(AUTH_TOKEN_NAME);
+        localStorage.removeItem(getAuthTokenName());
         sessionStorage.clear();
       }
       
@@ -157,7 +157,7 @@ export const authService = {
         if (error.response?.status === 401) {
           // 클라이언트 측 상태 정리 (토큰 만료)
           if (typeof window !== 'undefined') {
-            localStorage.removeItem(AUTH_TOKEN_NAME);
+            localStorage.removeItem(getAuthTokenName());
           }
           
           return { success: false, error: '인증 만료' } as AuthResponse;

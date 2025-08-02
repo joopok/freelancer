@@ -234,7 +234,7 @@ export default function CommunityGalleryPage() {
         setGalleryItems((prevItems) => [...prevItems, ...newItems]);
         setHasMore(endIndex < dummyGalleryItems.length);
         setLoading(false);
-      }, 800);
+      }, 500);
     };
     
     fetchData();

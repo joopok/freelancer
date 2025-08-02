@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLoading } from '@/components/layout/Loading';
@@ -22,6 +22,7 @@ interface BlogPost {
 }
 
 export default function BlogPostPage() {
+  const router = useRouter();
   const { id } = useParams();
   const { setLoading } = useLoading();
   const [post, setPost] = useState<BlogPost | null>(null);
@@ -84,7 +85,7 @@ export default function BlogPostPage() {
       setPost(postData);
       setLocalLoading(false);
       setLoading(false);
-    }, 2000); // 2초 로딩 효과
+    }, 500); // 2초 로딩 효과
     
     return () => clearTimeout(timer);
   }, [id, setLoading]);
@@ -127,13 +128,8 @@ export default function BlogPostPage() {
         <div className="max-w-3xl mx-auto">
           <div className="mb-4">
             <Link 
-              href={`/blog?category=${post.category}`}
+              href={`/blog?category=${encodeURIComponent(post.category)}`}
               className="inline-block bg-white dark:bg-gray-800 bg-opacity-20 text-white text-sm px-3 py-1 rounded-full hover:bg-opacity-30 transition-colors"
-              onClick={(e) => {
-                e.preventDefault();
-                setLoading(true);
-                window.location.href = `/blog?category=${post.category}`;
-              }}
             >
               {post.category}
             </Link>
@@ -182,13 +178,8 @@ export default function BlogPostPage() {
                 {post.tags.map(tag => (
                   <Link
                     key={tag}
-                    href={`/blog?tag=${tag}`}
+                    href={`/blog?tag=${encodeURIComponent(tag)}`}
                     className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm px-3 py-1 rounded-full hover:bg-gray-200 dark:bg-gray-600 transition-colors"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setLoading(true);
-                      window.location.href = `/blog?tag=${tag}`;
-                    }}
                   >
                     #{tag}
                   </Link>
@@ -223,11 +214,6 @@ export default function BlogPostPage() {
                 key={relatedPost.id}
                 href={`/blog/posts/${relatedPost.id}`}
                 className="block group"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setLoading(true);
-                  window.location.href = `/blog/posts/${relatedPost.id}`;
-                }}
               >
                 <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow duration-300 h-full">
                   <div className="relative h-40">
@@ -257,11 +243,6 @@ export default function BlogPostPage() {
           <Link 
             href="/blog"
             className="flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:text-indigo-300 transition-colors"
-            onClick={(e) => {
-              e.preventDefault();
-              setLoading(true);
-              window.location.href = '/blog';
-            }}
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

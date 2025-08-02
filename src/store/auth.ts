@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { SessionUser, User } from '@/types/auth';
-import { AUTH_TOKEN_NAME } from '@/utils/env';
+import { getAuthTokenName } from '@/utils/env';
 import { decodeToken, verifyToken, isTokenExpired, JwtPayload } from '@/utils/jwt';
 import { jwtDecode } from 'jwt-decode';
 
@@ -80,7 +80,7 @@ export const useAuthStore = create<AuthState>()(
         if (typeof window !== 'undefined') {
           try {
             // 인증 토큰 제거
-            localStorage.removeItem(AUTH_TOKEN_NAME);
+            localStorage.removeItem(getAuthTokenName());
             
             // 영속 상태 클리어
             localStorage.removeItem('auth-storage');
@@ -106,7 +106,7 @@ export const useAuthStore = create<AuthState>()(
           let token: string | null = null;
           
           try {
-            token = localStorage.getItem(AUTH_TOKEN_NAME);
+            token = localStorage.getItem(getAuthTokenName());
           } catch (e) {
             // 오류 발생 시 로그아웃 상태로 설정하고 종료
             if (currentState.isLoggedIn) {
@@ -126,7 +126,7 @@ export const useAuthStore = create<AuthState>()(
           // 토큰 기본 형식 검증
           const tokenParts = token.split('.');
           if (tokenParts.length !== 3) {
-            localStorage.removeItem(AUTH_TOKEN_NAME);
+            localStorage.removeItem(getAuthTokenName());
             set({ user: null, isLoggedIn: false });
             return false;
           }
@@ -162,7 +162,7 @@ export const useAuthStore = create<AuthState>()(
                 const now = Math.floor(Date.now() / 1000);
                 if (manualPayload.exp <= now) {
                   // 토큰 만료됨
-                  localStorage.removeItem(AUTH_TOKEN_NAME);
+                  localStorage.removeItem(getAuthTokenName());
                   set({ user: null, isLoggedIn: false });
                   return false;
                 } else {
@@ -185,7 +185,7 @@ export const useAuthStore = create<AuthState>()(
           }
           
           if (!isValid) {
-            localStorage.removeItem(AUTH_TOKEN_NAME);
+            localStorage.removeItem(getAuthTokenName());
             set({ user: null, isLoggedIn: false });
             return false;
           }
@@ -221,7 +221,7 @@ export const useAuthStore = create<AuthState>()(
           
           // ID가 비어있으면 유효하지 않은 사용자로 간주
           if (!sessionUser.id) {
-            localStorage.removeItem(AUTH_TOKEN_NAME);
+            localStorage.removeItem(getAuthTokenName());
             set({ user: null, isLoggedIn: false });
             return false;
           }

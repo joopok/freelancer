@@ -119,7 +119,7 @@ export default function CommunitySharePage() {
     navigator.clipboard.writeText(text)
       .then(() => {
         setCopiedId(id);
-        setTimeout(() => setCopiedId(null), 2000);
+        setTimeout(() => setCopiedId(null), 500);
       })
       .catch(err => console.error('클립보드 복사 실패:', err));
   };

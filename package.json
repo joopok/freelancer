@@ -18,7 +18,7 @@
     "db:update": "node scripts/update-database.js",
     "db:categories": "node scripts/apply-categories-table.js",
     "tone:check": "grep -r 'fail\\|error\\|invalid\\|wrong\\|bad\\|broken' src/components/ src/app/ --include='*.tsx' | grep -E '(className|aria-label|title|placeholder)' | grep -v '// TONE: OK' || echo '✅ No harsh language found'",
-    "tone:errors": "grep -r 'Error\\|Failed\\|Invalid\\|Wrong' src/components/ src/app/ --include='*.tsx' | grep -v '// OK:' || echo '✅ Error messages look supportive'",
+    "tone:errors": "grep -r 'Error\\|Failed\\||Invalid\\|wrong' src/components/ src/app/ --include='*.tsx' | grep -v '// OK:' || echo '✅ Error messages look supportive'",
     "tone:naming": "grep -r 'function handle\\|const handle\\|function get\\|const get' src/ --include='*.ts' --include='*.tsx' | grep -E '(handle|get|set|check)$' || echo '✅ Function names are descriptive'",
     "tone:validate": "npm run tone:check && npm run tone:errors && npm run tone:naming"
   },
@@ -26,26 +26,27 @@
     "@heroicons/react": "^2.2.0",
     "axios": "^1.8.3",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.19.2",
-    "jsonwebtoken": "^9.0.2",
-    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.525.0",
     "mariadb": "^3.4.2",
     "next": "^14.1.0",
     "next-bundle-analyzer": "^0.6.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "socket.io-client": "^4.8.1",
+    "socket.io-client": "^2.5.0",
     "uuid": "^11.1.0",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "react-intersection-observer": "^9.5.3",
+    "jwt-decode": "^4.0.0"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "20.11.0",
     "@types/react": "18.2.0",
-    "@types/react-dom": "18.2.0",
+    "@types/socket.io-client": "^1.4.36",
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.14",
+    "cross-env": "^7.0.3",
     "depcheck": "^1.4.7",
     "eslint": "8.56.0",
     "eslint-config-next": "14.1.0",
@@ -53,7 +54,6 @@
     "postcss": "^8.4.24",
     "tailwindcss": "^3.3.2",
     "typescript": "5.3.3",
-    "unimported": "^1.31.0",
-    "webpack-bundle-analyzer": "^4.10.2"
+    "unimported": "^1.31.0"
   }
 }

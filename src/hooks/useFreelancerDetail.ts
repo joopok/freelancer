@@ -37,8 +37,7 @@ export function useFreelancerDetail(freelancerId: string): UseFreelancerDetailRe
       
       if (result.success && result.data) {
         setFreelancer(result.data);
-        setIsBookmarked(result.data.isBookmarked || false);
-        console.log('✅ Loaded freelancer detail:', result.data.name);
+        setIsBookmarked(false); // 기본값으로 설정
       } else {
         setError(result.error || '프리랜서 정보를 불러오는데 실패했습니다.');
         console.error('❌ Failed to fetch freelancer detail:', result.error);
@@ -51,7 +50,12 @@ export function useFreelancerDetail(freelancerId: string): UseFreelancerDetailRe
       console.error('❌ Error fetching freelancer detail:', err);
     } finally {
       if (isMountedRef.current) {
-        setLoading(false);
+        // 렌더링이 완료될 때까지 약간의 지연을 추가
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setLoading(false);
+          });
+        });
       }
     }
   }, [freelancerId]);
@@ -67,11 +71,12 @@ export function useFreelancerDetail(freelancerId: string): UseFreelancerDetailRe
         setIsBookmarked(result.data.bookmarked);
         
         // 프리랜서 객체 업데이트
-        setFreelancer(prev => prev ? {
-          ...prev,
-          isBookmarked: result.data.bookmarked,
-          bookmarkCount: prev.bookmarkCount + (result.data.bookmarked ? 1 : -1)
-        } : null);
+        if (result.data) {
+          setFreelancer(prev => prev ? {
+            ...prev,
+            bookmarkCount: prev.viewCount + (result.data!.bookmarked ? 1 : -1)
+          } : null);
+        }
       }
     } catch (err) {
       console.error('❌ Error toggling bookmark:', err);

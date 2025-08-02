@@ -62,12 +62,12 @@ const ProjectCompany = React.memo(({ project, onShowCompanyModal }: ProjectCompa
         </div>
       </div>
 
-      {/* 회사 문화 */}
-      {project.companyInfo?.culture && (
+      {/* 회사 설명 */}
+      {project.companyInfo?.description && (
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <h3 className="text-xl font-bold mb-4">회사 문화</h3>
+          <h3 className="text-xl font-bold mb-4">회사 소개</h3>
           <p className="text-gray-600 dark:text-gray-400">
-            {project.companyInfo.culture}
+            {project.companyInfo.description}
           </p>
         </div>
       )}
@@ -131,7 +131,7 @@ const ProjectCompany = React.memo(({ project, onShowCompanyModal }: ProjectCompa
                 {project.location}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {project.detailedAddress || '상세 주소는 면접 시 안내드립니다.'}
+                {project.location || '상세 주소는 면접 시 안내드립니다.'}
               </p>
             </div>
           </div>

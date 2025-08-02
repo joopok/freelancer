@@ -24,7 +24,7 @@ export default function BlogContactPage() {
       // 페이지 로딩이 완료되면 로딩 상태 해제
       const timer = setTimeout(() => {
         setLoading(false);
-      }, 1000);
+      }, 500);
       
       return () => clearTimeout(timer);
     }
@@ -46,7 +46,7 @@ export default function BlogContactPage() {
     // 폼 제출 시뮬레이션 (실제로는 API 호출)
     setTimeout(() => {
       setFormSubmitted(true);
-    }, 1000);
+    }, 500);
   };
   
   return (

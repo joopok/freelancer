@@ -53,7 +53,7 @@ export function Testimonials({ testimonials }: { testimonials: Testimonial[] }) 
               </div>
               
               <blockquote className="text-gray-700 dark:text-gray-300 text-base leading-relaxed mb-8 transition-colors duration-300">
-                "{testimonial.quote}"
+                &quot;{testimonial.quote}&quot;
               </blockquote>
               
               <div className="flex items-center">

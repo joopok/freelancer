@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useProjects, type ProjectSearchParams } from '@/hooks/useProjects';
@@ -15,7 +15,7 @@ export default function ProjectPage() {
   // 숫자 포맷팅 훅
   const { formatNumber } = useNumberFormat();
   
-  // 초기 로딩 상태
+  // 초기 로딩 상태 - 하이드레이션 에러 방지를 위해 true로 시작
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   
   // 상태 관리
@@ -74,27 +74,21 @@ export default function ProjectPage() {
     refetch 
   } = useProjects(searchParams);
 
-  // 초기 로딩 처리 (2초)
+  // 초기 로딩 처리 - 데이터 로드 상태와 동기화
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsInitialLoading(false);
-    }, 2000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+    // isInitialLoading은 마운트 후 첫 데이터 로드 완료 시 한 번만 false로 변경
+    if (isInitialLoading && !loading && fetchedProjects !== undefined) {
+      // 데이터가 로드되고 렌더링이 완료될 때까지 대기
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsInitialLoading(false);
+        });
+      });
+    }
+  }, [loading, fetchedProjects, isInitialLoading]);
 
   // 프로젝트 데이터 업데이트
   useEffect(() => {
-    console.log('📊 Project Page Data Update:', {
-      loading,
-      fetchedProjectsLength: fetchedProjects?.length || 0,
-      currentPage,
-      error,
-      totalCount,
-      isInitialLoading,
-      fetchedProjects: fetchedProjects
-    });
-    
     // 에러가 있으면 로그
     if (error) {
       console.error('❌ Project Page Error:', error);  // TONE: OK - Console logging
@@ -102,7 +96,6 @@ export default function ProjectPage() {
     
     // 데이터가 로드되었을 때만 업데이트
     if (!loading && fetchedProjects !== undefined) {
-      console.log('✅ Setting projects:', fetchedProjects.length, 'items');
       if (currentPage === 1) {
         setAllProjects(fetchedProjects);
       } else if (fetchedProjects.length > 0) {
@@ -216,8 +209,16 @@ export default function ProjectPage() {
     setSortBy('latest');
   }, []);
 
+  // 이전 페이지에서 로드된 프로젝트 수를 추적하기 위한 ref
+  const prevProjectCount = useRef(0);
+
+  // 페이지 로드 시 이전 프로젝트 수 업데이트
+  useLayoutEffect(() => {
+    prevProjectCount.current = allProjects.length;
+  }, [allProjects.length]);
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300" suppressHydrationWarning>
       {/* 상단 배너 - 컴포넌트로 분리 */}
       <ProjectBanner searchTerm={searchTerm} onSearchChange={handleSearchChange} />
 
@@ -275,7 +276,6 @@ export default function ProjectPage() {
 
             {/* 메인 콘텐츠 영역 */}
             {isInitialLoading ? (
-              // 초기 2초 로딩
               <div className="flex flex-col justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 dark:border-blue-400 mb-4"></div>
                 <p className="text-gray-600 dark:text-gray-400 font-medium">프로젝트 목록을 불러오는 중...</p>
@@ -295,9 +295,28 @@ export default function ProjectPage() {
               // 프로젝트 목록
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {allProjects.map((project) => (
-                    <ProjectCard key={project.id} project={project} />
-                  ))}
+                  {allProjects.map((project, index) => {
+                    const isNew = index >= prevProjectCount.current;
+                    
+                    const animationClass = isNew 
+                      ? 'animate-fadeInUp will-change-transform' 
+                      : '';
+
+                    const delay = isNew ? (index - prevProjectCount.current) * 100 : 0;
+
+                    return (
+                      <div
+                        key={project.id}
+                        className={animationClass}
+                        style={{ 
+                          animationDelay: `${delay}ms`, 
+                          opacity: isNew ? 0 : 1
+                        }}
+                      >
+                        <ProjectCard project={project} />
+                      </div>
+                    );
+                  })}
                 </div>
                 
                 {/* 더보기 버튼 */}
@@ -548,11 +567,15 @@ export default function ProjectPage() {
               <p className="text-gray-700 dark:text-gray-300 font-medium">프로젝트 완료율</p>
             </div>
             <div className="text-center transform hover:scale-105 transition-transform duration-300">
-              <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text mb-3">{formatNumber(12000)}+</p>
+              <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text mb-3" suppressHydrationWarning>
+                {formatNumber(12000)}+
+              </p>
               <p className="text-gray-700 dark:text-gray-300 font-medium">등록된 프리랜서</p>
             </div>
             <div className="text-center transform hover:scale-105 transition-transform duration-300">
-              <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text mb-3">{formatNumber(2800)}+</p>
+              <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 text-transparent bg-clip-text mb-3" suppressHydrationWarning>
+                {formatNumber(2800)}+
+              </p>
               <p className="text-gray-700 dark:text-gray-300 font-medium">완료된 상주 프로젝트</p>
             </div>
             <div className="text-center transform hover:scale-105 transition-transform duration-300">

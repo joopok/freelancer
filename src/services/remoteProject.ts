@@ -45,6 +45,14 @@ class RemoteProjectService {
       const response = await api.get(`/api/remote-projects?${queryParams.toString()}`);
       
       if (response.data?.success) {
+        // Check if the data has the expected structure
+        if (!response.data.data || typeof response.data.data !== 'object') {
+          return {
+            success: false,
+            error: '서버 응답 형식이 올바르지 않습니다.'
+          };
+        }
+        
         return {
           success: true,
           data: response.data.data
@@ -233,6 +241,56 @@ class RemoteProjectService {
       };
     } catch (error: any) {
       console.error('Error incrementing view count:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || '네트워크 오류가 발생했습니다.'
+      };
+    }
+  }
+  
+  // 프로젝트 기술 스택 목록 조회 (상위 20개)
+  async getSkills(): Promise<ApiResponse<string[]>> {
+    try {
+      const response = await api.get('/api/remote-projects/skills');
+      
+      if (response.data?.success) {
+        return {
+          success: true,
+          data: response.data.data || []
+        };
+      }
+      
+      return {
+        success: false,
+        error: response.data?.message || '기술 스택 목록을 불러오는데 실패했습니다.'
+      };
+    } catch (error: any) {
+      console.error('Error fetching project skills:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || '네트워크 오류가 발생했습니다.'
+      };
+    }
+  }
+  
+  // 프로젝트 기술 스택 상위 20개 조회
+  async getTopProjectSkills(): Promise<ApiResponse<string[]>> {
+    try {
+      const response = await api.get('/api/remote-projects/skills');
+      
+      if (response.data?.success) {
+        return {
+          success: true,
+          data: response.data.data || []
+        };
+      }
+      
+      return {
+        success: false,
+        error: response.data?.message || '기술 스택 목록을 불러오는데 실패했습니다.'
+      };
+    } catch (error: any) {
+      console.error('Error fetching top project skills:', error);
       return {
         success: false,
         error: error.response?.data?.message || '네트워크 오류가 발생했습니다.'

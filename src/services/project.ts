@@ -577,5 +577,40 @@ export const projectService = {
       };
     }
   },
+
+  // 프로젝트 북마크 토글
+  async toggleBookmark(projectId: string): Promise<ApiResponse<boolean>> {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetchWithTimeout(
+        `${API_BASE_URL}/api/projects/${projectId}/bookmark`,
+        {
+          method: 'POST',
+          headers: {
+            ...getHeaders(),
+            'Authorization': token ? `Bearer ${token}` : '',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: data.isBookmarked,
+      };
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to toggle bookmark',
+      };
+    }
+  },
 };
 

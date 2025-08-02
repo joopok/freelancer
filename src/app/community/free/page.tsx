@@ -101,7 +101,7 @@ export default function CommunityFreePage() {
         setPosts((prevPosts) => [...prevPosts, ...newPosts]);
         setHasMore(endIndex < dummyPosts.length);
         setLoading(false);
-      }, 800);
+      }, 500);
     };
     
     fetchData();

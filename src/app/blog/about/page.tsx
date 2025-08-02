@@ -18,7 +18,7 @@ export default function BlogAboutPage() {
       // 페이지 로딩이 완료되면 로딩 상태 해제
       const timer = setTimeout(() => {
         setLoading(false);
-      }, 1000);
+      }, 500);
       
       return () => clearTimeout(timer);
     }

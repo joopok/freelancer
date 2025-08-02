@@ -88,17 +88,17 @@ const ProjectDetails = React.memo(({ project }: ProjectDetailsProps) => {
             </div>
           </div>
           
-          {project.developmentTools && (
+          {project.remoteTools && project.remoteTools.length > 0 && (
             <div>
               <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">개발 도구</h4>
-              <p className="text-gray-600 dark:text-gray-400">{project.developmentTools}</p>
+              <p className="text-gray-600 dark:text-gray-400">{project.remoteTools.join(', ')}</p>
             </div>
           )}
 
-          {project.collaborationTools && (
+          {project.communicationMethods && project.communicationMethods.length > 0 && (
             <div>
-              <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">협업 도구</h4>
-              <p className="text-gray-600 dark:text-gray-400">{project.collaborationTools}</p>
+              <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">소통 방법</h4>
+              <p className="text-gray-600 dark:text-gray-400">{project.communicationMethods.join(', ')}</p>
             </div>
           )}
         </div>
@@ -114,10 +114,10 @@ const ProjectDetails = React.memo(({ project }: ProjectDetailsProps) => {
               {project.teamSize || '1'}명
             </span>
           </div>
-          {project.teamComposition && (
+          {project.teamSize && (
             <div className="border-t pt-3">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">팀 구성원</h4>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">{project.teamComposition}</p>
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">팀 규모</h4>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">{project.teamSize}</p>
             </div>
           )}
         </div>
@@ -130,19 +130,17 @@ const ProjectDetails = React.memo(({ project }: ProjectDetailsProps) => {
           <div className="space-y-4">
             {project.projectStages.map((stage, index) => (
               <div key={index} className="relative pl-8">
-                <div className={`absolute left-0 top-1 w-6 h-6 rounded-full flex items-center justify-center
-                  ${stage.status === 'completed' ? 'bg-green-500' : 
-                    stage.status === 'current' ? 'bg-blue-500' : 'bg-gray-300'}`}>
-                  {stage.status === 'completed' && (
+                <div className="absolute left-0 top-1 w-6 h-6 rounded-full flex items-center justify-center bg-blue-500">
+                  {index === 0 && (
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   )}
-                  {stage.status === 'current' && (
+                  {index === 1 && (
                     <div className="w-3 h-3 bg-white rounded-full"></div>
                   )}
                 </div>
-                {index < project.projectStages.length - 1 && (
+                {index < (project.projectStages?.length || 0) - 1 && (
                   <div className="absolute left-[11px] top-8 bottom-0 w-0.5 bg-gray-300"></div>
                 )}
                 <div>

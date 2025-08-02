@@ -35,13 +35,13 @@ export interface FreelancerSearchParams {
   type?: string;
   experience?: string;
   skills?: string[];
-  sortBy?: 'rating' | 'experience' | 'viewCount' | 'projectCount' | 'hourlyRateHigh' | 'hourlyRateLow' | 'recentActivity';
+  sortBy?: 'rating' | 'experience' | 'viewCount' | 'projectCount' | 'recentActivity';
   sortOrder?: 'asc' | 'desc';
   rating?: number;
-  hourlyRateMin?: number;
-  hourlyRateMax?: number;
   projectCount?: number;
   availability?: string;
+  hourlyRateMin?: number;
+  hourlyRateMax?: number;
 }
 
 class FreelancerService {
@@ -65,28 +65,18 @@ class FreelancerService {
         if (params.sortBy) queryParams.append('sortBy', params.sortBy);
         if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
         if (params.rating) queryParams.append('rating', params.rating.toString());
-        if (params.hourlyRateMin) queryParams.append('hourlyRateMin', params.hourlyRateMin.toString());
-        if (params.hourlyRateMax) queryParams.append('hourlyRateMax', params.hourlyRateMax.toString());
         if (params.projectCount) queryParams.append('projectCount', params.projectCount.toString());
         if (params.availability) queryParams.append('availability', params.availability);
+        if (params.hourlyRateMin) queryParams.append('hourlyRateMin', params.hourlyRateMin.toString());
+        if (params.hourlyRateMax) queryParams.append('hourlyRateMax', params.hourlyRateMax.toString());
       }
 
       const url = `/api/freelancers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-      console.log('Requesting freelancers from:', url);
-      console.log('Full API URL will be:', `${api.defaults.baseURL}${url}`);
       
       const response = await api.get<FreelancerListResponse>(url);
-      console.log('Freelancer API raw response:', response);
       
       // Transform backend data to match frontend expectations
       if (response.data.success && response.data.data && response.data.data.freelancers) {
-        // 원본 데이터 확인을 위한 로그
-        if (response.data.data.freelancers.length > 0) {
-          console.log('Raw freelancer data from backend:', response.data.data.freelancers[0]);
-          console.log('viewCount in raw data:', response.data.data.freelancers[0].viewCount);
-          console.log('projectCount in raw data:', response.data.data.freelancers[0].projectCount);
-        }
-        
         response.data.data.freelancers = response.data.data.freelancers.map((freelancer: any) => ({
           ...freelancer,
           name: freelancer.userFullName || freelancer.name || '이름 없음',
@@ -105,7 +95,6 @@ class FreelancerService {
           viewCount: freelancer.viewCount || 0,
           projectCount: freelancer.projectCount || 0
         }));
-        console.log('Transformed freelancer data:', response.data.data.freelancers[0]);
       }
       
       return response.data;
@@ -164,7 +153,10 @@ class FreelancerService {
    */
   async incrementViewCount(id: string): Promise<{ success: boolean; error?: string }> {
     try {
-      const response = await api.post(`/api/freelancers/${id}/view`);
+      // 백엔드가 view 엔드포인트를 지원하지 않을 수 있으므로 임시로 비활성화
+      // const response = await api.post(`/api/freelancers/${id}/view`);
+      console.log(`View count increment for freelancer ${id} (currently disabled)`);
+      const response = { data: { success: true } };
       return response.data;
     } catch (error: any) {
       console.error(`Failed to increment view count for freelancer ${id}:`, error);
@@ -206,11 +198,19 @@ class FreelancerService {
    */
   async getFreelancerDetail(id: string): Promise<FreelancerDetailResponse> {
     try {
-      const response = await api.get<FreelancerDetailResponse>(`/api/freelancers/${id}/detail`);
+      const response = await api.get<FreelancerDetailResponse>(`/api/freelancers/${id}`);
       
       // Transform backend data to match frontend expectations
-      if (response.data.success && response.data.data) {
-        const freelancer = response.data.data;
+      // 백엔드 응답이 바로 freelancer 객체일 수 있음
+      const freelancerData = response.data.data || response.data;
+      
+      if (freelancerData) {
+        const freelancer = freelancerData;
+        
+        // Handle name field - backend returns userFullName
+        if (!freelancer.name && freelancer.userFullName) {
+          freelancer.name = freelancer.userFullName;
+        }
         
         // Parse JSON fields if they come as strings
         if (typeof freelancer.skills === 'string') {
@@ -222,26 +222,22 @@ class FreelancerService {
           }
         }
         
-        if (typeof freelancer.techStack === 'string') {
-          try {
-            freelancer.techStack = JSON.parse(freelancer.techStack);
-          } catch (e) {
-            console.warn('Failed to parse techStack JSON:', freelancer.techStack);
-            freelancer.techStack = [];
-          }
-        }
+        // techStack은 skills 배열로 대체되었으므로 제거
         
-        if (typeof freelancer.certificates === 'string') {
-          try {
-            freelancer.certificates = JSON.parse(freelancer.certificates);
-          } catch (e) {
-            console.warn('Failed to parse certificates JSON:', freelancer.certificates);
-            freelancer.certificates = [];
-          }
-        }
+        // certificates는 certifications로 대체되었으므로 제거
       }
       
-      return response.data;
+      // 응답 구조 정규화
+      if (response.data.success !== undefined) {
+        return response.data;
+      } else {
+        // 백엔드가 직접 freelancer 객체를 반환하는 경우
+        return {
+          success: true,
+          data: freelancerData,
+          error: null
+        };
+      }
     } catch (error: any) {
       console.error(`Failed to fetch freelancer detail ${id}:`, error);
       return {

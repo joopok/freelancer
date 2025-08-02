@@ -182,12 +182,11 @@ const ProjectCard = memo(({ project }: ProjectCardProps) => {
         )}
         
         {/* 상세보기 버튼 */}
-        <Link
-          href={`/project/${project.id}`}
+        <div
           className="block w-full text-center bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/50 dark:to-blue-800/50 hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-800/50 dark:hover:to-blue-700/50 text-blue-700 dark:text-blue-300 font-medium py-3 rounded-xl transition-all mt-4 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-blue-700 group-hover:text-white border border-blue-100 dark:border-blue-800 group-hover:border-transparent"
         >
           상세보기
-        </Link>
+        </div>
       </div>
     </Link>
   );

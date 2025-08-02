@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { API_URL, API_TIMEOUT, USE_MOCK_API, USE_API_CACHE, API_CACHE_TIME, AUTH_TOKEN_NAME } from '@/utils/env';
+import { getApiUrl, getApiTimeout, config, getAuthTokenName } from '@/utils/env';
 
 // 타입 정의
 export interface ApiResponse<T = any> {
@@ -30,12 +30,12 @@ interface ApiConfig {
 // API 설정
 const apiConfig: ApiConfig = {
   baseURL: '', // Next.js rewrites를 사용하므로 빈 문자열로 설정
-  timeout: API_TIMEOUT,
+  timeout: getApiTimeout(),
   withCredentials: true,
-  useMock: USE_MOCK_API,
-  useCache: USE_API_CACHE,
-  cacheTime: API_CACHE_TIME,
-  tokenName: AUTH_TOKEN_NAME
+  useMock: config.api.useMock,
+  useCache: false, // TODO: Add cache configuration to env
+  cacheTime: 5 * 60 * 1000, // 5 minutes default
+  tokenName: getAuthTokenName()
 };
 
 // 인증이 필요한 API 경로 패턴

@@ -75,15 +75,25 @@ export const useRecommendations = (
   const [stats, setStats] = useState<RecommendationStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
 
-  // 추천 요청 객체 생성
+  // 추천 요청 객체 생성 - filters 객체를 안정화
+  const stableFilters = useMemo(() => filters, [
+    filters?.category,
+    filters?.budgetRange?.min,
+    filters?.budgetRange?.max,
+    filters?.location,
+    filters?.experienceLevel,
+    filters?.skills?.join(','),
+    filters?.workType
+  ]);
+
   const request = useMemo((): RecommendationRequest => ({
     userId,
     projectId,
     type,
     limit,
     excludeIds,
-    filters
-  }), [userId, projectId, type, limit, excludeIds, filters]);
+    filters: stableFilters
+  }), [userId, projectId, type, limit, excludeIds?.join(','), stableFilters]);
 
   // 추천 데이터 가져오기
   const fetchRecommendations = useCallback(async () => {
@@ -93,16 +103,14 @@ export const useRecommendations = (
     setError(null);
 
     try {
-      console.log('🔍 추천 데이터 가져오기 시작:', request);
+      console.log('🔍 추천 데이터 가져오기 시작:', {
+        userId,
+        type,
+        cacheHit: false
+      });
       
       const response = await recommendationService.getRecommendations(request);
       
-      console.log('✅ 추천 데이터 가져오기 성공:', {
-        count: response.recommendations.length,
-        algorithm: response.metadata.algorithm,
-        cacheHit: response.metadata.cacheHit
-      });
-
       setRecommendations(response.recommendations);
       setMetadata(response.metadata);
     } catch (err) {
@@ -111,9 +119,14 @@ export const useRecommendations = (
       setError(errorMessage);
       setRecommendations([]);
     } finally {
-      setLoading(false);
+      // 렌더링이 완료될 때까지 약간의 지연을 추가
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setLoading(false);
+        });
+      });
     }
-  }, [request, autoFetch, userId, projectId]);
+  }, [request]);
 
   // 새로고침
   const refresh = useCallback(async () => {
@@ -137,7 +150,12 @@ export const useRecommendations = (
       console.error('❌ 추천 데이터 새로고침 실패:', err);
       setError(errorMessage);
     } finally {
-      setLoading(false);
+      // 렌더링이 완료될 때까지 약간의 지연을 추가
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setLoading(false);
+        });
+      });
     }
   }, [request]);
 
@@ -204,12 +222,18 @@ export const useRecommendations = (
     }
   }, [userId]);
 
-  // 초기 데이터 로딩
+  // 초기 데이터 로딩 - 마운트 시 한 번만 실행
   useEffect(() => {
-    if (autoFetch) {
+    let mounted = true;
+    
+    if (autoFetch && mounted) {
       fetchRecommendations();
     }
-  }, [fetchRecommendations, autoFetch]);
+    
+    return () => {
+      mounted = false;
+    };
+  }, []); // 빈 배열로 마운트 시 한 번만 실행
 
   // 통계 데이터 로딩
   useEffect(() => {
@@ -385,7 +409,12 @@ export const useRecommendationStats = (userId?: string) => {
       console.error('❌ 통계 가져오기 실패:', err);
       setError(errorMessage);
     } finally {
-      setLoading(false);
+      // 렌더링이 완료될 때까지 약간의 지연을 추가
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setLoading(false);
+        });
+      });
     }
   }, [userId]);
 

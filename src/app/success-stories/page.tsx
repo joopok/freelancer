@@ -428,7 +428,7 @@ export default function SuccessStoriesPage() {
                     <CheckCircle className="h-6 w-6 text-green-500 mt-1 mr-3" />
                     <div>
                       <p className="text-gray-700 dark:text-gray-300 italic mb-3">
-                        "{selectedStory.testimonial}"
+                        &quot;{selectedStory.testimonial}&quot;
                       </p>
                       <p className="font-semibold text-gray-900 dark:text-white">
                         {selectedStory.author}

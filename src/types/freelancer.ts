@@ -1,7 +1,8 @@
 // 프리랜서 기본 정보 타입
 export interface Freelancer {
   id: string;
-  name: string;
+  name?: string;
+  userFullName?: string;
   experience: string;
   type: '개인' | '팀' | '법인사업자';
   skills: string[];
@@ -12,18 +13,19 @@ export interface Freelancer {
   proposalCount: number;
   category: string;
   profileImage?: string;
-  hourlyRate?: number;
   location?: string;
   languages?: string[];
   availableFrom?: string;
   responseTime?: string;
   completionRate?: number;
+  hourlyRate?: number | string;
 }
 
 // FeaturedFreelancer 타입 추가
 export interface FeaturedFreelancer {
   id: number;
-  name: string;
+  name?: string;
+  userFullName?: string;
   position: string;
   experience: string;
   skills: string[];
@@ -159,11 +161,6 @@ export interface Availability {
 
 // 가격 정보 타입
 export interface PricingInfo {
-  hourlyRate: {
-    min: number;
-    max: number;
-    currency: string;
-  };
   fixedProjectRate: {
     min: number;
     max: number;
@@ -261,10 +258,10 @@ export interface FreelancerStats {
 // 추천 프리랜서 타입
 export interface SimilarFreelancer {
   id: string;
-  name: string;
+  name?: string;
+  userFullName?: string;
   title: string;
   rating: number;
-  hourlyRate: number;
   skills: string[];
   location: string;
   profileImage: string;

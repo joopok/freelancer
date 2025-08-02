@@ -42,7 +42,7 @@ export default function CommunityBoardPage() {
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
       setGlobalLoading(false);
-    }, 2000);
+    }, 500);
     
     return () => clearTimeout(timer);
   }, [setGlobalLoading]);
@@ -119,7 +119,7 @@ export default function CommunityBoardPage() {
         setPosts((prevPosts) => [...prevPosts, ...newPosts]);
         setHasMore(endIndex < mockPosts.length);
         setLoading(false);
-      }, 2000);
+      }, 500);
     };
     
     fetchData();

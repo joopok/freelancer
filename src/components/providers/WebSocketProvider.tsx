@@ -12,20 +12,17 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     const enableWebSocket = process.env.NEXT_PUBLIC_ENABLE_WEBSOCKET === 'true';
     
     if (!enableWebSocket) {
-      console.log('🔌 WebSocket is disabled by environment variable');
       return;
     }
 
     // 로그인 상태일 때만 WebSocket 연결
     if (isLoggedIn) {
-      console.log('🔌 Initializing WebSocket connection...');
       wsService.connect();
     }
 
     // Cleanup on unmount or when logged out
     return () => {
       if (wsService.isConnected()) {
-        console.log('🔌 Closing WebSocket connection...');
         wsService.disconnect();
       }
     };

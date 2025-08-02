@@ -1,348 +1,432 @@
-import { api } from '@/utils/api';
 import { 
-  NotificationData, 
-  NotificationResponse, 
-  CreateNotificationRequest, 
-  NotificationSettings 
+  AppNotification, 
+  NotificationType, 
+  NotificationSettings, 
+  NotificationSubscription,
+  NotificationResponse,
+  NotificationCreateRequest,
+  NotificationFilter,
+  NotificationBadge
 } from '@/types/notification';
+import api from '@/utils/api';
 
-export class NotificationService {
-  private static instance: NotificationService;
-  private eventSource: EventSource | null = null;
+class NotificationService {
+  private storageKey = 'local_notifications';
+  private settingsKey = 'notification_settings';
+  private subscriptionKey = 'notification_subscription';
 
-  static getInstance(): NotificationService {
-    if (!NotificationService.instance) {
-      NotificationService.instance = new NotificationService();
-    }
-    return NotificationService.instance;
-  }
-
-  // Fetch notifications with pagination
-  async getNotifications(
-    page: number = 1,
-    limit: number = 20,
-    unreadOnly: boolean = false
-  ): Promise<NotificationResponse> {
+  // 로컬 스토리지에서 알림 목록 가져오기
+  private getLocalNotifications(): AppNotification[] {
     try {
-      const response = await api.get('/notifications', {
-        params: {
-          page,
-          limit,
-          unreadOnly,
-        },
-      });
-      
-      return {
-        notifications: response.data.notifications || [],
-        total: response.data.total || 0,
-        unreadCount: response.data.unreadCount || 0,
-        hasMore: response.data.hasMore || false,
-      };
+      const stored = localStorage.getItem(this.storageKey);
+      return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.error('🔍 NotificationService - getNotifications 오류:', error);
-      // Return empty response for offline mode
-      return {
-        notifications: [],
-        total: 0,
-        unreadCount: 0,
-        hasMore: false,
-      };
+      console.error('Failed to get local notifications:', error);
+      return [];
     }
   }
 
-  // Get unread count
-  async getUnreadCount(): Promise<number> {
+  // 로컬 스토리지에 알림 저장
+  private saveLocalNotifications(notifications: AppNotification[]): void {
     try {
-      const response = await api.get('/notifications/unread-count');
-      return response.data.count || 0;
+      localStorage.setItem(this.storageKey, JSON.stringify(notifications));
     } catch (error) {
-      console.error('🔍 NotificationService - getUnreadCount 오류:', error);
-      return 0;
+      console.error('Failed to save local notifications:', error);
     }
   }
 
-  // Mark notification as read
-  async markAsRead(id: string): Promise<boolean> {
+  // 알림 목록 조회
+  async getNotifications(filter: NotificationFilter = {}): Promise<NotificationResponse> {
     try {
-      await api.put(`/notifications/${id}/read`);
-      return true;
-    } catch (error) {
-      console.error('🔍 NotificationService - markAsRead 오류:', error);
-      return false;
-    }
-  }
+      // 개발 환경에서는 Mock 데이터 사용
+      if (process.env.NEXT_PUBLIC_USE_MOCK_API === 'true') {
+        return this.getMockNotifications(filter);
+      }
 
-  // Mark all notifications as read
-  async markAllAsRead(): Promise<boolean> {
-    try {
-      await api.put('/notifications/mark-all-read');
-      return true;
-    } catch (error) {
-      console.error('🔍 NotificationService - markAllAsRead 오류:', error);
-      return false;
-    }
-  }
-
-  // Delete notification
-  async deleteNotification(id: string): Promise<boolean> {
-    try {
-      await api.delete(`/notifications/${id}`);
-      return true;
-    } catch (error) {
-      console.error('🔍 NotificationService - deleteNotification 오류:', error);
-      return false;
-    }
-  }
-
-  // Clear all notifications
-  async clearAllNotifications(): Promise<boolean> {
-    try {
-      await api.delete('/notifications/clear-all');
-      return true;
-    } catch (error) {
-      console.error('🔍 NotificationService - clearAllNotifications 오류:', error);
-      return false;
-    }
-  }
-
-  // Create notification
-  async createNotification(request: CreateNotificationRequest): Promise<NotificationData | null> {
-    try {
-      const response = await api.post('/notifications', request);
+      const response = await api.get('/notifications', { params: filter });
       return response.data;
     } catch (error) {
-      console.error('🔍 NotificationService - createNotification 오류:', error);
-      return null;
+      console.error('Failed to fetch notifications:', error);
+      return { success: false, error: 'Failed to fetch notifications' };
     }
   }
 
-  // Get notification settings
-  async getSettings(): Promise<NotificationSettings | null> {
+  // Mock 알림 데이터 생성
+  private getMockNotifications(filter: NotificationFilter): NotificationResponse {
+    const mockNotifications: AppNotification[] = [
+      {
+        id: '1',
+        userId: 'user1',
+        type: 'project_applied',
+        title: '프로젝트 지원 완료',
+        message: 'React 웹 개발 프로젝트에 지원하셨습니다.',
+        data: { projectId: 'proj1', projectTitle: 'React 웹 개발' },
+        read: false,
+        createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString()
+      },
+      {
+        id: '2',
+        userId: 'user1',
+        type: 'new_similar_project',
+        title: '유사한 프로젝트 등록',
+        message: '관심 있어하실 만한 새로운 프로젝트가 등록되었습니다.',
+        data: { projectId: 'proj2', projectTitle: 'Vue.js 프로젝트' },
+        read: false,
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString()
+      },
+      {
+        id: '3',
+        userId: 'user1',
+        type: 'application_accepted',
+        title: '지원 승인',
+        message: '모바일 앱 개발 프로젝트에 선정되셨습니다!',
+        data: { projectId: 'proj3', projectTitle: '모바일 앱 개발' },
+        read: true,
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString()
+      },
+      {
+        id: '4',
+        userId: 'user1',
+        type: 'freelancer_contacted',
+        title: '프리랜서 연락',
+        message: '김개발 프리랜서가 연락을 요청했습니다.',
+        data: { freelancerId: 'freelancer1', freelancerName: '김개발' },
+        read: false,
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString()
+      },
+      {
+        id: '5',
+        userId: 'user1',
+        type: 'project_deadline_approaching',
+        title: '마감일 임박',
+        message: '블록체인 개발 프로젝트 마감까지 2일 남았습니다.',
+        data: { projectId: 'proj4', projectTitle: '블록체인 개발', daysLeft: 2 },
+        read: false,
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString()
+      }
+    ];
+
+    let filteredNotifications = mockNotifications;
+
+    // 필터 적용
+    if (filter.type) {
+      filteredNotifications = filteredNotifications.filter(n => n.type === filter.type);
+    }
+    if (filter.read !== undefined) {
+      filteredNotifications = filteredNotifications.filter(n => n.read === filter.read);
+    }
+
+    // 정렬
+    filteredNotifications.sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return filter.sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+
+    // 페이지네이션
+    const offset = filter.offset || 0;
+    const limit = filter.limit || 10;
+    const paginatedNotifications = filteredNotifications.slice(offset, offset + limit);
+
+    const unreadCount = mockNotifications.filter(n => !n.read).length;
+
+    return {
+      success: true,
+      data: paginatedNotifications,
+      total: filteredNotifications.length,
+      unreadCount
+    };
+  }
+
+  // 알림 읽음 처리
+  async markAsRead(notificationId: string): Promise<{ success: boolean; error?: string }> {
     try {
+      if (process.env.NEXT_PUBLIC_USE_MOCK_API === 'true') {
+        return { success: true };
+      }
+
+      const response = await api.patch(`/notifications/${notificationId}/read`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+      return { success: false, error: 'Failed to mark notification as read' };
+    }
+  }
+
+  // 모든 알림 읽음 처리
+  async markAllAsRead(): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (process.env.NEXT_PUBLIC_USE_MOCK_API === 'true') {
+        return { success: true };
+      }
+
+      const response = await api.patch('/notifications/mark-all-read');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+      return { success: false, error: 'Failed to mark all notifications as read' };
+    }
+  }
+
+  // 알림 삭제
+  async deleteNotification(notificationId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (process.env.NEXT_PUBLIC_USE_MOCK_API === 'true') {
+        return { success: true };
+      }
+
+      const response = await api.delete(`/notifications/${notificationId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to delete notification:', error);
+      return { success: false, error: 'Failed to delete notification' };
+    }
+  }
+
+  // 알림 생성
+  async createNotification(notification: NotificationCreateRequest): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (process.env.NEXT_PUBLIC_USE_MOCK_API === 'true') {
+        // Mock 환경에서는 로컬 스토리지에 저장
+        const notifications = this.getLocalNotifications();
+        const newNotification: AppNotification = {
+          id: Date.now().toString(),
+          ...notification,
+          read: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        notifications.unshift(newNotification);
+        this.saveLocalNotifications(notifications);
+        return { success: true };
+      }
+
+      const response = await api.post('/notifications', notification);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create notification:', error);
+      return { success: false, error: 'Failed to create notification' };
+    }
+  }
+
+  // 알림 설정 조회
+  async getNotificationSettings(): Promise<NotificationSettings | null> {
+    try {
+      if (process.env.NEXT_PUBLIC_USE_MOCK_API === 'true') {
+        const stored = localStorage.getItem(this.settingsKey);
+        return stored ? JSON.parse(stored) : this.getDefaultSettings();
+      }
+
       const response = await api.get('/notifications/settings');
+      return response.data.success ? response.data.data : null;
+    } catch (error) {
+      console.error('Failed to get notification settings:', error);
+      return this.getDefaultSettings();
+    }
+  }
+
+  // 기본 알림 설정
+  private getDefaultSettings(): NotificationSettings {
+    return {
+      userId: 'user1',
+      emailNotifications: true,
+      pushNotifications: true,
+      browserNotifications: true,
+      types: {
+        project_applied: true,
+        project_bookmarked: true,
+        project_status_changed: true,
+        new_similar_project: true,
+        freelancer_contacted: true,
+        freelancer_bookmarked: true,
+        project_deadline_approaching: true,
+        application_accepted: true,
+        application_rejected: true,
+        message_received: true,
+        system_announcement: true
+      },
+      quietHours: {
+        enabled: true,
+        start: '22:00',
+        end: '08:00'
+      }
+    };
+  }
+
+  // 알림 설정 업데이트
+  async updateNotificationSettings(settings: Partial<NotificationSettings>): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (process.env.NEXT_PUBLIC_USE_MOCK_API === 'true') {
+        const currentSettings = await this.getNotificationSettings();
+        const updatedSettings = { ...currentSettings, ...settings };
+        localStorage.setItem(this.settingsKey, JSON.stringify(updatedSettings));
+        return { success: true };
+      }
+
+      const response = await api.patch('/notifications/settings', settings);
       return response.data;
     } catch (error) {
-      console.error('🔍 NotificationService - getSettings 오류:', error);
-      return null;
+      console.error('Failed to update notification settings:', error);
+      return { success: false, error: 'Failed to update notification settings' };
     }
   }
 
-  // Update notification settings
-  async updateSettings(settings: Partial<NotificationSettings>): Promise<boolean> {
-    try {
-      await api.put('/notifications/settings', settings);
-      return true;
-    } catch (error) {
-      console.error('🔍 NotificationService - updateSettings 오류:', error);
-      return false;
-    }
-  }
-
-  // Request browser notification permission
-  async requestPermission(): Promise<NotificationPermission> {
+  // 브라우저 알림 권한 요청
+  async requestNotificationPermission(): Promise<NotificationPermission> {
     if (!('Notification' in window)) {
+      console.warn('This browser does not support notifications');
       return 'denied';
     }
 
-    if (Notification.permission === 'granted') {
-      return 'granted';
-    }
-
-    if (Notification.permission !== 'denied') {
-      const permission = await Notification.requestPermission();
-      return permission;
-    }
-
-    return 'denied';
+    const permission = await Notification.requestPermission();
+    return permission;
   }
 
-  // Show browser notification
-  showBrowserNotification(
-    title: string,
-    options: {
-      body?: string;
-      icon?: string;
-      tag?: string;
-      requireInteraction?: boolean;
-      actions?: NotificationAction[];
-    } = {}
-  ): Notification | null {
-    if (!('Notification' in window) || Notification.permission !== 'granted') {
-      return null;
+  // 브라우저 알림 전송
+  async sendBrowserNotification(title: string, options: NotificationOptions = {}): Promise<void> {
+    if (!('Notification' in window)) {
+      console.warn('This browser does not support notifications');
+      return;
     }
 
-    const notification = new Notification(title, {
-      body: options.body,
-      icon: options.icon || '/icons/notification.png',
-      tag: options.tag,
-      requireInteraction: options.requireInteraction || false,
-      badge: '/icons/badge.png',
-      ...options,
-    });
+    if (Notification.permission === 'granted') {
+      const notification = new Notification(title, {
+        icon: '/icon-192x192.png',
+        badge: '/badge-72x72.png',
+        ...options
+      });
 
-    // Auto close after 5 seconds unless requireInteraction is true
-    if (!options.requireInteraction) {
+      // 알림 클릭 시 창 포커스
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+
+      // 5초 후 자동 닫기
       setTimeout(() => {
         notification.close();
       }, 5000);
     }
-
-    return notification;
   }
 
-  // Start real-time notification stream
-  startNotificationStream(onNotification: (notification: NotificationData) => void): void {
-    if (this.eventSource) {
-      this.eventSource.close();
-    }
-
+  // 알림 배지 정보 조회
+  async getNotificationBadge(): Promise<NotificationBadge> {
     try {
-      this.eventSource = new EventSource('/api/notifications/stream');
-      
-      this.eventSource.onmessage = (event) => {
-        try {
-          const notification = JSON.parse(event.data);
-          onNotification(notification);
-        } catch (error) {
-          console.error('🔍 NotificationService - 스트림 파싱 오류:', error);
-        }
-      };
-
-      this.eventSource.onerror = (error) => {
-        console.error('🔍 NotificationService - 스트림 연결 오류:', error);
-        // Attempt to reconnect after 5 seconds
-        setTimeout(() => {
-          this.startNotificationStream(onNotification);
-        }, 5000);
+      const response = await this.getNotifications({ limit: 1 });
+      return {
+        count: response.unreadCount || 0,
+        hasUnread: (response.unreadCount || 0) > 0
       };
     } catch (error) {
-      console.error('🔍 NotificationService - 스트림 시작 오류:', error);
+      console.error('Failed to get notification badge:', error);
+      return { count: 0, hasUnread: false };
     }
   }
 
-  // Stop real-time notification stream
-  stopNotificationStream(): void {
-    if (this.eventSource) {
-      this.eventSource.close();
-      this.eventSource = null;
+  // 알림 타입별 메시지 템플릿
+  getNotificationTemplate(type: NotificationType, data: any): { title: string; message: string } {
+    const templates = {
+      project_applied: {
+        title: '프로젝트 지원 완료',
+        message: `${data.projectTitle} 프로젝트에 지원하셨습니다.`
+      },
+      project_bookmarked: {
+        title: '프로젝트 북마크',
+        message: `${data.projectTitle} 프로젝트를 북마크했습니다.`
+      },
+      project_status_changed: {
+        title: '프로젝트 상태 변경',
+        message: `${data.projectTitle} 프로젝트의 상태가 ${data.status}로 변경되었습니다.`
+      },
+      new_similar_project: {
+        title: '유사한 프로젝트 등록',
+        message: '관심 있어하실 만한 새로운 프로젝트가 등록되었습니다.'
+      },
+      freelancer_contacted: {
+        title: '프리랜서 연락',
+        message: `${data.freelancerName} 프리랜서가 연락을 요청했습니다.`
+      },
+      freelancer_bookmarked: {
+        title: '프리랜서 북마크',
+        message: `${data.freelancerName} 프리랜서를 북마크했습니다.`
+      },
+      project_deadline_approaching: {
+        title: '마감일 임박',
+        message: `${data.projectTitle} 프로젝트 마감까지 ${data.daysLeft}일 남았습니다.`
+      },
+      application_accepted: {
+        title: '지원 승인',
+        message: `${data.projectTitle} 프로젝트에 선정되셨습니다!`
+      },
+      application_rejected: {
+        title: '지원 거절',
+        message: `${data.projectTitle} 프로젝트 지원이 거절되었습니다.`
+      },
+      message_received: {
+        title: '새 메시지',
+        message: `${data.senderName}님으로부터 새 메시지가 도착했습니다.`
+      },
+      system_announcement: {
+        title: '시스템 공지',
+        message: data.message || '새로운 공지사항이 있습니다.'
+      }
+    };
+
+    return templates[type] || { title: '알림', message: '새로운 알림이 있습니다.' };
+  }
+
+  // 조용한 시간 확인
+  private isQuietHours(settings: NotificationSettings): boolean {
+    if (!settings.quietHours.enabled) return false;
+
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    
+    const start = settings.quietHours.start;
+    const end = settings.quietHours.end;
+    
+    if (start <= end) {
+      return currentTime >= start && currentTime <= end;
+    } else {
+      return currentTime >= start || currentTime <= end;
     }
   }
 
-  // Subscribe to notification type
-  async subscribeToType(type: string): Promise<boolean> {
-    try {
-      await api.post('/notifications/subscribe', { type });
-      return true;
-    } catch (error) {
-      console.error('🔍 NotificationService - subscribeToType 오류:', error);
-      return false;
-    }
-  }
+  // 알림 전송 (설정 고려)
+  async sendNotification(type: NotificationType, data: any, userId?: string): Promise<void> {
+    const settings = await this.getNotificationSettings();
+    if (!settings) return;
 
-  // Unsubscribe from notification type
-  async unsubscribeFromType(type: string): Promise<boolean> {
-    try {
-      await api.post('/notifications/unsubscribe', { type });
-      return true;
-    } catch (error) {
-      console.error('🔍 NotificationService - unsubscribeFromType 오류:', error);
-      return false;
+    // 해당 타입의 알림이 비활성화되어 있는지 확인
+    if (!settings.types[type]) return;
+
+    // 조용한 시간인지 확인
+    if (this.isQuietHours(settings)) return;
+
+    const template = this.getNotificationTemplate(type, data);
+    
+    // 데이터베이스에 알림 저장
+    await this.createNotification({
+      userId: userId || 'user1',
+      type,
+      title: template.title,
+      message: template.message,
+      data
+    });
+
+    // 브라우저 알림 전송
+    if (settings.browserNotifications && Notification.permission === 'granted') {
+      await this.sendBrowserNotification(template.title, {
+        body: template.message,
+        data: data
+      });
     }
   }
 }
 
-// Export singleton instance
-export const notificationService = NotificationService.getInstance();
-
-// Mock data for development
-export const mockNotifications: NotificationData[] = [
-  {
-    id: '1',
-    type: 'application_received' as any,
-    title: '새로운 지원자가 있어요',
-    message: '"React 웹 개발자 모집" 프로젝트에 새로운 지원자가 있습니다.',
-    data: { projectId: '1', applicantId: '123' },
-    isRead: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30분 전
-    userId: 'user1',
-    priority: 'high' as any,
-    actions: [
-      { id: '1', label: '지원서 보기', action: 'view_application', url: '/project/1/applications' },
-      { id: '2', label: '프로젝트 보기', action: 'view_project', url: '/project/1' }
-    ]
-  },
-  {
-    id: '2',
-    type: 'project_bookmark' as any,
-    title: '프로젝트가 북마크되었어요',
-    message: '누군가 당신의 "모바일 앱 개발" 프로젝트를 북마크했습니다.',
-    data: { projectId: '2' },
-    isRead: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2시간 전
-    userId: 'user1',
-    priority: 'medium' as any,
-  },
-  {
-    id: '3',
-    type: 'similar_project_available' as any,
-    title: '관심있을 만한 프로젝트가 있어요',
-    message: '당신의 기술과 매치되는 새로운 프로젝트가 등록되었습니다.',
-    data: { projectId: '3' },
-    isRead: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1일 전
-    userId: 'user1',
-    priority: 'medium' as any,
-    actions: [
-      { id: '1', label: '프로젝트 보기', action: 'view_project', url: '/project/3' }
-    ]
-  }
-];
-
-// Export mock service for development
-export const mockNotificationService = {
-  getNotifications: async (page: number = 1, limit: number = 20, unreadOnly: boolean = false) => {
-    console.log('🔍 MockNotificationService - getNotifications 호출');
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-    
-    const filtered = unreadOnly ? mockNotifications.filter(n => !n.isRead) : mockNotifications;
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    const paginatedNotifications = filtered.slice(start, end);
-    
-    return {
-      notifications: paginatedNotifications,
-      total: filtered.length,
-      unreadCount: mockNotifications.filter(n => !n.isRead).length,
-      hasMore: end < filtered.length,
-    };
-  },
-  
-  getUnreadCount: async () => {
-    console.log('🔍 MockNotificationService - getUnreadCount 호출');
-    return mockNotifications.filter(n => !n.isRead).length;
-  },
-  
-  markAsRead: async (id: string) => {
-    console.log('🔍 MockNotificationService - markAsRead 호출:', id);
-    const notification = mockNotifications.find(n => n.id === id);
-    if (notification) {
-      notification.isRead = true;
-    }
-    return true;
-  },
-  
-  markAllAsRead: async () => {
-    console.log('🔍 MockNotificationService - markAllAsRead 호출');
-    mockNotifications.forEach(n => n.isRead = true);
-    return true;
-  },
-  
-  deleteNotification: async (id: string) => {
-    console.log('🔍 MockNotificationService - deleteNotification 호출:', id);
-    const index = mockNotifications.findIndex(n => n.id === id);
-    if (index !== -1) {
-      mockNotifications.splice(index, 1);
-    }
-    return true;
-  },
-};
+export const notificationService = new NotificationService();

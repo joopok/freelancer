@@ -90,7 +90,7 @@ export default function ProjectReviewPage() {
         setReviews(prevReviews => [...prevReviews, ...dummyReviews]);
         setHasMore(dummyReviews.length > 0);
         setLoading(false);
-      }, 1000);
+      }, 500);
     };
     
     fetchData();

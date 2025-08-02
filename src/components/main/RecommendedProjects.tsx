@@ -14,8 +14,8 @@ import {
   CurrencyDollarIcon,
   BoltIcon,
   StarIcon,
-  ThumbUpIcon,
-  ThumbDownIcon,
+  HandThumbUpIcon,
+  HandThumbDownIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { 
@@ -91,7 +91,7 @@ export const RecommendedProjects: React.FC<RecommendedProjectsProps> = ({
         setBookmarkedProjects(prev => new Set(prev).add(projectId));
       }
     } catch (error) {
-      console.error('피드백 제출 실패:', error);
+      // 피드백 제출 실패
     }
   };
 

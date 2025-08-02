@@ -11,7 +11,7 @@ import clsx from 'clsx';
 import { useLoading } from './Loading';
 import api from '@/utils/api';
 import { authService } from '@/services/auth';
-import NotificationButton from '@/components/common/NotificationButton';
+import NotificationBell from '@/components/notification/NotificationBell';
 
 // 서브메뉴를 가질 수 있는 메뉴 아이템 타입 정의
 interface MenuItem {
@@ -31,27 +31,29 @@ export default function Header() {
   const { setLoading } = useLoading();
   const { isDarkMode, toggleTheme } = useThemeStore();
   
-  // 사용자 역할에 따른 토글 상태 초기화
-  const getUserType = () => {
-    if (!isLoggedIn || !user?.role) return 'individual';
-    return user.role === 'freelancer' ? 'individual' : 'company';
-  };
+  // 사용자 역할에 따른 토글 상태 초기화 - 하이드레이션 에러 방지
+  const [userType, setUserType] = useState<'individual' | 'company'>('individual');
+  const [mounted, setMounted] = useState(false);
   
-  const [userType, setUserType] = useState<'individual' | 'company'>(getUserType());
-  
-  // 디버깅을 위한 콘솔 로그
   useEffect(() => {
-    console.log('Header - 사용자 정보:', {
-      isLoggedIn,
-      user,
-      role: user?.role,
-      userType
-    });
-  }, [isLoggedIn, user, userType]);
+    setMounted(true);
+  }, []);
+  
+  useEffect(() => {
+    if (mounted) {
+      const newUserType = (!isLoggedIn || !user?.role) ? 'individual' : 
+        (user.role === 'freelancer' ? 'individual' : 'company');
+      setUserType(newUserType);
+    }
+  }, [mounted, isLoggedIn, user]);
   
   // 사용자 로그인 상태 변경 시 토글 상태 업데이트
   useEffect(() => {
-    setUserType(getUserType());
+    if (mounted) {
+      const newUserType = (!isLoggedIn || !user?.role) ? 'individual' : 
+        (user.role === 'freelancer' ? 'individual' : 'company');
+      setUserType(newUserType);
+    }
   }, [isLoggedIn, user?.role]);
   
   // 서브메뉴 참조 생성
@@ -80,14 +82,14 @@ export default function Header() {
 
         // 로컬 스토리지에 토큰이 있으면 세션 체크
         setLoading(true);
-        const response = await api.get('/auth/session');
+        const response = await authService.checkSession();
         
-        if (response.data?.success && response.data?.user) {
+        if (response.success && response.user) {
           // 세션이 유효하면 유저 정보 설정
-          setUser(response.data.user);
+          setUser(response.user);
         }
       } catch (error) {
-        console.error('세션 체크 중 오류:', error);
+        // 세션 체크 중 오류
         // 오류 발생 시 로컬 스토리지 토큰 제거
         localStorage.removeItem('auth_token');
       } finally {
@@ -136,13 +138,13 @@ export default function Header() {
       
       // 3. 백엔드 로그아웃 API 호출 (비동기로 수행, 결과 대기 안함)
       authService.logout().catch(error => {
-        console.warn('로그아웃 API 호출 중 오류:', error);
+        // 로그아웃 API 호출 중 오류
       });
       
       // 4. 즉시 홈으로 이동 (로딩 상태 없이)
       router.push('/');
     } catch (error) {
-      console.error('로그아웃 중 오류:', error);
+      // 로그아웃 중 오류
       // 오류가 발생해도 로컬 로그아웃은 진행
       logout();
       router.push('/');
@@ -238,7 +240,7 @@ export default function Header() {
                       className={clsx(
                         "px-3 py-2 text-lg font-medium transition-all duration-200 relative cursor-pointer",
                         pathname === item.href || 
-                        (item.subMenus?.some(sub => pathname === sub.href)) ||
+                        (item.subMenus && (item.subMenus as any[]).some(sub => pathname === sub.href)) ||
                         (item.href === '/project' && pathname?.startsWith('/project/')) ||
                         (item.href === '/freelancer' && pathname?.startsWith('/freelancer/')) ||
                         (item.href === '/athome' && pathname?.startsWith('/athome/'))
@@ -249,7 +251,7 @@ export default function Header() {
                     >
                       {item.label}
                       {(pathname === item.href || 
-                        (item.subMenus && item.subMenus.some(sub => pathname === sub.href)) ||
+                        (item.subMenus && (item.subMenus as any[]).some(sub => pathname === sub.href)) ||
                         (item.href === '/project' && pathname?.startsWith('/project/')) ||
                         (item.href === '/freelancer' && pathname?.startsWith('/freelancer/')) ||
                         (item.href === '/athome' && pathname?.startsWith('/athome/'))) && (
@@ -266,7 +268,7 @@ export default function Header() {
                       className={clsx(
                         "px-3 py-2 text-lg font-medium transition-all duration-200 relative",
                         pathname === item.href || 
-                        (item.subMenus?.some(sub => pathname === sub.href)) ||
+                        (item.subMenus && (item.subMenus as any[]).some(sub => pathname === sub.href)) ||
                         (item.href === '/project' && pathname?.startsWith('/project/')) ||
                         (item.href === '/freelancer' && pathname?.startsWith('/freelancer/')) ||
                         (item.href === '/athome' && pathname?.startsWith('/athome/'))
@@ -276,7 +278,7 @@ export default function Header() {
                     >
                       {item.label}
                       {(pathname === item.href || 
-                        (item.subMenus && item.subMenus.some(sub => pathname === sub.href)) ||
+                        (item.subMenus && (item.subMenus as any[]).some(sub => pathname === sub.href)) ||
                         (item.href === '/project' && pathname?.startsWith('/project/')) ||
                         (item.href === '/freelancer' && pathname?.startsWith('/freelancer/')) ||
                         (item.href === '/athome' && pathname?.startsWith('/athome/'))) && (
@@ -333,7 +335,7 @@ export default function Header() {
           {/* 데스크톱 설정 */}
           <div className="hidden lg:flex items-center space-x-4">
             {/* 알림 버튼 */}
-            <NotificationButton />
+            {isLoggedIn && <NotificationBell />}
 
             {/* 개인/기업 토글 & 설정 아이콘 */}
             <div className="flex items-center space-x-2">
@@ -391,6 +393,7 @@ export default function Header() {
                   </button>
                 </div>
               )}
+              
               
               {/* 설정 아이콘 */}
               <div className="relative" ref={settingsRef}>
@@ -576,7 +579,7 @@ export default function Header() {
           {/* 모바일 메뉴 버튼 */}
           <div className="lg:hidden flex items-center space-x-2">
             {/* 모바일 알림 버튼 */}
-            <NotificationButton />
+            {isLoggedIn && <NotificationBell />}
             
             {/* 모바일 설정 아이콘 */}
             <motion.button
@@ -622,7 +625,7 @@ export default function Header() {
                     className={clsx(
                       "block px-3 py-2 text-lg font-medium transition-colors duration-200",
                       pathname === item.href || 
-                      (item.subMenus?.some(sub => pathname === sub.href)) ||
+                      (item.subMenus && (item.subMenus as any[]).some(sub => pathname === sub.href)) ||
                       (item.href === '/project' && pathname?.startsWith('/project/')) ||
                       (item.href === '/freelancer' && pathname?.startsWith('/freelancer/')) ||
                       (item.href === '/athome' && pathname?.startsWith('/athome/'))
@@ -639,7 +642,7 @@ export default function Header() {
                     className={clsx(
                       "block px-3 py-2 text-lg font-medium transition-colors duration-200",
                       pathname === item.href || 
-                      (item.subMenus?.some(sub => pathname === sub.href)) ||
+                      (item.subMenus && (item.subMenus as any[]).some(sub => pathname === sub.href)) ||
                       (item.href === '/project' && pathname?.startsWith('/project/')) ||
                       (item.href === '/freelancer' && pathname?.startsWith('/freelancer/')) ||
                       (item.href === '/athome' && pathname?.startsWith('/athome/'))

@@ -29,7 +29,7 @@ export default function CommunityPage() {
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
       setLoading(false);
-    }, 2000);
+    }, 500);
     
     return () => clearTimeout(timer);
   }, [setLoading]);

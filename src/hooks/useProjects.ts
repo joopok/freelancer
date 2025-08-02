@@ -191,14 +191,11 @@ export const useProjects = (params: ProjectSearchParams = {}) => {
 
       // API 호출 로그 - 프로덕션에서는 주석 처리
       if (process.env.NODE_ENV === 'development') {
-        console.log('Request params:', params);
+        // Request params
       }
 
       // Mock API 사용 여부 확인
       const useMockApi = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true';
-      
-      console.log('🔍 useProjects - Mock API 사용:', useMockApi);
-      console.log('🔍 useProjects - API 요청 URL:', `/api/projects?${queryParams.toString()}`);
       
       let response;
       if (useMockApi) {
@@ -220,8 +217,6 @@ export const useProjects = (params: ProjectSearchParams = {}) => {
         );
       }
       
-      console.log('🔍 useProjects - API 응답:', response.data);
-
       // API 응답 처리 - success 필드 없이 직접 데이터를 반환하는 경우도 처리
       let data = response.data;
       let newProjects: Project[];
@@ -283,7 +278,7 @@ export const useProjects = (params: ProjectSearchParams = {}) => {
                 processedProject.requiredSkills = parsed;
               }
             } catch (e) {
-              console.warn('Failed to parse requiredSkills:', e);
+              // Failed to parse requiredSkills
               processedProject.requiredSkills = [];
             }
           } else if (Array.isArray(processedProject.requiredSkills)) {
@@ -301,7 +296,7 @@ export const useProjects = (params: ProjectSearchParams = {}) => {
                 processedProject.preferredSkills = parsed;
               }
             } catch (e) {
-              console.warn('Failed to parse preferredSkills:', e);
+              // Failed to parse preferredSkills
               processedProject.preferredSkills = [];
             }
           } else if (Array.isArray(processedProject.preferredSkills)) {
@@ -333,21 +328,9 @@ export const useProjects = (params: ProjectSearchParams = {}) => {
         // currentPage는 1-based이므로 totalPages와 직접 비교
         setHasMore(currentPage < totalPages);
         
-        console.log('✅ Projects fetched:', {
-          count: newProjects.length,
-          total: totalElements,
-          page: currentPage + '/' + totalPages
-        });
     } catch (err) {
       const axiosError = err as AxiosError<any>;
       let errorMessage = '프로젝트 목록을 불러오는데 실패했습니다.';
-      
-      console.error('❌ useProjects - API 에러:', err);
-      console.error('❌ useProjects - 에러 상세:', {
-        message: axiosError.message,
-        response: axiosError.response?.data,
-        status: axiosError.response?.status
-      });
       
       const useMockApi = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true';
       
@@ -356,7 +339,7 @@ export const useProjects = (params: ProjectSearchParams = {}) => {
         setProjects([]);
         setTotalCount(0);
         setHasMore(false);
-        console.warn('Mock API mode: Error occurred but returning empty data');
+        // Mock API mode: Error occurred but returning empty data
         return;
       } else {
         errorMessage = axiosError.response?.data?.message || axiosError.message || errorMessage;
@@ -524,8 +507,8 @@ export const useProjectDetail = (id: string | number) => {
         // Mock API 사용 여부 확인
         const useMockApi = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true';
         
-        console.log('🔍 useProjectDetail - Mock API 사용:', useMockApi);
-        console.log('🔍 useProjectDetail - Project ID:', id);
+        // useProjectDetail - Mock API 사용
+        // useProjectDetail - Project ID
 
         if (useMockApi) {
           // Mock 데이터 반환
@@ -533,7 +516,6 @@ export const useProjectDetail = (id: string | number) => {
             const mockProject = createMockProjectDetail(id);
             setProject(mockProject);
             setLoading(false);
-            console.log('✅ Mock project detail loaded:', mockProject);
           }, 500); // 실제 API 호출처럼 약간의 지연 추가
           return;
         }
@@ -541,10 +523,6 @@ export const useProjectDetail = (id: string | number) => {
         const response = await axiosInstance.get<ApiResponse<ProjectDetail>>(
           `/api/projects/${id}`
         );
-
-        console.log('🔍 useProjectDetail - API Response:', response);
-        console.log('🔍 useProjectDetail - Response Data:', response.data);
-        console.log('🔍 useProjectDetail - Response Status:', response.status);
 
         // 다양한 응답 형식 처리
         let projectData: ProjectDetail | null = null;
@@ -572,7 +550,7 @@ export const useProjectDetail = (id: string | number) => {
             try {
               projectData.requiredSkills = JSON.parse(projectData.requiredSkills);
             } catch (e) {
-              console.warn('Failed to parse requiredSkills:', e);
+              // Failed to parse requiredSkills
               projectData.requiredSkills = [];
             }
           }
@@ -582,7 +560,7 @@ export const useProjectDetail = (id: string | number) => {
             try {
               projectData.preferredSkills = JSON.parse(projectData.preferredSkills);
             } catch (e) {
-              console.warn('Failed to parse preferredSkills:', e);
+              // Failed to parse preferredSkills
               projectData.preferredSkills = [];
             }
           }
@@ -622,7 +600,7 @@ export const useProjectDetail = (id: string | number) => {
             isRemote: projectData.isRemote || projectData.workType === 'remote' || projectData.workType === 'hybrid'
           };
 
-          console.log('✅ Project detail loaded:', projectData);
+          // Project detail loaded
           setProject(projectData);
         } else {
           throw new Error('프로젝트 데이터를 찾을 수 없습니다.');
@@ -633,12 +611,15 @@ export const useProjectDetail = (id: string | number) => {
           : '프로젝트 정보를 불러오는데 실패했습니다.';
         setError(errorMessage);
         if (process.env.NODE_ENV === 'development') {
-          console.error('Error fetching project detail:', err);
+          // Error fetching project detail
         }
       } finally {
-        if (!process.env.NEXT_PUBLIC_USE_MOCK_API || process.env.NEXT_PUBLIC_USE_MOCK_API !== 'true') {
-          setLoading(false);
-        }
+        // 렌더링이 완료될 때까지 약간의 지연을 추가
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setLoading(false);
+          });
+        });
       }
     };
 
@@ -677,7 +658,7 @@ export const useProjectApply = () => {
         : '프로젝트 지원에 실패했습니다.';
       setError(errorMessage);
       if (process.env.NODE_ENV === 'development') {
-        console.error('Error applying to project:', err);
+        // Error applying to project
       }
       return false;
     } finally {
@@ -714,7 +695,7 @@ export const useProjectBookmark = () => {
         : '북마크 처리에 실패했습니다.';
       setError(errorMessage);
       if (process.env.NODE_ENV === 'development') {
-        console.error('Error toggling bookmark:', err);
+        // Error toggling bookmark
       }
       return false;
     } finally {
@@ -754,7 +735,7 @@ export const useRelatedProjects = (projectId: string | number, limit = 6) => {
           : '관련 프로젝트를 불러오는데 실패했습니다.';
         setError(errorMessage);
         if (process.env.NODE_ENV === 'development') {
-          console.error('Error fetching related projects:', err);
+          // Error fetching related projects
         }
       } finally {
         setLoading(false);

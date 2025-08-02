@@ -5,7 +5,12 @@ export interface RemoteProject {
   description: string;
   clientName: string;
   companyName: string;
-  budget: string;
+  budget: string | {
+    type: 'fixed' | 'hourly';
+    amount: string;
+    negotiable: boolean;
+    currency: string;
+  };
   budgetType: 'fixed' | 'hourly';
   budgetNegotiable: boolean;
   duration: string;

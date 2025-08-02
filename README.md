@@ -1,12 +1,18 @@
-# 잡코리아 빌보드 - 프리랜서 매칭 플랫폼
+# TechBridge - IT 프리랜서 매칭 플랫폼
 
-프리랜서와 프로젝트를 연결하는 현대적이고 매력적인 매칭 플랫폼입니다. 사용자 친화적인 인터페이스와 다양한 인터랙티브 요소를 통해 최적의 사용자 경험을 제공합니다.
+<div align="center">
+  <img src="public/logo.png" alt="TechBridge Logo" width="200"/>
+  
+  [![Next.js](https://img.shields.io/badge/Next.js-14.1.0-black)](https://nextjs.org/)
+  [![React](https://img.shields.io/badge/React-18.2.0-blue)](https://reactjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.3.3-blue)](https://www.typescriptlang.org/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.3.2-blue)](https://tailwindcss.com/)
+  [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+</div>
 
-![잡코리아 빌보드](https://via.placeholder.com/1200x630/3b82f6/FFFFFF?text=잡코리아+빌보드)
+## 📌 소개
 
-## 📋 프로젝트 개요
-
-본 프로젝트는 Next.js, React, TypeScript를 기반으로 구축된 SPA(Single Page Application)입니다. 프리랜서와 기업이 쉽게 만날 수 있도록 설계되었으며, 다양한 카테고리의 프로젝트와 검증된 프리랜서를 제공합니다.
+TechBridge는 IT 프리랜서와 기업을 연결하는 혁신적인 매칭 플랫폼입니다. AI 기반 추천 시스템을 통해 최적의 프로젝트와 인재를 매칭하여 성공적인 협업을 지원합니다.
 
 ## 🛠 기술 스택
 

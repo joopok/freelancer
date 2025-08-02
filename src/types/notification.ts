@@ -1,80 +1,76 @@
-export interface NotificationData {
+// 알림 시스템 타입 정의
+export interface AppNotification {
   id: string;
+  userId: string;
   type: NotificationType;
   title: string;
   message: string;
   data?: any;
-  isRead: boolean;
-  createdAt: Date;
-  userId: string;
-  priority: NotificationPriority;
-  actions?: NotificationAction[];
+  read: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export enum NotificationType {
-  APPLICATION_RECEIVED = 'application_received',
-  APPLICATION_ACCEPTED = 'application_accepted',
-  APPLICATION_REJECTED = 'application_rejected',
-  PROJECT_BOOKMARK = 'project_bookmark',
-  PROJECT_STATUS_CHANGE = 'project_status_change',
-  SIMILAR_PROJECT_AVAILABLE = 'similar_project_available',
-  FREELANCER_BOOKMARK = 'freelancer_bookmark',
-  PROJECT_DEADLINE_REMINDER = 'project_deadline_reminder',
-  SYSTEM_ANNOUNCEMENT = 'system_announcement',
-  PROFILE_UPDATE = 'profile_update',
-  PAYMENT_RECEIVED = 'payment_received',
-  REVIEW_REQUEST = 'review_request'
-}
-
-export enum NotificationPriority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  URGENT = 'urgent'
-}
-
-export interface NotificationAction {
-  id: string;
-  label: string;
-  action: string;
-  url?: string;
-  style?: 'primary' | 'secondary' | 'success' | 'danger';
-}
+export type NotificationType = 
+  | 'project_applied'
+  | 'project_bookmarked'
+  | 'project_status_changed'
+  | 'new_similar_project'
+  | 'freelancer_contacted'
+  | 'freelancer_bookmarked'
+  | 'project_deadline_approaching'
+  | 'application_accepted'
+  | 'application_rejected'
+  | 'message_received'
+  | 'system_announcement';
 
 export interface NotificationSettings {
   userId: string;
-  browserNotifications: boolean;
-  inAppNotifications: boolean;
   emailNotifications: boolean;
-  types: {
-    [key in NotificationType]: boolean;
-  };
+  pushNotifications: boolean;
+  browserNotifications: boolean;
+  types: Record<NotificationType, boolean>;
   quietHours: {
     enabled: boolean;
-    start: string; // HH:MM format
-    end: string; // HH:MM format
+    start: string; // "22:00"
+    end: string;   // "08:00"
   };
 }
 
-export interface CreateNotificationRequest {
-  type: NotificationType;
-  title: string;
-  message: string;
-  userId: string;
-  priority?: NotificationPriority;
-  data?: any;
-  actions?: NotificationAction[];
+export interface NotificationSubscription {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
 }
 
 export interface NotificationResponse {
-  notifications: NotificationData[];
-  total: number;
-  unreadCount: number;
-  hasMore: boolean;
+  success: boolean;
+  data?: AppNotification[];
+  error?: string;
+  total?: number;
+  unreadCount?: number;
 }
 
-export interface NotificationPermission {
-  granted: boolean;
-  requested: boolean;
-  denied: boolean;
+export interface NotificationCreateRequest {
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  data?: any;
+}
+
+export interface NotificationFilter {
+  type?: NotificationType;
+  read?: boolean;
+  limit?: number;
+  offset?: number;
+  sortBy?: 'createdAt' | 'updatedAt';
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface NotificationBadge {
+  count: number;
+  hasUnread: boolean;
 }

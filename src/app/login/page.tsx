@@ -6,7 +6,7 @@ import { useAuthStore } from "@/store/auth";
 import Link from "next/link";
 import Image from "next/image";
 import { authService } from "@/services/auth";
-import { AUTH_TOKEN_NAME } from '@/utils/env';
+import { getAuthTokenName } from '@/utils/env';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -139,7 +139,7 @@ export default function LoginPage() {
         // 성공 응답이 왔지만 데이터 체크
         if (response.token) {
           // 토큰이 있으면 로컬 스토리지에 저장
-          localStorage.setItem(AUTH_TOKEN_NAME, response.token);
+          localStorage.setItem(getAuthTokenName(), response.token);
           
           // 토큰 저장 후 세션 체크를 즉시 수행
           try {

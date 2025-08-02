@@ -112,12 +112,13 @@ export default function Bottom() {
                 width={120}
                 height={30}
                 className="mr-4"
+                style={{ width: 'auto', height: 'auto' }}
               />
               <span className="text-gray-500 dark:text-gray-400">(주)잡코리아 빌보드에</span>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{footerLinks.contact.address}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{footerLinks.contact.business}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500 dark:text-gray-400" suppressHydrationWarning>
               © {new Date().getFullYear()} JobKorea. All rights reserved.
             </p>
           </div>

@@ -1,9 +1,8 @@
 /**
  * JWT 토큰 관리 유틸리티
- * JWT 토큰 생성, 검증, 디코딩 기능을 제공합니다.
+ * JWT 토큰 검증, 디코딩 기능을 제공합니다.
+ * 주의: 토큰 생성은 서버 사이드에서만 수행되어야 합니다.
  */
-import jwt from 'jsonwebtoken';
-import { JWT_SECRET, JWT_EXPIRY } from '@/utils/env';
 
 // 토큰 페이로드 타입
 export type JwtPayload = {
@@ -19,15 +18,13 @@ export type JwtPayload = {
 };
 
 /**
- * JWT 토큰 생성
+ * JWT 토큰 생성 - 서버 사이드에서만 사용
+ * @deprecated 클라이언트 사이드에서는 사용하지 마세요
  * @param payload 토큰에 포함될 데이터
  * @returns 생성된 JWT 토큰
  */
 export function generateToken(payload: Omit<JwtPayload, 'iat' | 'exp'>): string {
-  if (!JWT_SECRET) {
-    throw new Error('JWT_SECRET is not defined');
-  }
-  return jwt.sign(payload, JWT_SECRET as string, { expiresIn: JWT_EXPIRY || '30d' } as any);
+  throw new Error('토큰 생성은 서버 사이드에서만 수행되어야 합니다. 클라이언트에서는 사용할 수 없습니다.');
 }
 
 /**

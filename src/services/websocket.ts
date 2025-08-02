@@ -1,4 +1,4 @@
-import { io, Socket } from 'socket.io-client';
+import * as io from 'socket.io-client';
 
 export interface RealtimeStats {
   viewCount: number;
@@ -18,7 +18,7 @@ export interface RealtimeUpdate {
 type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
 class WebSocketService {
-  private socket: Socket | null = null;
+  private socket: SocketIOClient.Socket | null = null;
   private listeners: Map<string, Set<(data: RealtimeUpdate) => void>> = new Map();
   private connectionListeners: Set<(status: ConnectionStatus) => void> = new Set();
   private reconnectAttempts = 0;
@@ -27,8 +27,13 @@ class WebSocketService {
   private reconnectTimer: NodeJS.Timeout | null = null;
 
   connect(url?: string) {
+    // Check if WebSocket is enabled
+    if (process.env.NEXT_PUBLIC_ENABLE_WEBSOCKET !== 'true') {
+      console.log('🔌 WebSocket is disabled');
+      return;
+    }
+
     if (this.socket?.connected) {
-      console.log('🔌 WebSocket already connected');
       this.notifyConnectionStatus('connected');
       return;
     }
@@ -36,30 +41,34 @@ class WebSocketService {
     // Notify connecting status
     this.notifyConnectionStatus('connecting');
 
-    const wsUrl = url || process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8080';
+    const wsUrl = url || process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:9092';
     
-    console.log('🔌 Connecting to WebSocket:', wsUrl);
     
-    this.socket = io(wsUrl, {
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionAttempts: this.maxReconnectAttempts,
-      reconnectionDelay: this.reconnectDelay,
-      reconnectionDelayMax: 10000,
-      timeout: 20000,
-      auth: {
-        token: localStorage.getItem('auth_token') || ''
-      }
-    });
+    try {
+      // Socket.IO v2 compatible options
+      this.socket = io(wsUrl, {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: this.maxReconnectAttempts,
+        reconnectionDelay: this.reconnectDelay,
+        reconnectionDelayMax: 10000,
+        timeout: 20000,
+        query: {
+          token: typeof window !== 'undefined' ? localStorage.getItem('auth_token') || '' : ''
+        }
+      });
 
-    this.setupEventHandlers();
+      this.setupEventHandlers();
+    } catch (error) {
+      console.error('❌ Failed to create WebSocket connection:', error);
+      this.notifyConnectionStatus('disconnected');
+    }
   }
 
   private setupEventHandlers() {
     if (!this.socket) return;
 
     this.socket.on('connect', () => {
-      console.log('✅ WebSocket connected');
       this.reconnectAttempts = 0;
       this.notifyConnectionStatus('connected');
       
@@ -71,34 +80,40 @@ class WebSocketService {
     });
 
     this.socket.on('disconnect', (reason) => {
-      console.log('❌ WebSocket disconnected:', reason);
+      console.log('WebSocket disconnected:', reason);
       this.notifyConnectionStatus('disconnected');
       
-      // Auto-reconnect with exponential backoff
-      if (this.reconnectAttempts < this.maxReconnectAttempts) {
-        const delay = Math.min(this.reconnectDelay * Math.pow(2, this.reconnectAttempts), 30000);
-        console.log(`🔄 Attempting to reconnect in ${delay}ms...`);
-        
-        this.reconnectTimer = setTimeout(() => {
-          this.connect();
-        }, delay);
-      }
+      // Socket.IO v2 handles reconnection automatically
+      // Manual reconnection is not needed
     });
 
-    this.socket.on('connect_error', (error) => {
-      console.error('❌ WebSocket connection error:', error);
-      this.reconnectAttempts++;
+    this.socket.on('connect_error', (error: any) => {
+      console.error('❌ WebSocket connection error:', error.message || error);
       this.notifyConnectionStatus('disconnected');
-      
-      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        console.error('❌ Max reconnection attempts reached');
-        this.notifyConnectionStatus('disconnected');
-      }
+    });
+
+    this.socket.on('error', (error: any) => {
+      console.error('❌ WebSocket error:', error.message || error);
+    });
+
+    this.socket.on('reconnect', (attemptNumber: number) => {
+      console.log('✅ WebSocket reconnected after', attemptNumber, 'attempts');
+      this.reconnectAttempts = 0;
+      this.notifyConnectionStatus('connected');
+    });
+
+    this.socket.on('reconnect_attempt', (attemptNumber: number) => {
+      console.log('🔄 WebSocket reconnection attempt', attemptNumber);
+      this.reconnectAttempts = attemptNumber;
+    });
+
+    this.socket.on('reconnect_failed', () => {
+      console.error('❌ WebSocket reconnection failed');
+      this.notifyConnectionStatus('disconnected');
     });
 
     // Listen for realtime updates
     this.socket.on('realtime_update', (update: RealtimeUpdate) => {
-      console.log('📊 Realtime update received:', update);
       this.notifyListeners(update);
     });
 
@@ -123,35 +138,29 @@ class WebSocketService {
 
   joinProject(projectId: string) {
     if (!this.socket?.connected) {
-      console.warn('🔌 WebSocket not connected');
       return;
     }
 
-    console.log('👀 Joining project room:', projectId);
     this.socket.emit('join_project', { projectId });
   }
 
   leaveProject(projectId: string) {
     if (!this.socket?.connected) return;
 
-    console.log('👋 Leaving project room:', projectId);
     this.socket.emit('leave_project', { projectId });
   }
 
   joinFreelancer(freelancerId: string) {
     if (!this.socket?.connected) {
-      console.warn('🔌 WebSocket not connected');
       return;
     }
 
-    console.log('👀 Joining freelancer room:', freelancerId);
     this.socket.emit('join_freelancer', { freelancerId });
   }
 
   leaveFreelancer(freelancerId: string) {
     if (!this.socket?.connected) return;
 
-    console.log('👋 Leaving freelancer room:', freelancerId);
     this.socket.emit('leave_freelancer', { freelancerId });
   }
 
@@ -199,7 +208,7 @@ class WebSocketService {
     // Immediately notify current status
     if (this.socket?.connected) {
       callback('connected');
-    } else if (this.socket?.connecting) {
+    } else if (this.socket && !this.socket.connected) {
       callback('connecting');
     } else {
       callback('disconnected');

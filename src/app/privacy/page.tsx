@@ -34,7 +34,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-xl font-bold text-gray-800 mb-4">1. 개인정보의 수집 및 이용 목적</h2>
               <p className="text-gray-600">
-                잡코리아 빌보드(이하 '회사')는 다음의 목적을 위하여 개인정보를 처리합니다. 처리하고 있는 개인정보는 다음의 목적 이외의 용도로는 이용되지 않으며, 이용 목적이 변경되는 경우에는 개인정보 보호법 제18조에 따라 별도의 동의를 받는 등 필요한 조치를 이행할 예정입니다.
+                잡코리아 빌보드(이하 &apos;회사&apos;)는 다음의 목적을 위하여 개인정보를 처리합니다. 처리하고 있는 개인정보는 다음의 목적 이외의 용도로는 이용되지 않으며, 이용 목적이 변경되는 경우에는 개인정보 보호법 제18조에 따라 별도의 동의를 받는 등 필요한 조치를 이행할 예정입니다.
               </p>
               <ul className="list-disc list-inside mt-3 text-gray-600 space-y-1">
                 <li>회원 가입 및 관리</li>
@@ -120,7 +120,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-xl font-bold text-gray-800 mb-4">6. 개인정보 자동 수집 장치의 설치·운영 및 거부에 관한 사항</h2>
               <p className="text-gray-600">
-                회사는 이용자에게 개별적인 맞춤서비스를 제공하기 위해 이용정보를 저장하고 수시로 불러오는 '쿠키(cookie)'를 사용합니다.
+                회사는 이용자에게 개별적인 맞춤서비스를 제공하기 위해 이용정보를 저장하고 수시로 불러오는 &apos;쿠키(cookie)&apos;를 사용합니다.
               </p>
               <p className="text-gray-600 mt-3">
                 쿠키는 웹사이트를 운영하는데 이용되는 서버가 이용자의 브라우저에 보내는 소량의 정보이며 이용자들의 PC 컴퓨터 내의 하드디스크에 저장되기도 합니다.
@@ -173,4 +173,4 @@ export default function PrivacyPage() {
       </motion.div>
     </div>
   );
-} 
+}

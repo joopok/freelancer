@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { ProjectDetail } from '@/types/project';
-import { formatCurrency, formatCurrencyRange } from '@/utils/format';
+import { Project } from '@/types/project';
+import { useNumberFormat } from '@/hooks/useNumberFormat';
 
 interface ProjectSidebarProps {
-  project: ProjectDetail;
+  project: Project;
   realtimeStats: {
     applicants: number;
     views: number;
@@ -25,6 +25,8 @@ const ProjectSidebar = React.memo(({
   onShowApplicationModal,
   onShowChatModal
 }: ProjectSidebarProps) => {
+  const { formatManwonRange } = useNumberFormat();
+  
   return (
     <div className="space-y-6">
       {/* 예산 정보 카드 */}
@@ -35,7 +37,7 @@ const ProjectSidebar = React.memo(({
             <span className="text-sm text-gray-600 dark:text-gray-400">예상 금액</span>
             <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
               {project.budgetMin && project.budgetMax 
-                ? formatCurrencyRange(project.budgetMin / 10000, project.budgetMax / 10000)
+                ? formatManwonRange(project.budgetMin, project.budgetMax)
                 : project.budget || '협의'}
             </p>
           </div>
@@ -125,12 +127,12 @@ const ProjectSidebar = React.memo(({
           <div className="flex items-center space-x-3">
             <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
               <span className="text-blue-600 dark:text-blue-400 font-bold text-lg">
-                {(project.companyName || project.company?.name || '회사').charAt(0)}
+{(project.companyName || (typeof project.company === 'object' ? project.company.name : project.company) || '회사').charAt(0)}
               </span>
             </div>
             <div>
               <p className="font-medium text-gray-900 dark:text-gray-100">
-                {project.companyName || project.company?.name}
+{project.companyName || (typeof project.company === 'object' ? project.company.name : project.company)}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {project.companyInfo?.industry || 'IT/소프트웨어'}

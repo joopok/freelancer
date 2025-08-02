@@ -2261,7 +2261,7 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
                   {freelancer.similarFreelancers.map(similar => (
                     <Link
                       key={similar.id}
-                      href={`/freelancer/${similar.id}`}
+                      href={`/freelancer/${encodeURIComponent(similar.id)}`}
                       className="block p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
                       <div className="flex items-start gap-3">

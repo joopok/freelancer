@@ -21,15 +21,6 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // 요청 로그
-    console.log('API Request:', {
-      method: config.method,
-      url: config.url,
-      params: config.params,
-      data: config.data,
-      headers: config.headers
-    });
-    
     return config;
   },
   (error) => {
@@ -41,25 +32,9 @@ axiosInstance.interceptors.request.use(
 // 응답 인터셉터
 axiosInstance.interceptors.response.use(
   (response) => {
-    // 응답 로그
-    console.log('API Response:', {
-      url: response.config.url,
-      status: response.status,
-      data: response.data
-    });
-    
     return response;
   },
   (error) => {
-    // 에러 로그
-    console.error('Response Error:', {
-      url: error.config?.url,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message
-    });
-    
     // 500 에러인 경우 상세 정보 출력
     if (error.response?.status === 500) {
       console.error('Server Error Details:', error.response?.data);

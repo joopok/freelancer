@@ -3,24 +3,8 @@
  * 사용자 기반, 유사성 기반, 인기도 기반 추천 알고리즘 구현
  */
 
-// API 클라이언트 대신 fetch 사용
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-
-const apiClient = {
-  async get(url: string, config?: { params?: any }) {
-    const params = config?.params ? '?' + new URLSearchParams(config.params).toString() : '';
-    const response = await fetch(`${API_BASE_URL}${url}${params}`);
-    return { data: await response.json() };
-  },
-  async post(url: string, data: any) {
-    const response = await fetch(`${API_BASE_URL}${url}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    return { data: await response.json() };
-  }
-};
+// Cached API 클라이언트 사용
+import { cachedApi } from '@/services/cached-api';
 import { Project } from '@/types/project';
 import { Freelancer } from '@/types/freelancer';
 import {
@@ -181,18 +165,21 @@ class RecommendationService {
    * 사용자 기반 추천 시스템
    */
   private async getUserBasedRecommendations(request: RecommendationRequest): Promise<RecommendedProject[]> {
-    console.log('🔍 사용자 기반 추천 시작');
     
     try {
       // 사용자 프로필 가져오기
       const userProfile = await this.getUserProfile(request.userId);
       if (!userProfile) {
-        console.warn('사용자 프로필이 없음, 일반 추천으로 전환');
         return await this.getPopularityBasedRecommendations(request);
       }
 
       // 모든 프로젝트 가져오기
       const projects = await this.getAllProjects(request.excludeIds);
+      
+      // 배열 확인
+      if (!Array.isArray(projects) || projects.length === 0) {
+        return [];
+      }
       
       // 각 프로젝트에 대한 점수 계산
       const scoredProjects = projects.map(project => {
@@ -237,6 +224,11 @@ class RecommendationService {
       // 모든 프로젝트 가져오기
       const projects = await this.getAllProjects([request.projectId, ...(request.excludeIds || [])]);
       
+      // 배열 확인
+      if (!Array.isArray(projects) || projects.length === 0) {
+        return [];
+      }
+      
       // 유사성 점수 계산
       const scoredProjects = projects.map(project => {
         const similarityScore = this.calculateProjectSimilarity(baseProject, project);
@@ -265,11 +257,14 @@ class RecommendationService {
    * 인기도 기반 추천 시스템
    */
   private async getPopularityBasedRecommendations(request: RecommendationRequest): Promise<RecommendedProject[]> {
-    console.log('🔍 인기도 기반 추천 시작');
-    
     try {
       // 모든 프로젝트 가져오기
       const projects = await this.getAllProjects(request.excludeIds);
+      
+      // 배열 확인
+      if (!Array.isArray(projects) || projects.length === 0) {
+        return [];
+      }
       
       // 인기도 점수 계산
       const scoredProjects = projects.map(project => {
@@ -844,7 +839,9 @@ class RecommendationService {
         return this.getMockUserProfile(userId);
       }
       
-      const response = await apiClient.get(`/users/${userId}/profile`);
+      const response = await cachedApi.get(`/api/users/${userId}/profile`, {
+        cacheTTL: 10 * 60 * 1000 // 10분 캐싱
+      });
       return response.data;
     } catch (error) {
       console.error('사용자 프로필 가져오기 실패:', error);
@@ -859,14 +856,26 @@ class RecommendationService {
         return this.getMockProjects(excludeIds);
       }
       
-      const response = await apiClient.get('/projects', {
+      const response = await cachedApi.get('/api/projects', {
         params: { 
           page: 1, 
           limit: 100,
           excludeIds: excludeIds?.join(',')
-        }
+        },
+        cacheTTL: 5 * 60 * 1000 // 5분 캐싱
       });
-      return response.data.content || response.data;
+      
+      // 응답 데이터 확인 및 배열 추출
+      const data = response.data;
+      if (Array.isArray(data)) {
+        return data;
+      } else if (data?.content && Array.isArray(data.content)) {
+        return data.content;
+      } else if (data?.projects && Array.isArray(data.projects)) {
+        return data.projects;
+      }
+      
+      return [];
     } catch (error) {
       console.error('프로젝트 목록 가져오기 실패:', error);
       return [];
@@ -880,7 +889,9 @@ class RecommendationService {
         return this.getMockProject(projectId);
       }
       
-      const response = await apiClient.get(`/projects/${projectId}`);
+      const response = await cachedApi.get(`/api/projects/${projectId}`, {
+        cacheTTL: 10 * 60 * 1000 // 10분 캐싱
+      });
       return response.data;
     } catch (error) {
       console.error('프로젝트 가져오기 실패:', error);
@@ -968,7 +979,7 @@ class RecommendationService {
       console.log('📊 추천 피드백 제출:', feedback);
       
       if (process.env.NEXT_PUBLIC_USE_MOCK_API !== 'true') {
-        await apiClient.post('/recommendations/feedback', feedback);
+        await cachedApi.post('/api/recommendations/feedback', feedback);
       }
       
       // 피드백을 통한 학습 (간단한 버전)
@@ -996,7 +1007,9 @@ class RecommendationService {
         return this.getMockRecommendationStats(userId);
       }
       
-      const response = await apiClient.get(`/recommendations/stats/${userId}`);
+      const response = await cachedApi.get(`/api/recommendations/stats/${userId}`, {
+        cacheTTL: 15 * 60 * 1000 // 15분 캐싱
+      });
       return response.data;
     } catch (error) {
       console.error('추천 통계 조회 실패:', error);

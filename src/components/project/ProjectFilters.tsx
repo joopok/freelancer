@@ -3,6 +3,48 @@
 import React, { memo, useCallback } from 'react';
 import { useNumberFormat } from '@/hooks/useNumberFormat';
 
+// 상수들을 컴포넌트 외부로 이동하여 재생성 방지
+const ALL_SKILLS = [
+  'AWS', 'Figma', 'Node.js',
+  'Python', 'React', 'Kubernetes',
+  'Adobe XD', 'Docker', 'Terraform',
+  'TensorFlow', 'MongoDB', 'Sketch',
+  'Prototyping', 'Vue.js', 'Java',
+  'Flutter', 'Swift', 'User Research',
+  'Redux', 'Nuxt.js'
+];
+
+const WORK_TYPE_OPTIONS = [
+  { value: '상주', label: '상주' },
+  { value: '재택', label: '재택' },
+  { value: '혼합', label: '혼합' }
+];
+
+const EXPERIENCE_LEVEL_OPTIONS = [
+  { value: '주니어', label: '주니어 (1-3년)' },
+  { value: '미드레벨', label: '미드레벨 (4-6년)' },
+  { value: '시니어', label: '시니어 (7년 이상)' }
+];
+
+const LOCATION_OPTIONS = [
+  { value: '서울', label: '서울' },
+  { value: '경기', label: '경기' },
+  { value: '인천', label: '인천' },
+  { value: '부산', label: '부산' },
+  { value: '대구', label: '대구' },
+  { value: '광주', label: '광주' },
+  { value: '대전', label: '대전' },
+  { value: '기타', label: '기타' }
+];
+
+const SORT_OPTIONS = [
+  { value: 'latest', label: '최신순' },
+  { value: 'popular', label: '인기순' },
+  { value: 'budget_high', label: '예산 높은순' },
+  { value: 'budget_low', label: '예산 낮은순' },
+  { value: 'deadline', label: '마감임박순' }
+];
+
 interface ProjectFiltersProps {
   selectedSkills: string[];
   selectedWorkType: string;
@@ -185,46 +227,6 @@ const ProjectFilters = memo((props: ProjectFiltersProps) => {
     onResetFilters
   } = props;
 
-  const allSkills = [
-    'AWS', 'Figma', 'Node.js',
-    'Python', 'React', 'Kubernetes',
-    'Adobe XD', 'Docker', 'Terraform',
-    'TensorFlow', 'MongoDB', 'Sketch',
-    'Prototyping', 'Vue.js', 'Java',
-    'Flutter', 'Swift', 'User Research',
-    'Redux', 'Nuxt.js'
-  ];
-
-  const workTypeOptions = [
-    { value: '상주', label: '상주' },
-    { value: '재택', label: '재택' },
-    { value: '혼합', label: '혼합' }
-  ];
-
-  const experienceLevelOptions = [
-    { value: '주니어', label: '주니어 (1-3년)' },
-    { value: '미드레벨', label: '미드레벨 (4-6년)' },
-    { value: '시니어', label: '시니어 (7년 이상)' }
-  ];
-
-  const locationOptions = [
-    { value: '서울', label: '서울' },
-    { value: '경기', label: '경기' },
-    { value: '인천', label: '인천' },
-    { value: '부산', label: '부산' },
-    { value: '대구', label: '대구' },
-    { value: '광주', label: '광주' },
-    { value: '대전', label: '대전' },
-    { value: '기타', label: '기타' }
-  ];
-
-  const sortOptions = [
-    { value: 'latest', label: '최신순' },
-    { value: 'popular', label: '인기순' },
-    { value: 'budget_high', label: '예산 높은순' },
-    { value: 'budget_low', label: '예산 낮은순' },
-    { value: 'deadline', label: '마감임박순' }
-  ];
 
   // 필터가 적용되었는지 확인
   const hasActiveFilters = selectedSkills.length > 0 || 
@@ -238,7 +240,7 @@ const ProjectFilters = memo((props: ProjectFiltersProps) => {
     <div className="space-y-6">
       {/* 기술 스택 필터 */}
       <SkillFilter
-        skills={allSkills}
+        skills={ALL_SKILLS}
         selectedSkills={selectedSkills}
         onToggle={onSkillToggle}
       />
@@ -248,7 +250,7 @@ const ProjectFilters = memo((props: ProjectFiltersProps) => {
         label="근무 형태"
         value={selectedWorkType}
         onChange={onWorkTypeChange}
-        options={workTypeOptions}
+        options={WORK_TYPE_OPTIONS}
       />
 
       {/* 경력 수준 필터 */}
@@ -256,7 +258,7 @@ const ProjectFilters = memo((props: ProjectFiltersProps) => {
         label="경력 수준"
         value={selectedExperienceLevel}
         onChange={onExperienceLevelChange}
-        options={experienceLevelOptions}
+        options={EXPERIENCE_LEVEL_OPTIONS}
       />
 
       {/* 지역 필터 */}
@@ -264,7 +266,7 @@ const ProjectFilters = memo((props: ProjectFiltersProps) => {
         label="지역"
         value={selectedLocation}
         onChange={onLocationChange}
-        options={locationOptions}
+        options={LOCATION_OPTIONS}
       />
 
       {/* 예산 범위 필터 */}
@@ -279,7 +281,7 @@ const ProjectFilters = memo((props: ProjectFiltersProps) => {
         label="정렬"
         value={sortBy}
         onChange={onSortByChange}
-        options={sortOptions}
+        options={SORT_OPTIONS}
       />
 
       {/* 필터 초기화 버튼 */}
