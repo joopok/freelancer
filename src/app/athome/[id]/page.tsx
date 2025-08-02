@@ -288,7 +288,7 @@ const ProjectDescription = ({ project }: { project: RemoteProjectDetail }) => (
   </div>
           <div>
             <div className="text-sm text-gray-500 dark:text-gray-400">완료 예정일</div>
-            <div className="font-medium text-gray-900 dark:text-white">{project.endDate}</div>
+            <div className="font-medium text-gray-900 dark:text-white">{project.deadline}</div>
   </div>
       <div>
             <div className="text-sm text-gray-500 dark:text-gray-400">작업 기간</div>
