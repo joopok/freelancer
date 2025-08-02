@@ -269,7 +269,7 @@ const ProjectDescription = ({ project }: { project: RemoteProjectDetail }) => (
     <div>
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">작업 범위</h3>
       <ul className="space-y-2">1
-        {project.scope.map((item, index) => (
+        {project.deliverables.map((item, index) => (
           <li key={index} className="flex items-start">
             <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
             <span className="text-gray-700 dark:text-gray-300">{item}</span>
