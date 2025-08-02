@@ -334,7 +334,7 @@ const ProjectRequirements = ({ project }: { project: RemoteProjectDetail }) => (
   <div>
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">우대 사항</h3>
       <ul className="space-y-2">
-        {project.preferences?.map((pref, index) => (
+        {project.benefits?.map((pref, index) => (
           <li key={index} className="flex items-start">
             <Award className="w-5 h-5 text-yellow-500 mt-0.5 mr-2 flex-shrink-0" />
             <span className="text-gray-700 dark:text-gray-300">{pref}</span>
