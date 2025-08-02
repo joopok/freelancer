@@ -41,6 +41,9 @@ export interface RemoteProjectDetail extends RemoteProject {
     projectsCompleted: number;
     verificationStatus: 'verified' | 'unverified';
     profileImage?: string;
+    industry?: string; // 추가
+    size?: string; // 추가
+    founded?: string; // 추가
   };
   requirements: string[];
   deliverables: string[];
