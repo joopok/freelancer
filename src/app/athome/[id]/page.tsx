@@ -184,7 +184,7 @@ const ProjectHeader = ({ project }: { project: RemoteProjectDetail }) => (
     </div>
       <div className="text-right">
         <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-          {typeof project.budget === 'object' ? formatCurrency(project.budget.amount) : project.budget}
+          {typeof project.budget === 'object' ? formatCurrency(parseInt(project.budget.amount, 10)) : project.budget}
         </div>
         <div className="text-sm text-gray-600 dark:text-gray-300">
           {typeof project.budget === 'object' ? (project.budget.type === 'fixed' ? '고정 금액' : '시간당') : project.budgetType === 'fixed' ? '고정 금액' : '시간당'}
@@ -416,7 +416,7 @@ const ActionButtons = ({
         {/* 예산 정보 */}
         <div className="text-center border-b border-gray-200 dark:border-gray-700 pb-4">
           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-            {typeof project.budget === 'object' ? formatCurrency(project.budget.amount) : project.budget}
+            {typeof project.budget === 'object' ? formatCurrency(parseInt(project.budget.amount, 10)) : project.budget}
               </div>
           <div className="text-sm text-gray-600 dark:text-gray-300">
             {typeof project.budget === 'object' ? (project.budget.type === 'fixed' ? '고정 금액' : '시간당') : project.budgetType === 'fixed' ? '고정 금액' : '시간당'}
