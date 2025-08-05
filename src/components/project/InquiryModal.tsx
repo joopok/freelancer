@@ -8,7 +8,7 @@ interface InquiryModalProps {
   projectTitle: string;
   isOpen: boolean;
   onClose: () => void;
-  onInquire: (data: InquiryFormData) => Promise<void>;
+  onSubmit: (data: InquiryFormData) => Promise<void>;
 }
 
 export interface InquiryFormData {
@@ -18,7 +18,7 @@ export interface InquiryFormData {
   contactPhone?: string;
 }
 
-export default function InquiryModal({ projectTitle, isOpen, onClose, onInquire }: InquiryModalProps) {
+export default function InquiryModal({ projectTitle, isOpen, onClose, onSubmit }: InquiryModalProps) {
   const { user } = useAuthStore();
   const [formData, setFormData] = useState<InquiryFormData>({
     subject: '',
@@ -40,7 +40,7 @@ export default function InquiryModal({ projectTitle, isOpen, onClose, onInquire 
 
     setIsSubmitting(true);
     try {
-      await onInquire(formData);
+      await onSubmit(formData);
       onClose();
       // Reset form
       setFormData({

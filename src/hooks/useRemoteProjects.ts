@@ -75,9 +75,9 @@ export function useRemoteProjects(
           totalElements = content.length;
           totalPages = 1;
           number = 0;
-        } else if (result.data.projects !== undefined) {
+        } else if ('projects' in result.data && result.data.projects !== undefined) {
           // Backend API format - transform the data
-          const rawProjects = result.data.projects || [];
+          const rawProjects = (result.data as any).projects || [];
           content = rawProjects.map((project: any) => ({
             ...project,
             // Map client.company to companyName
@@ -91,9 +91,9 @@ export function useRemoteProjects(
             // Ensure ID is string
             id: String(project.id),
           }));
-          totalElements = result.data.totalCount || 0;
-          totalPages = result.data.totalPages || 1;
-          number = result.data.currentPage - 1 || 0; // Backend uses 1-based
+          totalElements = (result.data as any).totalCount || 0;
+          totalPages = (result.data as any).totalPages || 1;
+          number = (result.data as any).currentPage - 1 || 0; // Backend uses 1-based
         } else if (result.data.content !== undefined) {
           // Spring Boot Page format
           content = result.data.content || [];

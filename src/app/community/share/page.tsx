@@ -47,11 +47,7 @@ export default function CommunitySharePage() {
 
   // 데이터 가져오기
   useEffect(() => {
-    fetchData();
-  }, [page, fetchData]);
-
-  // 모의 데이터 가져오기 함수
-  const fetchData = () => {
+    const fetchData = () => {
     // 실제 API 호출을 대신하는 모의 데이터
     const mockItems: SharedItem[] = [
       { id: 1, title: "2023년 개발자 이력서 템플릿 공유", description: "...", author: "김개발", profileImage: "https://randomuser.me/api/portraits/men/32.jpg", date: "2023-03-10", likes: 128, views: 1024, shares: 56, contentType: "template", tags: ["이력서", "취업", "템플릿"], thumbnailUrl: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80", resourceUrl: "https://example.com/resume-template" },
@@ -81,7 +77,10 @@ export default function CommunitySharePage() {
     setSharedItems((prevItems) => [...prevItems, ...newItems]);
     setHasMore(endIndex < mockItems.length);
     setLoading(false);
-  };
+    };
+    
+    fetchData();
+  }, [page]);
 
   // 필터링 토글 함수
   const toggleFilter = (filter: string) => {

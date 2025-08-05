@@ -208,17 +208,17 @@ class FreelancerService {
         const freelancer = freelancerData;
         
         // Handle name field - backend returns userFullName
-        if (!freelancer.name && freelancer.userFullName) {
-          freelancer.name = freelancer.userFullName;
+        if (!(freelancer as any).name && (freelancer as any).userFullName) {
+          (freelancer as any).name = (freelancer as any).userFullName;
         }
         
         // Parse JSON fields if they come as strings
-        if (typeof freelancer.skills === 'string') {
+        if (typeof (freelancer as any).skills === 'string') {
           try {
-            freelancer.skills = JSON.parse(freelancer.skills);
+            (freelancer as any).skills = JSON.parse((freelancer as any).skills);
           } catch (e) {
-            console.warn('Failed to parse skills JSON:', freelancer.skills);
-            freelancer.skills = [];
+            console.warn('Failed to parse skills JSON:', (freelancer as any).skills);
+            (freelancer as any).skills = [];
           }
         }
         
@@ -234,8 +234,8 @@ class FreelancerService {
         // 백엔드가 직접 freelancer 객체를 반환하는 경우
         return {
           success: true,
-          data: freelancerData,
-          error: null
+          data: freelancerData as any,
+          error: undefined
         };
       }
     } catch (error: any) {

@@ -6,10 +6,10 @@ import { useAuthStore } from '@/store/auth';
 import type { RemoteProject } from '@/types/remoteProject';
 
 interface ApplyModalProps {
-  project: RemoteProject;
   isOpen: boolean;
   onClose: () => void;
-  onApply: (data: ApplyFormData) => Promise<void>;
+  onSubmit: (data: ApplyFormData) => Promise<void>;
+  projectTitle: string;
 }
 
 export interface ApplyFormData {
@@ -19,7 +19,7 @@ export interface ApplyFormData {
   availableDate: string;
 }
 
-export default function ApplyModal({ project, isOpen, onClose, onApply }: ApplyModalProps) {
+export default function ApplyModal({ isOpen, onClose, onSubmit, projectTitle }: ApplyModalProps) {
   const { user } = useAuthStore();
   const [formData, setFormData] = useState<ApplyFormData>({
     coverLetter: '',
@@ -41,7 +41,7 @@ export default function ApplyModal({ project, isOpen, onClose, onApply }: ApplyM
 
     setIsSubmitting(true);
     try {
-      await onApply(formData);
+      await onSubmit(formData);
       onClose();
       // Reset form
       setFormData({
@@ -75,7 +75,7 @@ export default function ApplyModal({ project, isOpen, onClose, onApply }: ApplyM
                 프로젝트 지원하기
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {project.title}
+                {projectTitle}
               </p>
             </div>
             <button

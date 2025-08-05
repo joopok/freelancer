@@ -70,7 +70,7 @@ export const LazyCtaSection = dynamic(
 
 // Modal Components (클라이언트 사이드 전용)
 export const LazyApplyModal = dynamic(
-  () => import('@/components/project/ApplyModal').then(mod => ({ default: mod.ApplyModal })),
+  () => import('@/components/project/ApplyModal'),
   { 
     ssr: false,
     loading: () => <div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>
@@ -78,72 +78,72 @@ export const LazyApplyModal = dynamic(
 );
 
 export const LazyInquiryModal = dynamic(
-  () => import('@/components/project/InquiryModal').then(mod => ({ default: mod.InquiryModal })),
+  () => import('@/components/project/InquiryModal'),
   { 
     ssr: false,
     loading: () => <div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>
   }
 );
 
-// Chart Components (무거운 라이브러리)
-export const LazySkillChart = dynamic(
-  () => import('@/components/charts/SkillChart'),
-  { 
-    ssr: false,
-    loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg"></div>
-  }
-);
+// Chart Components (무거운 라이브러리) - 향후 구현 예정
+// export const LazySkillChart = dynamic(
+//   () => import('@/components/charts/SkillChart'),
+//   { 
+//     ssr: false,
+//     loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg"></div>
+//   }
+// );
 
-// Rich Text Editor (무거운 컴포넌트)
-export const LazyRichTextEditor = dynamic(
-  () => import('@/components/editor/RichTextEditor'),
-  { 
-    ssr: false,
-    loading: () => <div className="h-96 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg"></div>
-  }
-);
+// Rich Text Editor (무거운 컴포넌트) - 향후 구현 예정
+// export const LazyRichTextEditor = dynamic(
+//   () => import('@/components/editor/RichTextEditor'),
+//   { 
+//     ssr: false,
+//     loading: () => <div className="h-96 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg"></div>
+//   }
+// );
 
-// 지도 컴포넌트
-export const LazyMap = dynamic(
-  () => import('@/components/map/Map'),
-  { 
-    ssr: false,
-    loading: () => <div className="h-96 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg"></div>
-  }
-);
+// 지도 컴포넌트 - 향후 구현 예정
+// export const LazyMap = dynamic(
+//   () => import('@/components/map/Map'),
+//   { 
+//     ssr: false,
+//     loading: () => <div className="h-96 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg"></div>
+//   }
+// );
 
-// 프로필 이미지 업로더
-export const LazyImageUploader = dynamic(
-  () => import('@/components/upload/ImageUploader'),
-  { 
-    ssr: false,
-    loading: () => <div className="h-32 w-32 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-full"></div>
-  }
-);
+// 프로필 이미지 업로더 - 향후 구현 예정
+// export const LazyImageUploader = dynamic(
+//   () => import('@/components/upload/ImageUploader'),
+//   { 
+//     ssr: false,
+//     loading: () => <div className="h-32 w-32 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-full"></div>
+//   }
+// );
 
-// 결제 관련 컴포넌트
-export const LazyPaymentForm = dynamic(
-  () => import('@/components/payment/PaymentForm'),
-  { 
-    ssr: false,
-    loading: () => <div className="p-8 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg"></div>
-  }
-);
+// 결제 관련 컴포넌트 - 향후 구현 예정
+// export const LazyPaymentForm = dynamic(
+//   () => import('@/components/payment/PaymentForm'),
+//   { 
+//     ssr: false,
+//     loading: () => <div className="p-8 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg"></div>
+//   }
+// );
 
-// 대시보드 컴포넌트
-export const LazyDashboard = dynamic(
-  () => import('@/components/dashboard/Dashboard'),
-  { 
-    ssr: false,
-    loading: () => <div className="min-h-screen bg-gray-100 dark:bg-gray-800 animate-pulse"></div>
-  }
-);
+// 대시보드 컴포넌트 - 향후 구현 예정
+// export const LazyDashboard = dynamic(
+//   () => import('@/components/dashboard/Dashboard'),
+//   { 
+//     ssr: false,
+//     loading: () => <div className="min-h-screen bg-gray-100 dark:bg-gray-800 animate-pulse"></div>
+//   }
+// );
 
-// 채팅 컴포넌트
-export const LazyChatWidget = dynamic(
-  () => import('@/components/chat/ChatWidget'),
-  { 
-    ssr: false,
-    loading: () => <div className="fixed bottom-4 right-4 w-16 h-16 bg-blue-600 rounded-full animate-pulse"></div>
-  }
-);
+// 채팅 컴포넌트 - 향후 구현 예정
+// export const LazyChatWidget = dynamic(
+//   () => import('@/components/chat/ChatWidget'),
+//   { 
+//     ssr: false,
+//     loading: () => <div className="fixed bottom-4 right-4 w-16 h-16 bg-blue-600 rounded-full animate-pulse"></div>
+//   }
+// );

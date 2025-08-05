@@ -46,11 +46,7 @@ export default function CommunityStudyPage() {
 
   // 데이터 가져오기
   useEffect(() => {
-    fetchData();
-  }, [page, fetchData]);
-
-  // 모의 데이터 가져오기 함수
-  const fetchData = () => {
+    const fetchData = () => {
     // 실제 API 호출을 대신하는 모의 데이터
     const mockStudies: Study[] = [
       { id: 1, title: "프론트엔드 개발자를 위한 React/Next.js 스터디", description: "...", author: "김개발", profileImage: "https://randomuser.me/api/portraits/men/32.jpg", date: "2023-03-10", participants: 8, maxParticipants: 10, location: "온라인/줌", tags: ["React", "Next.js", "프론트엔드"], category: "개발", isRecruiting: true, imageUrl: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80" },
@@ -74,7 +70,10 @@ export default function CommunityStudyPage() {
     setStudies((prevStudies) => [...prevStudies, ...newStudies]);
     setHasMore(endIndex < mockStudies.length);
     setLoading(false);
-  };
+    };
+    
+    fetchData();
+  }, [page]);
 
   // 필터링 토글 함수
   const toggleFilter = (filter: string) => {

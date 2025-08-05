@@ -1,4 +1,4 @@
-import * as io from 'socket.io-client';
+import io from 'socket.io-client';
 
 export interface RealtimeStats {
   viewCount: number;
@@ -79,7 +79,7 @@ class WebSocketService {
       }
     });
 
-    this.socket.on('disconnect', (reason) => {
+    this.socket.on('disconnect', (reason: string) => {
       console.log('WebSocket disconnected:', reason);
       this.notifyConnectionStatus('disconnected');
       

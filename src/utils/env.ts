@@ -86,7 +86,7 @@ class EnvironmentValidator {
       const value = process.env[key];
 
       // 기본값 설정
-      const finalValue = value || config.default;
+      const finalValue = value || ('default' in config ? config.default : undefined);
       
       // 필수 환경 변수 체크 (기본값이 없는 경우에만)
       if (config.required && !finalValue) {
@@ -95,7 +95,7 @@ class EnvironmentValidator {
       }
       
       // 값이 있으면 검증
-      if (finalValue && config.validate) {
+      if (finalValue && 'validate' in config && config.validate) {
         if (!config.validate(finalValue)) {
           errors.push(`Invalid environment variable ${key}: ${finalValue}`);
           continue;
@@ -139,7 +139,7 @@ class EnvironmentValidator {
    */
   get<K extends EnvKeys>(key: K): string {
     this.validate();
-    return (this.cache[key] || envSchema[key].default || '') as string;
+    return (this.cache[key] || ('default' in envSchema[key] ? (envSchema[key] as any).default : '') || '') as string;
   }
 
   /**

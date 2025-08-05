@@ -2540,10 +2540,10 @@ AWS 클라우드 인프라 설계 및 운영 경험도 풍부합니다.
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                  {freelancer.name[0]}
+                  {freelancer.name?.[0] || 'U'}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{freelancer.name}</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{freelancer.name || '사용자'}</h3>
                   <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     온라인

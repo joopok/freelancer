@@ -44,7 +44,7 @@ export function FeaturedFreelancers({ freelancers }: { freelancers: FeaturedFree
                 <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2">
                   <div className="w-24 h-24 rounded-full border-4 border-white dark:border-gray-700 overflow-hidden bg-gray-200 dark:bg-gray-600 transition-colors duration-300">
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-200 to-blue-400 dark:from-blue-600 dark:to-blue-800">
-                      <span className="text-white text-2xl font-bold">{freelancer.name.charAt(0)}</span>
+                      <span className="text-white text-2xl font-bold">{freelancer.name?.charAt(0) || 'U'}</span>
                   </div>
                   </div>
                 </div>

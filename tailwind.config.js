@@ -15,8 +15,14 @@ module.exports = {
         'float': 'float 6s ease-in-out infinite',
         'glow': 'glow 2s ease-in-out infinite alternate',
         'fadeIn': 'fadeIn 0.3s ease-in-out',
+        'pulse-once': 'pulse-once 0.5s ease-out',
       },
       keyframes: {
+        'pulse-once': {
+          '0%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.05)' },
+          '100%': { transform: 'scale(1)' },
+        },
         'gradient-y': {
           '0%, 100%': {
             'background-size': '400% 400%',

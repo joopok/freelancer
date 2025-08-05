@@ -135,7 +135,7 @@ const ProjectSidebar = React.memo(({
 {project.companyName || (typeof project.company === 'object' ? project.company.name : project.company)}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {project.companyInfo?.industry || 'IT/소프트웨어'}
+                IT/소프트웨어
               </p>
             </div>
           </div>

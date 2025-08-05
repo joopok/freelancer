@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { cn } from '@/utils/cn';
+import clsx from 'clsx';
 
 interface OptimizedImageProps {
   src: string;
@@ -68,7 +68,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // 컨테이너가 필요한 경우 (fill 모드 또는 로딩 상태 표시)
   if (fill || containerClassName) {
     return (
-      <div className={cn('relative overflow-hidden', containerClassName)}>
+      <div className={clsx('relative overflow-hidden', containerClassName)}>
         {isLoading && (
           <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
         )}
@@ -80,7 +80,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           height={!fill ? height : undefined}
           priority={priority}
           quality={quality}
-          className={cn(
+          className={clsx(
             'transition-opacity duration-300',
             isLoading ? 'opacity-0' : 'opacity-100',
             className
@@ -100,7 +100,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     <>
       {isLoading && (
         <div 
-          className={cn(
+          className={clsx(
             'bg-gray-200 dark:bg-gray-700 animate-pulse',
             className
           )}
@@ -114,7 +114,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         height={height || 300}
         priority={priority}
         quality={quality}
-        className={cn(
+        className={clsx(
           'transition-opacity duration-300',
           isLoading ? 'opacity-0' : 'opacity-100',
           className
