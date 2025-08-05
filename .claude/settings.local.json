@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(lsof:*)",
+      "Bash(pkill:*)",
+      "Bash(true)",
+      "Bash(npm run dev:*)"
     ],
     "deny": []
   }
