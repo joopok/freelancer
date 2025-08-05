@@ -1,0 +1,19 @@
+
+> aiproject02@0.1.0 start:7005
+> next start -p 7005 -H 0.0.0.0
+
+   ▲ Next.js 14.1.0
+   - Local:        http://localhost:7005
+   - Network:      http://0.0.0.0:7005
+
+Error: ENOENT: no such file or directory, open '/Users/doseunghyeon/developerApp/react/aiproject02/.next/BUILD_ID'
+    at async open (node:internal/fs/promises:640:25)
+    at async Object.readFile (node:internal/fs/promises:1244:14)
+    at async setupFsCheck (/Users/doseunghyeon/developerApp/react/aiproject02/node_modules/next/dist/server/lib/router-utils/filesystem.js:145:19)
+    at async initialize (/Users/doseunghyeon/developerApp/react/aiproject02/node_modules/next/dist/server/lib/router-server.js:58:23)
+    at async Server.<anonymous> (/Users/doseunghyeon/developerApp/react/aiproject02/node_modules/next/dist/server/lib/start-server.js:246:36) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/doseunghyeon/developerApp/react/aiproject02/.next/BUILD_ID'
+}
