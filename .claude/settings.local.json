@@ -8,7 +8,17 @@
       "Bash(npm run dev:*)",
       "Bash(npm run start:*)",
       "Bash(rm:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(networksetup:*)",
+      "Bash(curl:*)",
+      "Bash(echo)",
+      "Bash(system_profiler:*)",
+      "Bash(sudo:*)",
+      "Bash(ssh:*)",
+      "Bash(rsync:*)",
+      "Bash(tar:*)",
+      "Bash(scp:*)"
     ],
     "deny": []
   }
