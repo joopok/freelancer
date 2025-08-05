@@ -5,7 +5,9 @@
       "Bash(lsof:*)",
       "Bash(pkill:*)",
       "Bash(true)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npm run start:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }
